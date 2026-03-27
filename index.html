@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="系统集成项目管理工程师备考系统 - 提供学习计划、真题练习、模拟考试等功能">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="#667eea">
+    <title>系统集成项目管理工程师备考系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+</head>
+<body>
+    <div id="app">
+        <!-- 移动端顶部导航 -->
+        <header class="mobile-header" v-if="isMobile">
+            <div class="mobile-logo">
+                <span class="logo-icon">📚</span>
+                <span class="logo-text">软考备考</span>
+            </div>
+            <div class="mobile-progress">
+                <span class="progress-text">{{ overallProgress }}%</span>
+                <div class="progress-bar-mini">
+                    <div class="progress-fill" :style="{width: overallProgress + '%'}"></div>
+                </div>
+            </div>
+            <button class="menu-toggle" @click="showMobileMenu = !showMobileMenu">
+                <span class="menu-icon">☰</span>
+            </button>
+        </header>
+
+        <!-- 桌面端顶部导航 -->
+        <header class="header" v-else>
+            <div class="logo">
+                <span class="logo-icon">📚</span>
+                <span class="logo-text">系统集成项目管理工程师备考系统</span>
+            </div>
+            <div class="header-right">
+                <div class="progress-info">
+                    <span>学习进度: {{ overallProgress }}%</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" :style="{width: overallProgress + '%'}"></div>
+                    </div>
+                </div>
+                <button class="btn-secondary" @click="resetDatabase">重置数据</button>
+            </div>
+        </header>
+
+        <!-- 移动端菜单 -->
+        <div class="mobile-menu" v-if="isMobile && showMobileMenu" @click.self="showMobileMenu = false">
+            <div class="mobile-menu-content">
+                <div class="mobile-menu-header">
+                    <span>菜单</span>
+                    <button class="close-menu" @click="showMobileMenu = false">✕</button>
+                </div>
+                <nav class="mobile-nav">
+                    <div v-for="item in menuItems" 
+                         :key="item.id"
+                         :class="['mobile-nav-item', {active: currentTab === item.id}]"
+                         @click="currentTab = item.id; showMobileMenu = false">
+                        <span class="nav-icon">{{ item.icon }}</span>
+                        <span class="nav-text">{{ item.text }}</span>
+                    </div>
+                </nav>
+                <div class="mobile-menu-footer">
+                    <button class="btn-secondary btn-block" @click="resetDatabase">重置数据</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-container">
+            <!-- 桌面端侧边栏 -->
+            <aside class="sidebar" v-if="!isMobile">
+                <nav class="nav-menu">
+                    <div v-for="item in menuItems" 
+                         :key="item.id"
+                         :class="['nav-item', {active: currentTab === item.id}]"
+                         @click="currentTab = item.id">
+                        <span class="nav-icon">{{ item.icon }}</span>
+                        <span class="nav-text">{{ item.text }}</span>
+                    </div>
+                </nav>
+                
+                <div class="daily-tasks">
+                    <h3>📅 今日任务</h3>
+                    <div class="task-list">
+                        <div v-for="task in dailyTasks" 
+                             :key="task.id"
+                             :class="['task-item', {completed: task.completed}]">
+                            <input type="checkbox" 
+                                   :checked="task.completed"
+                                   @change="toggleTask(task)">
+                            <span>{{ task.text }}</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 移动端底部导航 -->
+            <nav class="mobile-bottom-nav" v-if="isMobile">
+                <div v-for="item in menuItems.slice(0, 5)" 
+                     :key="item.id"
+                     :class="['mobile-bottom-item', {active: currentTab === item.id}]"
+                     @click="currentTab = item.id">
+                    <span class="nav-icon">{{ item.icon }}</span>
+                    <span class="nav-text">{{ item.shortText || item.text }}</span>
+                </div>
+            </nav>
+
+            <main class="content" :class="{'mobile-content': isMobile}">
+                <div v-if="isLoading" class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>正在加载...</p>
+                </div>
+                
+                <div v-if="errorMessage" class="error-message">
+                    <p>{{ errorMessage }}</p>
+                    <button class="btn-primary" @click="init">重新加载</button>
+                </div>
+
+                <!-- 学习计划模块 -->
+                <div v-if="currentTab === 'plan'" class="module">
+                    <div class="module-header">
+                        <h2>📅 学习计划</h2>
+                        <button class="btn-primary" @click="showPlanDialog = true">+ 创建计划</button>
+                    </div>
+                    
+                    <div class="plan-timeline">
+                        <div v-for="(week, index) in studyPlan" 
+                             :key="index"
+                             :class="['plan-week', {active: week.current}]">
+                            <div class="week-header">
+                                <h3>第{{ week.week }}周</h3>
+                                <span class="week-status" :class="week.status">
+                                    {{ week.statusText }}
+                                </span>
+                            </div>
+                            <div class="week-tasks">
+                                <div v-for="task in week.tasks" 
+                                     :key="task.id"
+                                     :class="['task', {completed: task.completed}]">
+                                    <div class="task-checkbox">
+                                        <input type="checkbox" 
+                                               :checked="task.completed"
+                                               @change="togglePlanTask(week, task)">
+                                    </div>
+                                    <div class="task-content">
+                                        <div class="task-title">{{ task.title }}</div>
+                                        <div class="task-meta">
+                                            <span>{{ task.duration }}小时</span>
+                                            <span>{{ task.type }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 学习重点模块 -->
+                <div v-if="currentTab === 'keypoints'" class="module">
+                    <div class="module-header">
+                        <h2>📚 学习重点</h2>
+                        <button class="btn-primary" @click="startLearning">开始学习</button>
+                    </div>
+                    
+                    <div class="chapters-list">
+                        <div v-for="chapter in chapters" 
+                             :key="chapter.id"
+                             class="chapter-card">
+                            <div class="chapter-header">
+                                <h3>{{ chapter.name }}</h3>
+                                <span class="chapter-progress">{{ getChapterProgress(chapter.id) }}%</span>
+                            </div>
+                            <div class="keypoints-preview">
+                                <div v-for="(point, index) in chapter.keypoints.slice(0, 3)" 
+                                     :key="point.id"
+                                     class="keypoint-item">
+                                    <span class="point-level" :class="point.level">{{ point.levelText }}</span>
+                                    <span class="point-title">{{ point.title }}</span>
+                                </div>
+                                <div v-if="chapter.keypoints.length > 3" class="more-points">
+                                    还有 {{ chapter.keypoints.length - 3 }} 个知识点...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 学习笔记模块 -->
+                <div v-if="currentTab === 'notes'" class="module">
+                    <div class="notes-container">
+                        <div class="notes-sidebar" v-if="!isMobile || !currentNote">
+                            <div v-if="notes.length === 0" class="empty-notes">
+                                <p>暂无笔记</p>
+                            </div>
+                            <div v-for="note in notes" 
+                                 :key="note.id"
+                                 :class="['note-item', {active: currentNote === note.id, 'mindmap-note': note.type === 'mindmap'}]"
+                                 @click="selectNote(note)">
+                                <div class="note-header">
+                                    <h4>
+                                        <span v-if="note.type === 'mindmap'" class="mindmap-badge">🧠</span>
+                                        {{ note.title }}
+                                    </h4>
+                                    <span class="note-date">{{ note.date }}</span>
+                                </div>
+                                <p class="note-preview">{{ note.content.substring(0, 100) }}...</p>
+                            </div>
+                            <button class="btn-primary btn-block" @click="createNewNote">+ 新建笔记</button>
+                        </div>
+                        
+                        <div class="note-editor" v-if="currentNote || isMobile">
+                            <div class="editor-header">
+                                <input type="text" 
+                                       v-model="noteTitle" 
+                                       placeholder="笔记标题"
+                                       class="note-title-input">
+                                <div class="editor-actions">
+                                    <button class="btn-secondary" @click="saveNote" v-if="!isMobile">保存</button>
+                                    <button class="btn-icon" @click="closeNoteEditor" v-if="isMobile">✕</button>
+                                </div>
+                            </div>
+                            <textarea v-model="noteContent" 
+                                      placeholder="在这里记录你的学习笔记..."
+                                      class="note-content-input"></textarea>
+                            <button class="btn-primary btn-block mobile-save" @click="saveNote" v-if="isMobile">保存笔记</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 真题练习模块 -->
+                <div v-if="currentTab === 'practice'" class="module">
+                    <div class="practice-filters">
+                        <select v-model="practiceFilter.year" class="filter-select">
+                            <option value="">全部年份</option>
+                            <option v-for="year in years" :key="year" :value="year">{{ year }}年</option>
+                        </select>
+                        <select v-model="practiceFilter.type" class="filter-select">
+                            <option value="">全部类型</option>
+                            <option value="morning">上午</option>
+                            <option value="afternoon">下午</option>
+                        </select>
+                        <select v-model="practiceFilter.chapter" class="filter-select">
+                            <option value="">全部章节</option>
+                            <option v-for="ch in chaptersList" :key="ch.id" :value="ch.id">{{ ch.name }}</option>
+                        </select>
+                    </div>
+                    
+                    <div class="practice-stats">
+                        <div class="stat-card">
+                            <div class="stat-value">{{ practiceStats.total }}</div>
+                            <div class="stat-label">总题数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">{{ practiceStats.correct }}</div>
+                            <div class="stat-label">正确数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">{{ practiceStats.accuracy }}%</div>
+                            <div class="stat-label">正确率</div>
+                        </div>
+                    </div>
+                    
+                    <div class="questions-grid">
+                        <div v-for="question in filteredQuestions" 
+                             :key="question.id"
+                             class="question-card"
+                             @click="startPractice(question)">
+                            <div class="question-header">
+                                <span class="question-type" :class="question.type">
+                                    {{ question.type === 'morning' ? '上午' : '下午' }}
+                                </span>
+                                <span class="question-year">{{ question.year }}年</span>
+                                <span class="question-chapter">{{ question.chapterName }}</span>
+                            </div>
+                            <div class="question-title">{{ question.title }}</div>
+                            <div class="question-tags">
+                                <span v-for="tag in question.tags" :key="tag" class="tag">{{ tag }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 冲刺复习模块 -->
+                <div v-if="currentTab === 'review'" class="module">
+                    <div class="review-mode-selector">
+                        <button :class="['mode-btn', {active: reviewMode === 'flashcards'}]" 
+                                @click="reviewMode = 'flashcards'">🎯 快速复习</button>
+                        <button :class="['mode-btn', {active: reviewMode === 'formulas'}]" 
+                                @click="reviewMode = 'formulas'">📐 核心公式</button>
+                    </div>
+                    
+                    <div v-if="reviewMode === 'flashcards'" class="flashcards-container">
+                        <div v-if="currentFlashcard" class="flashcard">
+                            <div class="flashcard-inner" :class="{flipped: flashcardFlipped}" @click="flipFlashcard">
+                                <div class="flashcard-front">
+                                    <h3>{{ currentFlashcard.question }}</h3>
+                                    <p class="flashcard-hint">点击翻转查看答案</p>
+                                </div>
+                                <div class="flashcard-back">
+                                    <h3>答案</h3>
+                                    <p>{{ currentFlashcard.answer }}</p>
+                                    <div class="flashcard-actions">
+                                        <button class="btn-success" @click.stop="markFlashcardKnown">✓ 已掌握</button>
+                                        <button class="btn-warning" @click.stop="markFlashcardUnknown">✗ 未掌握</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else class="review-complete">
+                            <h3>🎉 本轮复习完成！</h3>
+                            <p>你已完成所有复习卡片</p>
+                            <button class="btn-primary" @click="resetFlashcards">重新开始</button>
+                        </div>
+                    </div>
+                    
+                    <div v-if="reviewMode === 'formulas'" class="formulas-grid">
+                        <div v-for="formula in formulas" :key="formula.id" class="formula-card">
+                            <h4>{{ formula.name }}</h4>
+                            <div class="formula">{{ formula.formula }}</div>
+                            <p class="formula-desc">{{ formula.description }}</p>
+                            <div class="formula-example">
+                                <strong>示例：</strong>{{ formula.example }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 模拟考试模块 -->
+                <div v-if="currentTab === 'exam'" class="module">
+                    <div v-if="!inExam && !showExamResult" class="exam-intro">
+                        <h2>📝 模拟考试</h2>
+                        <div class="exam-options">
+                            <div class="exam-type-card" @click="startExam('morning')">
+                                <h3>上午考试</h3>
+                                <p>75道选择题</p>
+                                <p>考试时间：150分钟</p>
+                                <p>满分：75分</p>
+                                <button class="btn-primary">开始考试</button>
+                            </div>
+                            <div class="exam-type-card" @click="startExam('afternoon')">
+                                <h3>下午考试</h3>
+                                <p>4-5道案例分析题</p>
+                                <p>考试时间：150分钟</p>
+                                <p>满分：75分</p>
+                                <button class="btn-primary">开始考试</button>
+                            </div>
+                        </div>
+                        
+                        <div class="exam-history" v-if="examRecords.length > 0">
+                            <h3>考试记录</h3>
+                            <div class="history-list">
+                                <div v-for="record in examRecords" :key="record.id" class="history-item">
+                                    <span>{{ record.type === 'morning' ? '上午' : '下午' }}考试</span>
+                                    <span :class="['score', record.score >= 45 ? 'pass' : 'fail']">{{ record.score }}分</span>
+                                    <span>{{ record.date }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div v-if="inExam" class="exam-container">
+                        <div class="exam-header">
+                            <div class="exam-info">
+                                <span>{{ examType === 'morning' ? '上午考试' : '下午考试' }}</span>
+                                <span v-if="!reviewMode">题目: {{ currentQuestionIndex + 1 }}/{{ examQuestions.length }}</span>
+                                <span v-if="reviewMode" class="review-badge">解析模式</span>
+                            </div>
+                            <div class="exam-timer" v-if="!reviewMode">
+                                剩余时间: {{ formatTime(remainingTime) }}
+                            </div>
+                            <button v-if="!reviewMode" class="btn-submit" @click="confirmSubmit() && submitExam()">交卷</button>
+                            <button v-if="reviewMode" class="btn-secondary" @click="exitReviewMode">退出解析</button>
+                        </div>
+                        
+                        <div class="exam-progress">
+                            <div v-for="(q, index) in examQuestions" 
+                                 :key="q.id"
+                                 :class="['progress-dot', {
+                                     answered: q.answered,
+                                     current: index === currentQuestionIndex,
+                                     correct: reviewMode && q.isCorrect,
+                                     wrong: reviewMode && !q.isCorrect
+                                 }]"
+                                 @click="goToQuestion(index)">
+                                {{ index + 1 }}
+                            </div>
+                        </div>
+                        
+                        <div class="exam-question">
+                            <div class="question-content">
+                                <div class="question-header-row">
+                                    <h3>第{{ currentQuestionIndex + 1 }}题</h3>
+                                    <span v-if="reviewMode" :class="['review-status', currentExamQuestion.isCorrect ? 'correct' : 'wrong']">
+                                        {{ currentExamQuestion.isCorrect ? '✅ 正确' : '❌ 错误' }}
+                                    </span>
+                                </div>
+                                <p style="white-space: pre-wrap;">{{ currentExamQuestion.question }}</p>
+                                
+                                <div v-if="examType === 'morning'" class="options">
+                                    <div v-for="option in currentExamQuestion.options" 
+                                         :key="option.label"
+                                         :class="['option', {
+                                             selected: currentExamQuestion.selected === option.label,
+                                             correct: reviewMode && option.label === currentExamQuestion.answer,
+                                             wrong: reviewMode && currentExamQuestion.selected === option.label && option.label !== currentExamQuestion.answer
+                                         }]"
+                                         @click="!reviewMode && selectAnswer(option.label)">
+                                        <span class="option-label">{{ option.label }}</span>
+                                        <span class="option-text">{{ option.text }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div v-else class="case-answer">
+                                    <textarea v-model="currentExamQuestion.answer" 
+                                              placeholder="请输入你的答案..."
+                                              rows="10"
+                                              :disabled="reviewMode"></textarea>
+                                </div>
+                                
+                                <div v-if="reviewMode" class="question-analysis">
+                                    <div class="analysis-section">
+                                        <h4>📋 题目信息</h4>
+                                        <div class="info-row">
+                                            <span>所属章节：</span>
+                                            <span>{{ currentExamQuestion.chapterName }}</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span>正确答案：</span>
+                                            <span class="correct-answer-text">{{ currentExamQuestion.answer }}</span>
+                                        </div>
+                                        <div v-if="currentExamQuestion.selected" class="info-row">
+                                            <span>你的答案：</span>
+                                            <span :class="currentExamQuestion.isCorrect ? 'correct-answer-text' : 'wrong-answer-text'">
+                                                {{ currentExamQuestion.selected }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="analysis-section">
+                                        <h4>💡 答案解析</h4>
+                                        <div class="explanation-content" v-html="formatExplanation(currentExamQuestion.explanation)"></div>
+                                    </div>
+                                    
+                                    <div v-if="currentExamQuestion.tags && currentExamQuestion.tags.length > 0" class="analysis-section">
+                                        <h4>🏷️ 知识点标签</h4>
+                                        <div class="tags-list">
+                                            <span v-for="tag in currentExamQuestion.tags" :key="tag" class="tag">{{ tag }}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="analysis-actions">
+                                        <button v-if="!currentExamQuestion.isCorrect" 
+                                                class="btn-secondary" 
+                                                @click="addToMistakeBook(currentExamQuestion)">
+                                            加入错题本
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="exam-navigation">
+                                <button class="btn-secondary" 
+                                        @click="currentQuestionIndex--"
+                                        :disabled="currentQuestionIndex === 0">
+                                    上一题
+                                </button>
+                                <button class="btn-secondary" 
+                                        @click="currentQuestionIndex++"
+                                        :disabled="currentQuestionIndex === examQuestions.length - 1">
+                                    下一题
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div v-if="showExamResult" class="exam-result">
+                        <h2>考试结果</h2>
+                        <div class="result-score" :class="examResult.score >= 45 ? 'pass' : 'fail'">
+                            {{ examResult.score }}分
+                        </div>
+                        <div class="result-status">
+                            {{ examResult.score >= 45 ? '✅ 通过' : '❌ 未通过' }}
+                        </div>
+                        <div class="result-details">
+                            <div class="detail-item">
+                                <span>正确题数</span>
+                                <strong>{{ examResult.correct }}/{{ examResult.total }}</strong>
+                            </div>
+                            <div class="detail-item">
+                                <span>用时</span>
+                                <strong>{{ examResult.duration }}</strong>
+                            </div>
+                            <div class="detail-item">
+                                <span>正确率</span>
+                                <strong>{{ examResult.accuracy }}%</strong>
+                            </div>
+                        </div>
+                        <div class="result-analysis">
+                            <h3>知识点分析</h3>
+                            <div v-for="item in examResult.analysis" :key="item.chapter" class="analysis-item">
+                                <span>{{ item.chapter }}</span>
+                                <div class="analysis-bar">
+                                    <div class="analysis-fill" :style="{width: item.accuracy + '%'}"></div>
+                                </div>
+                                <span>{{ item.accuracy }}%</span>
+                            </div>
+                        </div>
+                        <div class="result-actions">
+                            <button class="btn-secondary" @click="reviewExam">查看解析</button>
+                            <button class="btn-primary" @click="showExamResult = false">返回</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 错题本模块 -->
+                <div v-if="currentTab === 'mistakes'" class="module">
+                    <div class="module-header">
+                        <h2>❌ 错题本</h2>
+                        <button class="btn-secondary" @click="clearAllMistakes" v-if="mistakeBook.length > 0">清空错题本</button>
+                    </div>
+                    
+                    <div v-if="mistakeBook.length === 0" class="empty-state">
+                        <p>暂无错题记录</p>
+                        <p>做错题目后会自动添加到此处</p>
+                    </div>
+                    
+                    <div v-else class="mistakes-list">
+                        <div v-for="mistake in mistakeBook" :key="mistake.id" class="mistake-item">
+                            <div class="mistake-header">
+                                <span class="mistake-chapter">{{ mistake.chapterName }}</span>
+                                <span class="mistake-date">{{ mistake.date }}</span>
+                            </div>
+                            <div class="mistake-question">{{ mistake.question }}</div>
+                            <div class="mistake-answers">
+                                <div class="your-answer">
+                                    <span>你的答案：</span>
+                                    <span class="wrong-text">{{ mistake.userAnswer }}</span>
+                                </div>
+                                <div class="correct-answer">
+                                    <span>正确答案：</span>
+                                    <span class="correct-text">{{ mistake.correctAnswer }}</span>
+                                </div>
+                            </div>
+                            <div class="mistake-actions">
+                                <button class="btn-secondary" @click="reviewMistake(mistake)">重新练习</button>
+                                <button class="btn-icon" @click="removeMistake(mistake.id)">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- 练习对话框 -->
+        <div v-if="showPracticeDialog" class="dialog-overlay" @click.self="showPracticeDialog = false">
+            <div class="dialog practice-dialog">
+                <div class="dialog-header">
+                    <h3>真题练习</h3>
+                    <button class="btn-close" @click="showPracticeDialog = false">×</button>
+                </div>
+                <div class="dialog-body">
+                    <div v-if="currentPracticeQuestion" class="practice-content">
+                        <div class="question-info">
+                            <span class="question-year">{{ currentPracticeQuestion.year }}年</span>
+                            <span class="question-type" :class="currentPracticeQuestion.type">
+                                {{ currentPracticeQuestion.type === 'morning' ? '上午' : '下午' }}
+                            </span>
+                            <span class="question-chapter">{{ currentPracticeQuestion.chapterName }}</span>
+                        </div>
+                        
+                        <div class="question-content">
+                            <p style="white-space: pre-wrap;">{{ currentPracticeQuestion.question }}</p>
+                        </div>
+                        
+                        <div v-if="currentPracticeQuestion.type === 'morning'" class="options">
+                            <div v-for="option in currentPracticeQuestion.options" 
+                                 :key="option.label"
+                                 :class="['option', { 
+                                     selected: practiceAnswer === option.label,
+                                     correct: practiceResult && option.label === currentPracticeQuestion.answer,
+                                     wrong: practiceResult && practiceAnswer === option.label && option.label !== currentPracticeQuestion.answer
+                                 }]"
+                                 @click="!practiceResult && (practiceAnswer = option.label)">
+                                <span class="option-label">{{ option.label }}</span>
+                                <span class="option-text">{{ option.text }}</span>
+                            </div>
+                        </div>
+                        
+                        <div v-else class="case-answer">
+                            <textarea v-model="practiceAnswer" 
+                                      placeholder="请输入你的答案..."
+                                      rows="10"
+                                      :disabled="practiceResult"></textarea>
+                        </div>
+                        
+                        <div v-if="practiceResult" class="practice-result">
+                            <div :class="['result-status', practiceResult.isCorrect ? 'correct' : 'wrong']">
+                                {{ practiceResult.isCorrect ? '✅ 回答正确' : '❌ 回答错误' }}
+                            </div>
+                            <div class="correct-answer">
+                                <strong>正确答案：{{ practiceResult.correctAnswer }}</strong>
+                            </div>
+                            <div class="explanation">
+                                <h4>解析：</h4>
+                                <p style="white-space: pre-wrap;">{{ practiceResult.explanation }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="dialog-footer">
+                    <button class="btn-secondary" @click="showPracticeDialog = false">关闭</button>
+                    <button v-if="!practiceResult" class="btn-primary" @click="submitPracticeAnswer">提交答案</button>
+                    <button v-else class="btn-primary" @click="showPracticeDialog = false">完成</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 学习窗口 -->
+        <div v-if="showLearningDialog" class="dialog-overlay" @click.self="closeLearningDialog">
+            <div class="dialog learning-dialog">
+                <div class="dialog-header">
+                    <h3>学习 {{ currentLearningChapter ? currentLearningChapter.name : '章节' }}</h3>
+                    <div class="learning-timer">
+                        <span>⏱️ {{ formatLearningTime }}</span>
+                        <button class="btn-icon" @click="toggleLearningPause">
+                            {{ isLearningPaused ? '▶️' : '⏸️' }}
+                        </button>
+                    </div>
+                    <button class="btn-close" @click="closeLearningDialog">×</button>
+                </div>
+                <div class="dialog-body">
+                    <div v-if="currentLearningChapter" class="learning-content">
+                        <div class="chapter-overview">
+                            <h4>章节概览</h4>
+                            <p>本章节共 {{ currentLearningChapter.keypoints.length }} 个知识点</p>
+                            <div class="learning-progress-bar">
+                                <div class="progress-fill" :style="{width: learningProgress + '%'}"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="keypoints-list">
+                            <div v-for="keypoint in currentLearningChapter.keypoints" 
+                                 :key="keypoint.id"
+                                 class="keypoint-detail">
+                                <div class="keypoint-header" @click="keypoint.expanded = !keypoint.expanded">
+                                    <span class="expand-icon">{{ keypoint.expanded ? '▼' : '▶' }}</span>
+                                    <span class="keypoint-title-text">{{ keypoint.title }}</span>
+                                    <span class="keypoint-level" :class="keypoint.level">{{ keypoint.levelText }}</span>
+                                </div>
+                                <div v-if="keypoint.expanded" class="keypoint-content">
+                                    <pre>{{ keypoint.content }}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="dialog-footer">
+                    <button class="btn-secondary" @click="closeLearningDialog">暂停学习</button>
+                    <button class="btn-primary" @click="finishLearning">完成学习</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 创建计划对话框 -->
+        <div v-if="showPlanDialog" class="dialog-overlay" @click.self="showPlanDialog = false">
+            <div class="dialog">
+                <div class="dialog-header">
+                    <h3>创建学习计划</h3>
+                    <button class="btn-close" @click="showPlanDialog = false">×</button>
+                </div>
+                <div class="dialog-body">
+                    <div class="form-group">
+                        <label>考试日期</label>
+                        <input type="date" v-model="newPlan.examDate" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>每日学习时长（小时）</label>
+                        <input type="number" v-model="newPlan.dailyHours" min="1" max="8" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>学习模式</label>
+                        <select v-model="newPlan.mode" class="form-input">
+                            <option value="intensive">强化模式</option>
+                            <option value="standard">标准模式</option>
+                            <option value="relaxed">轻松模式</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="dialog-footer">
+                    <button class="btn-secondary" @click="showPlanDialog = false">取消</button>
+                    <button class="btn-primary" @click="createPlan">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <script src="db.js"></script>
+    <script src="questions.js"></script>
+    <script src="chapters.js"></script>
+    <script src="formulas.js"></script>
+    <script src="mindmap.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

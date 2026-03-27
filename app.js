@@ -185,8 +185,10 @@ new Vue({
     
     methods: {
         selectTab: function(tabId) {
+            console.log('切换到菜单:', tabId);
             this.currentTab = tabId;
             this.showMobileMenu = false;
+            console.log('当前tab:', this.currentTab);
         },
         
         init: async function() {

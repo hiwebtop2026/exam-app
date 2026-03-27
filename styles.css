@@ -265,7 +265,7 @@ body {
 .mobile-content {
     padding: 16px !important;
     padding-bottom: calc(80px + var(--safe-area-bottom)) !important;
-    padding-top: 16px !important;
+    padding-top: calc(72px + var(--safe-area-top)) !important;
 }
 
 /* 桌面端顶部导航 */

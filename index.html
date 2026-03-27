@@ -163,13 +163,14 @@
                 <div v-if="currentTab === 'keypoints'" class="module">
                     <div class="module-header">
                         <h2>📚 学习重点</h2>
-                        <button class="btn-primary" @click="startLearning">开始学习</button>
+                        <button class="btn-primary" @click="startLearning(chapters[0])" v-if="chapters.length > 0">开始学习</button>
                     </div>
                     
                     <div class="chapters-list">
                         <div v-for="chapter in chapters" 
                              :key="chapter.id"
-                             class="chapter-card">
+                             class="chapter-card"
+                             @click="startLearning(chapter)">
                             <div class="chapter-header">
                                 <h3>{{ chapter.name }}</h3>
                                 <span class="chapter-progress">{{ getChapterProgress(chapter.id) }}%</span>
@@ -185,6 +186,7 @@
                                     还有 {{ chapter.keypoints.length - 3 }} 个知识点...
                                 </div>
                             </div>
+                            <div class="learn-more">点击开始学习 →</div>
                         </div>
                     </div>
                 </div>

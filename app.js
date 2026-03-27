@@ -948,6 +948,14 @@ new Vue({
         
         // 学习功能
         startLearning: function(chapter) {
+            if (!chapter) {
+                if (this.chapters && this.chapters.length > 0) {
+                    chapter = this.chapters[0];
+                } else {
+                    alert('暂无可学习的章节');
+                    return;
+                }
+            }
             this.isLearning = true;
             // 深拷贝章节数据，避免修改原始数据
             this.currentLearningChapter = JSON.parse(JSON.stringify(chapter));

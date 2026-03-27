@@ -53,19 +53,19 @@
             <div class="mobile-menu-content">
                 <div class="mobile-menu-header">
                     <span>菜单</span>
-                    <button class="close-menu" @click="showMobileMenu = false">✕</button>
+                    <button class="close-menu" @click.stop="showMobileMenu = false">✕</button>
                 </div>
                 <nav class="mobile-nav">
                     <div v-for="item in menuItems" 
                          :key="item.id"
                          :class="['mobile-nav-item', {active: currentTab === item.id}]"
-                         @click="currentTab = item.id; showMobileMenu = false">
+                         @click.stop="selectTab(item.id)">
                         <span class="nav-icon">{{ item.icon }}</span>
                         <span class="nav-text">{{ item.text }}</span>
                     </div>
                 </nav>
                 <div class="mobile-menu-footer">
-                    <button class="btn-secondary btn-block" @click="resetDatabase">重置数据</button>
+                    <button class="btn-secondary btn-block" @click.stop="resetDatabase">重置数据</button>
                 </div>
             </div>
         </div>
@@ -77,7 +77,7 @@
                     <div v-for="item in menuItems" 
                          :key="item.id"
                          :class="['nav-item', {active: currentTab === item.id}]"
-                         @click="currentTab = item.id">
+                         @click="selectTab(item.id)">
                         <span class="nav-icon">{{ item.icon }}</span>
                         <span class="nav-text">{{ item.text }}</span>
                     </div>
@@ -103,7 +103,7 @@
                 <div v-for="item in menuItems.slice(0, 5)" 
                      :key="item.id"
                      :class="['mobile-bottom-item', {active: currentTab === item.id}]"
-                     @click="currentTab = item.id">
+                     @click="selectTab(item.id)">
                     <span class="nav-icon">{{ item.icon }}</span>
                     <span class="nav-text">{{ item.shortText || item.text }}</span>
                 </div>

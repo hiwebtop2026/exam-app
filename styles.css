@@ -186,10 +186,17 @@ body {
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.2s;
+    pointer-events: auto;
+    user-select: none;
+}
+
+.mobile-nav-item:hover {
+    background: var(--bg-secondary);
 }
 
 .mobile-nav-item:active {
-    background: var(--bg-secondary);
+    background: var(--border-color);
+    transform: scale(0.98);
 }
 
 .mobile-nav-item.active {
@@ -228,10 +235,17 @@ body {
     border-radius: 8px;
     transition: all 0.2s;
     min-width: 0;
+    pointer-events: auto;
+    user-select: none;
+}
+
+.mobile-bottom-item:hover {
+    background: var(--bg-secondary);
 }
 
 .mobile-bottom-item:active {
-    background: var(--bg-secondary);
+    background: var(--border-color);
+    transform: scale(0.95);
 }
 
 .mobile-bottom-item.active {
@@ -336,10 +350,17 @@ body {
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
+    pointer-events: auto;
+    user-select: none;
 }
 
 .nav-item:hover {
     background: var(--bg-secondary);
+    transform: translateX(4px);
+}
+
+.nav-item:active {
+    transform: translateX(2px);
 }
 
 .nav-item.active {

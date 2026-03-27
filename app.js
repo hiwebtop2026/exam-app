@@ -184,6 +184,11 @@ new Vue({
     },
     
     methods: {
+        selectTab: function(tabId) {
+            this.currentTab = tabId;
+            this.showMobileMenu = false;
+        },
+        
         init: async function() {
             var self = this;
             this.isLoading = true;

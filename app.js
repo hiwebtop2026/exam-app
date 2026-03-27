@@ -199,6 +199,17 @@ new Vue({
             console.log('切换成功, currentTab现在是:', this.currentTab);
         },
         
+        getChapterProgress: function(chapterId) {
+            return 0;
+        },
+        
+        formatLearningTime: function() {
+            if (!this.learningStartTime) return '0分';
+            var now = new Date();
+            var elapsed = Math.floor((now - this.learningStartTime) / (1000 * 60));
+            return elapsed + '分';
+        },
+        
         init: async function() {
             var self = this;
             this.isLoading = true;

@@ -180,15 +180,23 @@ new Vue({
             var now = new Date();
             var elapsed = Math.floor((now - this.learningStartTime) / (1000 * 60));
             return elapsed;
+        },
+        
+        chaptersList: function() {
+            return this.chapters;
         }
     },
     
     methods: {
         selectTab: function(tabId) {
-            console.log('切换到菜单:', tabId);
+            console.log('selectTab被调用, tabId:', tabId);
+            if (!tabId) {
+                console.error('tabId为空!');
+                return;
+            }
             this.currentTab = tabId;
             this.showMobileMenu = false;
-            console.log('当前tab:', this.currentTab);
+            console.log('切换成功, currentTab现在是:', this.currentTab);
         },
         
         init: async function() {

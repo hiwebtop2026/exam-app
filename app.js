@@ -73,9 +73,9 @@ new Vue({
         
         questions: [],
         practiceFilter: {
-            year: 'all',
-            type: 'all',
-            chapter: 'all'
+            year: '',
+            type: '',
+            chapter: ''
         },
         practiceStats: {
             total: 0,
@@ -144,19 +144,19 @@ new Vue({
             var self = this;
             var result = this.questions;
             
-            if (this.practiceFilter.year !== 'all') {
+            if (this.practiceFilter.year && this.practiceFilter.year !== '') {
                 result = result.filter(function(q) { 
                     return q.year === parseInt(self.practiceFilter.year); 
                 });
             }
             
-            if (this.practiceFilter.type !== 'all') {
+            if (this.practiceFilter.type && this.practiceFilter.type !== '') {
                 result = result.filter(function(q) { 
                     return q.type === self.practiceFilter.type; 
                 });
             }
             
-            if (this.practiceFilter.chapter !== 'all') {
+            if (this.practiceFilter.chapter && this.practiceFilter.chapter !== '') {
                 result = result.filter(function(q) { 
                     return q.chapter === self.practiceFilter.chapter; 
                 });

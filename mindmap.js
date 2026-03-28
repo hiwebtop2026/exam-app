@@ -1,8 +1,8 @@
 // 思维导图生成器
 const MindMapGenerator = {
-    // 生成章节思维导图数据
+    // 生成章节思维导图数据（包含全部内容）
     generateChapterMindMap: function(chapter) {
-        if (!chapter || !chapter.keypoints) {
+        if (!chapter) {
             return null;
         }
 
@@ -17,13 +17,41 @@ const MindMapGenerator = {
             }
         };
 
-        // 遍历所有知识点，生成思维导图节点
-        chapter.keypoints.forEach((keypoint, index) => {
-            const node = this.parseKeypointToNode(keypoint, index + 1);
-            if (node) {
-                mindMapData.root.children.push(node);
-            }
-        });
+        // 添加章节基本信息节点
+        const basicInfoNode = {
+            id: 'basic-info',
+            text: '章节信息',
+            children: []
+        };
+
+        if (chapter.intro) {
+            basicInfoNode.children.push({
+                text: '章节概述',
+                children: this.extractContentItems(chapter.intro)
+            });
+        }
+
+        if (chapter.objectives) {
+            basicInfoNode.children.push({
+                text: '学习目标',
+                children: this.extractContentItems(chapter.objectives)
+            });
+        }
+
+        if (chapter.keypoints && chapter.keypoints.length > 0) {
+            // 遍历所有知识点，生成思维导图节点
+            chapter.keypoints.forEach((keypoint, index) => {
+                const node = this.parseKeypointToNode(keypoint, index + 1);
+                if (node) {
+                    mindMapData.root.children.push(node);
+                }
+            });
+        }
+
+        // 添加基本信息节点（如果有内容）
+        if (basicInfoNode.children.length > 0) {
+            mindMapData.root.children.unshift(basicInfoNode);
+        }
 
         return mindMapData;
     },
@@ -100,6 +128,32 @@ const MindMapGenerator = {
         }
 
         return sections;
+    },
+
+    // 提取内容项
+    extractContentItems: function(content) {
+        if (!content) return [];
+        
+        const items = [];
+        const lines = content.split('\n');
+        
+        lines.forEach(line => {
+            line = line.trim();
+            if (!line) return;
+            
+            // 清理行内容
+            const cleanLine = line
+                .replace(/^\d+\.\s*/, '')
+                .replace(/^[-•]\s*/, '')
+                .replace(/^[A-Z]\.\s*/, '')
+                .trim();
+            
+            if (cleanLine && cleanLine.length > 2) {
+                items.push({ text: cleanLine });
+            }
+        });
+        
+        return items;
     },
 
     // 将思维导图转换为Markdown格式（用于笔记）

@@ -1306,7 +1306,13 @@ new Vue({
                 clearInterval(this.learningTimer);
             }
             this.isLearning = false;
-            this.showLearningDialog = false;
+            
+            // 如果学习进度达到100%，自动生成思维导图
+            if (this.learningProgress >= 100 && this.currentLearningChapter) {
+                this.finishLearning();
+            } else {
+                this.showLearningDialog = false;
+            }
         }
     },
     

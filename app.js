@@ -21,9 +21,13 @@ var Utils = {
     },
     
     shuffleArray: function(array) {
+        // 使用 Fisher-Yates 洗牌算法，添加时间戳作为随机种子增强随机性
         var shuffled = array.slice();
+        var seed = Date.now() % 10000;
         for (var i = shuffled.length - 1; i > 0; i--) {
-            var j = Math.floor(Math.random() * (i + 1));
+            // 结合 Math.random() 和时间戳种子
+            var random = (Math.random() * 10000 + seed) % 1;
+            var j = Math.floor(random * (i + 1));
             var temp = shuffled[i];
             shuffled[i] = shuffled[j];
             shuffled[j] = temp;

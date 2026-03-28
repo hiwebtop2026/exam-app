@@ -205,6 +205,18 @@ new Vue({
         },
         
         currentExamQuestion: function() {
+            if (!this.examQuestions || this.examQuestions.length === 0 || this.currentQuestionIndex < 0 || this.currentQuestionIndex >= this.examQuestions.length) {
+                return {
+                    question: '加载中...',
+                    options: [],
+                    answer: '',
+                    chapterName: '',
+                    selected: null,
+                    answered: false,
+                    isCorrect: false,
+                    explanation: ''
+                };
+            }
             return this.examQuestions[this.currentQuestionIndex];
         },
         

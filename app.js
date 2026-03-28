@@ -127,7 +127,11 @@ new Vue({
         showExplanationDialog: false,
         
         // 错题本
-        mistakeBook: []
+        mistakeBook: [],
+        
+        // 加载状态
+        isLoading: false,
+        errorMessage: ''
     },
     
     computed: {
@@ -257,38 +261,31 @@ new Vue({
         
         init: async function() {
             var self = this;
+            console.log('Vue 实例初始化开始');
             this.isLoading = true;
             this.errorMessage = '';
 
             try {
-                await db.init();
-                console.log('数据库初始化成功');
-
-                // 首先加载 chapters（flashcards 依赖 chapters）
+                console.log('开始加载章节数据');
                 await self.loadChapters();
+                console.log('章节数据加载完成，共', self.chapters.length, '章');
 
-                // 并行加载其他静态数据
+                console.log('开始加载其他静态数据');
                 await Promise.all([
                     self.loadQuestions(),
                     self.loadFormulas(),
                     self.loadFlashcards()
                 ]);
+                console.log('静态数据加载完成');
 
-                // 并行加载用户数据
-                await Promise.all([
-                    self.loadStudyPlan(),
-                    self.loadNotes(),
-                    self.loadMistakes(),
-                    self.loadProgress(),
-                    self.loadPracticeStats()
-                ]);
-
-                console.log('应用初始化完成');
+                console.log('应用初始化完成（简化版）');
             } catch (error) {
                 console.error('初始化失败:', error);
+                console.error('错误堆栈:', error.stack);
                 self.errorMessage = '应用初始化失败，请刷新页面重试';
             } finally {
                 self.isLoading = false;
+                console.log('初始化结束，isLoading:', self.isLoading);
             }
         },
         

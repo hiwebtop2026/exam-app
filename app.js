@@ -816,15 +816,15 @@ new Vue({
             chapters.forEach(function(chapter) {
                 if (chapter.keypoints) {
                     chapter.keypoints.forEach(function(point) {
-                        if (point.level === 'high' || point.level === 'medium') {
-                            flashcards.push({
-                                id: id++,
-                                question: point.title,
-                                answer: point.content || '请查看详细内容',
-                                chapterId: chapter.id,
-                                chapterName: chapter.name
-                            });
-                        }
+                        // 加载全部卡片内容，不区分重要性级别
+                        flashcards.push({
+                            id: id++,
+                            question: point.title,
+                            answer: point.content || '请查看详细内容',
+                            chapterId: chapter.id,
+                            chapterName: chapter.name,
+                            level: point.level
+                        });
                     });
                 }
             });

@@ -119,6 +119,7 @@ new Vue({
         learningStartTime: null,
         learningTimer: null,
         isLearningPaused: false,
+        chapterProgress: {}, // 存储各章节的学习进度
         
         // 笔记编辑状态
         noteTitle: '',
@@ -266,7 +267,8 @@ new Vue({
         },
         
         getChapterProgress: function(chapterId) {
-            return 0;
+            // 从chapterProgress对象获取章节进度
+            return this.chapterProgress[chapterId] || 0;
         },
         
         formatLearningTime: function() {
@@ -469,6 +471,7 @@ new Vue({
             var progress = await db.getProgress();
             if (progress) {
                 this.overallProgress = progress.overallProgress || 0;
+                this.chapterProgress = progress.chapterProgress || {};
             }
         },
         
@@ -619,7 +622,8 @@ new Vue({
         saveDailyTasks: async function() {
             await db.saveProgress({
                 overallProgress: this.overallProgress,
-                dailyTasks: this.dailyTasks
+                dailyTasks: this.dailyTasks,
+                chapterProgress: this.chapterProgress
             });
         },
         
@@ -1435,39 +1439,55 @@ new Vue({
             this.learningProgress = 100;
             this.showLearningDialog = false;
             
-            // 生成思维导图
+            // 保存章节进度
             if (this.currentLearningChapter) {
-                var mindMapData = MindMapGenerator.generateChapterMindMap(this.currentLearningChapter);
-                if (mindMapData) {
-                    // 转换为Markdown格式
-                    var markdown = MindMapGenerator.toMarkdown(mindMapData);
-                    
-                    // 创建笔记
-                    var note = {
-                        title: this.currentLearningChapter.name + ' - 思维导图',
-                        content: markdown,
-                        chapter: this.currentLearningChapter.id,
-                        chapterName: this.currentLearningChapter.name,
-                        type: 'mindmap',
-                        mindMapData: mindMapData,
-                        createdAt: new Date().toISOString()
-                    };
-                    
-                    // 保存笔记
-                    db.saveNote(note).then(function(id) {
-                        note.id = id;
-                        note.date = new Date().toLocaleDateString('zh-CN');
-                        self.notes.unshift(note);
+                this.chapterProgress[this.currentLearningChapter.id] = 100;
+                this.saveDailyTasks();
+            }
+            
+            // 生成思维导图（一个章节只生成一次）
+            if (this.currentLearningChapter) {
+                // 检查是否已经为该章节生成过思维导图
+                var existingMindMapNote = this.notes.find(function(note) {
+                    return note.type === 'mindmap' && note.chapter === self.currentLearningChapter.id;
+                });
+                
+                if (!existingMindMapNote) {
+                    var mindMapData = MindMapGenerator.generateChapterMindMap(this.currentLearningChapter);
+                    if (mindMapData) {
+                        // 转换为Markdown格式
+                        var markdown = MindMapGenerator.toMarkdown(mindMapData);
                         
-                        // 显示提示
-                        alert('学习完成！已自动生成思维导图笔记，可在"学习笔记"中查看。');
-                    }).catch(function(error) {
-                        console.error('保存思维导图笔记失败:', error);
-                    });
-                    
-                    // 保存学习记录
-                    this.saveLearningRecord();
+                        // 创建笔记
+                        var note = {
+                            title: this.currentLearningChapter.name + ' - 思维导图',
+                            content: markdown,
+                            chapter: this.currentLearningChapter.id,
+                            chapterName: this.currentLearningChapter.name,
+                            type: 'mindmap',
+                            mindMapData: mindMapData,
+                            createdAt: new Date().toISOString()
+                        };
+                        
+                        // 保存笔记
+                        db.saveNote(note).then(function(id) {
+                            note.id = id;
+                            note.date = new Date().toLocaleDateString('zh-CN');
+                            self.notes.unshift(note);
+                            
+                            // 显示提示
+                            alert('学习完成！已自动生成思维导图笔记，可在"学习笔记"中查看。');
+                        }).catch(function(error) {
+                            console.error('保存思维导图笔记失败:', error);
+                        });
+                    }
+                } else {
+                    // 显示提示
+                    alert('学习完成！该章节的思维导图已经存在于学习笔记中。');
                 }
+                
+                // 保存学习记录
+                this.saveLearningRecord();
             }
         },
         

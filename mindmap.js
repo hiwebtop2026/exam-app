@@ -194,61 +194,47 @@ const MindMapGenerator = {
         return markdown;
     },
 
-    // 将思维导图转换为HTML可视化格式（符合用户要求的格式）
+    // 将思维导图转换为HTML可视化格式（经典树状图）
     toHTML: function(mindMapData) {
         if (!mindMapData) return '';
 
-        // 生成符合要求的思维导图HTML
-        const colors = ['#e11d48', '#3b82f6', '#eab308', '#8b5cf6', '#10b981'];
+        // 生成经典树状图HTML
+        const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
         
-        const generateNodeHTML = (node, level, parentX, parentY, parentAngle, index, total) => {
-            const nodeRadius = level === 0 ? 60 : 40;
+        const generateTreeHTML = (node, level) => {
             const nodeColor = colors[level % colors.length];
-            const lineColor = colors[level % colors.length];
-            
-            // 计算位置
-            const centerX = 600;
-            const centerY = 200;
-            const radius = 150 + (level * 120);
-            const angle = (index / total) * Math.PI * 2;
-            const x = centerX + Math.cos(angle) * radius;
-            const y = centerY + Math.sin(angle) * radius;
-            
             let html = '';
             
-            // 绘制连接线
-            if (level > 0) {
-                html += `<svg class="mindmap-connector" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
-                    <path d="M ${parentX} ${parentY} Q ${(parentX + x) / 2} ${(parentY + y) / 2} ${x} ${y}" 
-                          stroke="${lineColor}" stroke-width="3" fill="none" />
-                </svg>`;
-            }
-            
-            // 绘制节点
-            html += `<div class="mindmap-node" style="position: absolute; left: ${x - nodeRadius}px; top: ${y - nodeRadius/2}px; width: ${nodeRadius*2}px; text-align: center;">
-                <div class="node-content" style="background-color: ${nodeColor}; color: white; border-radius: 50%; padding: 15px; display: inline-block;">
+            html += `<div class="tree-node" style="margin-left: ${level * 40}px; margin-top: 10px;">
+                <div class="node-box" style="background-color: ${nodeColor}; color: white; padding: 10px 15px; border-radius: 6px; display: inline-block;">
                     ${node.text}
-                </div>
-            </div>`;
+                </div>`;
             
-            // 绘制子节点
             if (node.children && node.children.length > 0) {
-                node.children.forEach((child, childIndex) => {
-                    html += generateNodeHTML(child, level + 1, x, y, angle, childIndex, node.children.length);
+                html += '<div class="tree-children">';
+                node.children.forEach(child => {
+                    html += generateTreeHTML(child, level + 1);
                 });
+                html += '</div>';
             }
             
+            html += '</div>';
             return html;
         };
 
         return `
-            <div class="mindmap-container" style="position: relative; width: 1200px; height: 800px; background-color: #f8fafc; border-radius: 10px;">
-                <div class="mindmap-root" style="position: absolute; left: 550px; top: 170px; background-color: #e11d48; color: white; border-radius: 50%; padding: 20px; font-size: 24px; font-weight: bold;">
-                    ${mindMapData.root.text}
+            <div class="mindmap-container" style="width: 100%; max-width: 1000px; padding: 20px; background-color: #f8fafc; border-radius: 10px; overflow-x: auto;">
+                <h2 style="text-align: center; color: #1f2937; margin-bottom: 30px;">${mindMapData.root.text} - 思维导图</h2>
+                <div class="tree-container" style="font-family: Arial, sans-serif;">
+                    <div class="tree-node root-node" style="text-align: center; margin-bottom: 30px;">
+                        <div class="node-box" style="background-color: #e11d48; color: white; padding: 15px 25px; border-radius: 8px; display: inline-block; font-size: 18px; font-weight: bold;">
+                            ${mindMapData.root.text}
+                        </div>
+                        <div class="tree-children">
+                            ${mindMapData.root.children.map(child => generateTreeHTML(child, 0)).join('')}
+                        </div>
+                    </div>
                 </div>
-                ${mindMapData.root.children.map((child, index) => 
-                    generateNodeHTML(child, 1, 600, 200, 0, index, mindMapData.root.children.length)
-                ).join('')}
             </div>
         `;
     },

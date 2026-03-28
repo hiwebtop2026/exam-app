@@ -194,36 +194,61 @@ const MindMapGenerator = {
         return markdown;
     },
 
-    // 将思维导图转换为HTML可视化格式
+    // 将思维导图转换为HTML可视化格式（符合用户要求的格式）
     toHTML: function(mindMapData) {
         if (!mindMapData) return '';
 
-        const generateNodeHTML = (node, level) => {
-            const levelClass = `mindmap-level-${Math.min(level, 4)}`;
-            const importanceClass = node.level === 'high' ? 'importance-high' : 
-                                   node.level === 'medium' ? 'importance-medium' : 'importance-low';
+        // 生成符合要求的思维导图HTML
+        const colors = ['#e11d48', '#3b82f6', '#eab308', '#8b5cf6', '#10b981'];
+        
+        const generateNodeHTML = (node, level, parentX, parentY, parentAngle, index, total) => {
+            const nodeRadius = level === 0 ? 60 : 40;
+            const nodeColor = colors[level % colors.length];
+            const lineColor = colors[level % colors.length];
             
-            let html = `<div class="mindmap-node ${levelClass} ${importanceClass}">`;
-            html += `<div class="node-content">${node.text}</div>`;
+            // 计算位置
+            const centerX = 600;
+            const centerY = 200;
+            const radius = 150 + (level * 120);
+            const angle = (index / total) * Math.PI * 2;
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius;
             
-            if (node.children && node.children.length > 0) {
-                html += `<div class="node-children">`;
-                node.children.forEach(child => {
-                    html += generateNodeHTML(child, level + 1);
-                });
-                html += `</div>`;
+            let html = '';
+            
+            // 绘制连接线
+            if (level > 0) {
+                html += `<svg class="mindmap-connector" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                    <path d="M ${parentX} ${parentY} Q ${(parentX + x) / 2} ${(parentY + y) / 2} ${x} ${y}" 
+                          stroke="${lineColor}" stroke-width="3" fill="none" />
+                </svg>`;
             }
             
-            html += `</div>`;
+            // 绘制节点
+            html += `<div class="mindmap-node" style="position: absolute; left: ${x - nodeRadius}px; top: ${y - nodeRadius/2}px; width: ${nodeRadius*2}px; text-align: center;">
+                <div class="node-content" style="background-color: ${nodeColor}; color: white; border-radius: 50%; padding: 15px; display: inline-block;">
+                    ${node.text}
+                </div>
+            </div>`;
+            
+            // 绘制子节点
+            if (node.children && node.children.length > 0) {
+                node.children.forEach((child, childIndex) => {
+                    html += generateNodeHTML(child, level + 1, x, y, angle, childIndex, node.children.length);
+                });
+            }
+            
             return html;
         };
 
         return `
-            <div class="mindmap-container">
-                <div class="mindmap-title">${mindMapData.root.text}</div>
-                <div class="mindmap-body">
-                    ${mindMapData.root.children.map(child => generateNodeHTML(child, 1)).join('')}
+            <div class="mindmap-container" style="position: relative; width: 1200px; height: 800px; background-color: #f8fafc; border-radius: 10px;">
+                <div class="mindmap-root" style="position: absolute; left: 550px; top: 170px; background-color: #e11d48; color: white; border-radius: 50%; padding: 20px; font-size: 24px; font-weight: bold;">
+                    ${mindMapData.root.text}
                 </div>
+                ${mindMapData.root.children.map((child, index) => 
+                    generateNodeHTML(child, 1, 600, 200, 0, index, mindMapData.root.children.length)
+                ).join('')}
             </div>
         `;
     },

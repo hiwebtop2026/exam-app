@@ -281,6 +281,10 @@ new Vue({
             this.errorMessage = '';
 
             try {
+                console.log('开始加载系统设置');
+                self.loadSettings();
+                console.log('系统设置加载完成');
+
                 console.log('开始初始化数据库');
                 await db.init();
                 console.log('数据库初始化完成');
@@ -746,19 +750,45 @@ new Vue({
             // 保存到数据库
             db.savePracticeStats(this.practiceStats);
             
-            // 如果答错，添加到错题本
+            // 处理错题本逻辑
             if (!isCorrect) {
-                var mistake = {
-                    questionId: question.id,
-                    question: question.question,
-                    chapterName: question.chapterName,
-                    userAnswer: this.practiceAnswer,
-                    correctAnswer: question.answer,
-                    explanation: question.explanation,
-                    date: new Date().toLocaleDateString('zh-CN')
-                };
-                db.addMistake(mistake);
-                this.mistakeBook.unshift(mistake);
+                // 检查是否已在错题本中
+                var existingMistakeIndex = this.mistakeBook.findIndex(function(m) {
+                    return m.questionId === question.id;
+                });
+                
+                if (existingMistakeIndex === -1) {
+                    // 不在错题本中，添加新错题
+                    var mistake = {
+                        questionId: question.id,
+                        question: question.question,
+                        chapterName: question.chapterName,
+                        userAnswer: this.practiceAnswer,
+                        correctAnswer: question.answer,
+                        explanation: question.explanation,
+                        date: new Date().toLocaleDateString('zh-CN')
+                    };
+                    db.addMistake(mistake).then(function(id) {
+                        mistake.id = id;
+                        self.mistakeBook.unshift(mistake);
+                    }).catch(function(error) {
+                        console.error('添加错题失败:', error);
+                    });
+                }
+            } else {
+                // 回答正确，从错题本中删除
+                var mistakeIndex = this.mistakeBook.findIndex(function(m) {
+                    return m.questionId === question.id;
+                });
+                
+                if (mistakeIndex > -1) {
+                    var mistakeId = this.mistakeBook[mistakeIndex].id;
+                    db.removeMistake(mistakeId).then(function() {
+                        self.mistakeBook.splice(mistakeIndex, 1);
+                    }).catch(function(error) {
+                        console.error('删除错题失败:', error);
+                    });
+                }
             }
             
             // 显示答案解析弹窗
@@ -953,9 +983,11 @@ new Vue({
             this.examQuestions.forEach(function(q, index) {
                 console.log('题目' + (index + 1) + ':', q.id, '选择：', q.selected, '答案：', q.answer);
                 
+                var isCorrect = false;
                 if (self.examType === 'morning') {
                     // 上午考试：选择题自动评分
-                    if (q.selected && q.selected === q.answer) {
+                    isCorrect = q.selected && q.selected === q.answer;
+                    if (isCorrect) {
                         correct++;
                         console.log('  ✓ 正确');
                     } else {
@@ -969,8 +1001,50 @@ new Vue({
                 }
                 analysis[q.chapterName].total++;
                 
-                if (self.examType === 'morning' && q.selected === q.answer) {
+                if (isCorrect) {
                     analysis[q.chapterName].correct++;
+                }
+                
+                // 处理错题本逻辑
+                if (self.examType === 'morning') {
+                    if (!isCorrect && q.selected) {
+                        // 答错，添加到错题本
+                        var existingMistakeIndex = self.mistakeBook.findIndex(function(m) {
+                            return m.questionId === q.id;
+                        });
+                        
+                        if (existingMistakeIndex === -1) {
+                            var mistake = {
+                                questionId: q.id,
+                                question: q.question,
+                                chapterName: q.chapterName,
+                                userAnswer: q.selected,
+                                correctAnswer: q.answer,
+                                explanation: q.explanation,
+                                date: new Date().toLocaleDateString('zh-CN')
+                            };
+                            db.addMistake(mistake).then(function(id) {
+                                mistake.id = id;
+                                self.mistakeBook.unshift(mistake);
+                            }).catch(function(error) {
+                                console.error('添加错题失败:', error);
+                            });
+                        }
+                    } else if (isCorrect) {
+                        // 答对，从错题本中删除
+                        var mistakeIndex = self.mistakeBook.findIndex(function(m) {
+                            return m.questionId === q.id;
+                        });
+                        
+                        if (mistakeIndex > -1) {
+                            var mistakeId = self.mistakeBook[mistakeIndex].id;
+                            db.removeMistake(mistakeId).then(function() {
+                                self.mistakeBook.splice(mistakeIndex, 1);
+                            }).catch(function(error) {
+                                console.error('删除错题失败:', error);
+                            });
+                        }
+                    }
                 }
             });
             
@@ -1190,6 +1264,10 @@ new Vue({
         // 系统设置
         changeFontSize: function(size) {
             this.settings.fontSize = size;
+            // 保存设置到本地存储
+            localStorage.setItem('examAppSettings', JSON.stringify(this.settings));
+            // 实时更新页面字体大小
+            document.querySelector('.main-container').className = 'main-container font-size-' + size;
         },
         
         showSettings: function() {
@@ -1198,6 +1276,18 @@ new Vue({
         
         closeSettings: function() {
             this.showSettingsDialog = false;
+        },
+        
+        // 加载系统设置
+        loadSettings: function() {
+            var savedSettings = localStorage.getItem('examAppSettings');
+            if (savedSettings) {
+                try {
+                    this.settings = JSON.parse(savedSettings);
+                } catch (e) {
+                    console.error('加载设置失败:', e);
+                }
+            }
         },
         
         // 学习功能

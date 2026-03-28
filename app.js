@@ -297,6 +297,10 @@ new Vue({
                 await self.loadChapters();
                 console.log('章节数据加载完成，共', self.chapters.length, '章');
 
+                console.log('开始加载学习进度');
+                await self.loadProgress();
+                console.log('学习进度加载完成');
+
                 console.log('开始加载其他静态数据');
                 await Promise.all([
                     self.loadQuestions(),
@@ -1383,7 +1387,8 @@ new Vue({
                     keypoint.expanded = true; // 默认展开所有知识点
                 });
             }
-            this.learningProgress = 0;
+            // 从保存的进度开始学习
+            this.learningProgress = this.chapterProgress[chapter.id] || 0;
             this.learningStartTime = new Date();
             // 开始学习计时
             this.startLearningTimer();
@@ -1517,6 +1522,11 @@ new Vue({
             // 如果学习进度达到100%，自动生成思维导图
             if (this.learningProgress >= 100 && this.currentLearningChapter) {
                 this.finishLearning();
+            } else if (this.currentLearningChapter && this.learningProgress > 0) {
+                // 保存当前学习进度
+                this.chapterProgress[this.currentLearningChapter.id] = this.learningProgress;
+                this.saveDailyTasks();
+                this.showLearningDialog = false;
             } else {
                 this.showLearningDialog = false;
             }

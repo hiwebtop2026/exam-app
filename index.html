@@ -619,16 +619,12 @@
                                       :disabled="practiceResult"></textarea>
                         </div>
                         
-                        <div v-if="practiceResult" class="practice-result">
+                        <div v-if="practiceResult" class="practice-result-summary">
                             <div :class="['result-status', practiceResult.isCorrect ? 'correct' : 'wrong']">
                                 {{ practiceResult.isCorrect ? '✅ 回答正确' : '❌ 回答错误' }}
                             </div>
                             <div class="correct-answer">
                                 <strong>正确答案：{{ practiceResult.correctAnswer }}</strong>
-                            </div>
-                            <div class="explanation">
-                                <h4>解析：</h4>
-                                <p style="white-space: pre-wrap;">{{ practiceResult.explanation }}</p>
                             </div>
                         </div>
                     </div>
@@ -636,7 +632,61 @@
                 <div class="dialog-footer">
                     <button class="btn-secondary" @click="showPracticeDialog = false">关闭</button>
                     <button v-if="!practiceResult" class="btn-primary" @click="submitPracticeAnswer">提交答案</button>
-                    <button v-else class="btn-primary" @click="showPracticeDialog = false">完成</button>
+                    <button v-else class="btn-primary" @click="showExplanationDialog = true">查看解析</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 答案解析弹出窗口 -->
+        <div v-if="showExplanationDialog" class="dialog-overlay" @click.self="showExplanationDialog = false">
+            <div class="dialog explanation-dialog">
+                <div class="dialog-header">
+                    <h3>📋 答案解析</h3>
+                    <button class="btn-close" @click="showExplanationDialog = false">×</button>
+                </div>
+                <div class="dialog-body">
+                    <div v-if="practiceResult" class="explanation-content">
+                        <div class="result-summary">
+                            <div :class="['result-status', practiceResult.isCorrect ? 'correct' : 'wrong']">
+                                {{ practiceResult.isCorrect ? '✅ 回答正确' : '❌ 回答错误' }}
+                            </div>
+                            <div class="answer-comparison">
+                                <div class="your-answer">
+                                    <span>你的答案：</span>
+                                    <strong :class="practiceResult.isCorrect ? 'correct' : 'wrong'">{{ practiceAnswer || '未作答' }}</strong>
+                                </div>
+                                <div class="correct-answer">
+                                    <span>正确答案：</span>
+                                    <strong class="correct">{{ practiceResult.correctAnswer }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="explanation-detail">
+                            <h4>📖 详细解析</h4>
+                            <div class="explanation-text" style="white-space: pre-wrap;">{{ practiceResult.explanation || '暂无解析' }}</div>
+                        </div>
+                        <div v-if="currentPracticeQuestion" class="question-info">
+                            <h4>📌 题目信息</h4>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="label">年份：</span>
+                                    <span class="value">{{ currentPracticeQuestion.year }}年</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">类型：</span>
+                                    <span class="value">{{ currentPracticeQuestion.type === 'morning' ? '上午题' : '下午题' }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">章节：</span>
+                                    <span class="value">{{ currentPracticeQuestion.chapterName }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="dialog-footer">
+                    <button class="btn-secondary" @click="showExplanationDialog = false">关闭</button>
+                    <button class="btn-primary" @click="showExplanationDialog = false; showPracticeDialog = false">下一题</button>
                 </div>
             </div>
         </div>

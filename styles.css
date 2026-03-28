@@ -2014,6 +2014,159 @@ body {
     font-size: 14px;
 }
 
+/* 答案解析弹出窗口 */
+.explanation-dialog {
+    width: 95% !important;
+    max-width: 800px !important;
+    max-height: 90vh !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.explanation-dialog .dialog-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    max-height: calc(90vh - 120px);
+}
+
+.explanation-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.explanation-content .result-summary {
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 10px;
+    border: 2px solid var(--border-color);
+}
+
+.explanation-content .result-status {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.explanation-content .answer-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.explanation-content .your-answer,
+.explanation-content .correct-answer {
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.explanation-content .your-answer {
+    background: #fee2e2;
+}
+
+.explanation-content .your-answer strong.correct {
+    color: #065f46;
+}
+
+.explanation-content .your-answer strong.wrong {
+    color: #991b1b;
+}
+
+.explanation-content .correct-answer {
+    background: #d1fae5;
+}
+
+.explanation-content .correct-answer strong {
+    color: #065f46;
+}
+
+.explanation-detail {
+    background: #f0f9ff;
+    padding: 16px;
+    border-radius: 10px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.explanation-detail h4 {
+    margin-bottom: 12px;
+    color: var(--primary-color);
+    font-size: 16px;
+}
+
+.explanation-text {
+    line-height: 1.8;
+    color: var(--text-primary);
+    font-size: 14px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.explanation-content .question-info {
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.explanation-content .question-info h4 {
+    margin-bottom: 12px;
+    color: var(--text-primary);
+    font-size: 15px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-item .label {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.info-item .value {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 13px;
+}
+
+/* 练习结果摘要（简化版） */
+.practice-result-summary {
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 10px;
+    border: 2px solid var(--border-color);
+    text-align: center;
+}
+
+.practice-result-summary .result-status {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.practice-result-summary .correct-answer {
+    padding: 10px;
+    background: #dbeafe;
+    border-radius: 8px;
+    color: #1e40af;
+    font-size: 14px;
+}
+
 /* 表单 */
 .form-group {
     margin-bottom: 20px;

@@ -297,9 +297,12 @@ new Vue({
                 await Promise.all([
                     self.loadQuestions(),
                     self.loadFormulas(),
-                    self.loadFlashcards()
+                    self.loadFlashcards(),
+                    self.loadMistakes()
                 ]);
                 console.log('静态数据加载完成');
+                console.log('错题本数据加载完成，共', self.mistakeBook.length, '条');
+
 
                 console.log('应用初始化完成');
             } catch (error) {

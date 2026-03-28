@@ -822,18 +822,18 @@ new Vue({
             // 回答正确时直接跳题，不需要显示解析
             if (isCorrect) {
                 // 启动倒计时
-                self.practiceAutoJumpCountdown = 5;
-                self.practiceAutoJumpTimer = setInterval(function() {
-                    self.practiceAutoJumpCountdown--;
-                    if (self.practiceAutoJumpCountdown <= 0) {
-                        clearInterval(self.practiceAutoJumpTimer);
-                        self.practiceAutoJumpTimer = null;
-                        self.showPracticeDialog = false;
-                        self.practiceAnswer = '';
-                        self.practiceResult = null;
-                        self.practiceAutoJumpCountdown = 0;
+                this.practiceAutoJumpCountdown = 5;
+                this.practiceAutoJumpTimer = setInterval(() => {
+                    this.practiceAutoJumpCountdown--;
+                    if (this.practiceAutoJumpCountdown <= 0) {
+                        clearInterval(this.practiceAutoJumpTimer);
+                        this.practiceAutoJumpTimer = null;
+                        this.showPracticeDialog = false;
+                        this.practiceAnswer = '';
+                        this.practiceResult = null;
+                        this.practiceAutoJumpCountdown = 0;
                         // 自动开始下一题
-                        self.startRandomPractice();
+                        this.startRandomPractice();
                     }
                 }, 1000);
             } else {

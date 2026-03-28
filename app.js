@@ -136,7 +136,13 @@ new Vue({
         
         // 加载状态
         isLoading: false,
-        errorMessage: ''
+        errorMessage: '',
+        
+        // 系统设置
+        settings: {
+            fontSize: 'medium' // small, medium, large
+        },
+        showSettingsDialog: false
     },
     
     computed: {
@@ -238,6 +244,10 @@ new Vue({
         
         formulas: function() {
             return this.coreFormulas;
+        },
+        
+        fontSizeClass: function() {
+            return 'font-size-' + this.settings.fontSize;
         }
     },
     
@@ -271,6 +281,10 @@ new Vue({
             this.errorMessage = '';
 
             try {
+                console.log('开始初始化数据库');
+                await db.init();
+                console.log('数据库初始化完成');
+
                 console.log('开始加载章节数据');
                 await self.loadChapters();
                 console.log('章节数据加载完成，共', self.chapters.length, '章');
@@ -283,7 +297,7 @@ new Vue({
                 ]);
                 console.log('静态数据加载完成');
 
-                console.log('应用初始化完成（简化版）');
+                console.log('应用初始化完成');
             } catch (error) {
                 console.error('初始化失败:', error);
                 console.error('错误堆栈:', error.stack);
@@ -1126,11 +1140,11 @@ new Vue({
             }
         },
         
-        removeMistake: function(mistake) {
+        removeMistake: function(mistakeId) {
             var self = this;
-            db.removeMistake(mistake.id).then(function() {
+            db.removeMistake(mistakeId).then(function() {
                 var index = self.mistakeBook.findIndex(function(m) { 
-                    return m.id === mistake.id; 
+                    return m.id === mistakeId; 
                 });
                 if (index > -1) {
                     self.mistakeBook.splice(index, 1);
@@ -1171,6 +1185,19 @@ new Vue({
                     self.isLoading = false;
                 }
             }
+        },
+        
+        // 系统设置
+        changeFontSize: function(size) {
+            this.settings.fontSize = size;
+        },
+        
+        showSettings: function() {
+            this.showSettingsDialog = true;
+        },
+        
+        closeSettings: function() {
+            this.showSettingsDialog = false;
         },
         
         // 学习功能

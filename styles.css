@@ -2461,6 +2461,80 @@ body {
     background: #94a3b8;
 }
 
+/* 字号调整 */
+.font-size-small {
+    font-size: 14px;
+}
+
+.font-size-small .keypoint-content pre,
+.font-size-small .explanation-text,
+.font-size-small .question-content p,
+.font-size-small .practice-result-summary {
+    font-size: 13px;
+}
+
+.font-size-medium {
+    font-size: 16px;
+}
+
+.font-size-medium .keypoint-content pre,
+.font-size-medium .explanation-text,
+.font-size-medium .question-content p,
+.font-size-medium .practice-result-summary {
+    font-size: 14px;
+}
+
+.font-size-large {
+    font-size: 18px;
+}
+
+.font-size-large .keypoint-content pre,
+.font-size-large .explanation-text,
+.font-size-large .question-content p,
+.font-size-large .practice-result-summary {
+    font-size: 16px;
+}
+
+/* 字号预览 */
+.font-size-preview.small {
+    font-size: 14px;
+}
+
+.font-size-preview.medium {
+    font-size: 16px;
+}
+
+.font-size-preview.large {
+    font-size: 18px;
+}
+
+/* 字号选择按钮 */
+.font-size-options {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.font-size-btn {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.font-size-btn.active {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: white;
+}
+
+.font-size-btn:hover {
+    border-color: var(--primary-color);
+}
+
 /* 答案解析弹窗样式 */
 .explanation-overlay {
     z-index: 3000;

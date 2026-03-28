@@ -1,5 +1,5 @@
 // 题库数据
-const questionsData = [
+window.questionsData = [
     // ===== 2024年真题 =====
     {
         id: 'q2024001',

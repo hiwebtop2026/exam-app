@@ -825,6 +825,8 @@ new Vue({
                 this.practiceAutoJumpCountdown = 5;
                 this.practiceAutoJumpTimer = setInterval(() => {
                     this.practiceAutoJumpCountdown--;
+                    // 强制Vue更新视图
+                    this.$forceUpdate();
                     if (this.practiceAutoJumpCountdown <= 0) {
                         clearInterval(this.practiceAutoJumpTimer);
                         this.practiceAutoJumpTimer = null;

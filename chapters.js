@@ -1,4 +1,4 @@
-const chaptersData = [
+window.chaptersData = [
     {
         id: 'chapter1',
         name: '第1章 信息化发展',

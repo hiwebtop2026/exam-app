@@ -823,7 +823,7 @@ new Vue({
                     self.practiceResult = null;
                     // 自动开始下一题
                     self.startRandomPractice();
-                }, 2000); // 2秒后自动跳题
+                }, 5000); // 5秒后自动跳题
             }
         },
         

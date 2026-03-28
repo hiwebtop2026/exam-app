@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>系统集成项目管理工程师备考系统</title>
+    <style>
+        /* ========== 全局样式 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f5f7fa;
+            color: #1f2937;
+        }
+        .font-small { font-size: 14px; }
+        .font-medium { font-size: 16px; }
+        .font-large { font-size: 18px; }
+
+        /* 头部 */
+        .header, .mobile-header {
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 1.2rem; }
+        .logo-icon { font-size: 1.8rem; }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .progress-info { display: flex; align-items: center; gap: 8px; }
+        .progress-bar { width: 150px; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: #667eea; transition: width 0.3s; }
+        .progress-bar-mini { width: 60px; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden; }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 280px;
+            background: #fff;
+            border-right: 1px solid #e5e7eb;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            height: calc(100vh - 60px);
+            position: sticky;
+            top: 60px;
+            overflow-y: auto;
+        }
+        .nav-menu { display: flex; flex-direction: column; gap: 8px; }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .nav-item:hover { background: #f3f4f6; }
+        .nav-item.active { background: #667eea20; color: #667eea; font-weight: 500; }
+        .nav-icon { font-size: 1.2rem; }
+
+        /* 主内容 */
+        .main-container { display: flex; }
+        .content { flex: 1; padding: 24px; overflow-y: auto; }
+        .mobile-content { padding: 16px; padding-bottom: 70px; }
+
+        /* 模块 */
+        .module { max-width: 1200px; margin: 0 auto; }
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .btn-primary, .btn-secondary, .btn-success, .btn-warning {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5a67d8; }
+        .btn-secondary { background: #e5e7eb; color: #1f2937; }
+        .btn-secondary:hover { background: #d1d5db; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-block { width: 100%; }
+
+        /* 真题练习 */
+        .practice-filters {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .filter-select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+        }
+        .practice-stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            flex: 1;
+        }
+        .questions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 24px;
+        }
+        .question-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        /* 对话框 */
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .dialog {
+            background: #fff;
+            border-radius: 24px;
+            max-width: 90%;
+            width: 700px;
+            max-height: 90%;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        .dialog-header {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .dialog-body { padding: 20px; }
+        .dialog-footer {
+            padding: 20px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        /* 选项样式 */
+        .option {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option.selected { background: #667eea20; border-color: #667eea; }
+        .option.correct { background: #d1fae5; border-color: #10b981; }
+        .option.wrong { background: #fee2e2; border-color: #ef4444; }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .mobile-header { display: flex; }
+            .mobile-bottom-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: #fff;
+                display: flex;
+                justify-content: space-around;
+                padding: 8px 0;
+                border-top: 1px solid #e5e7eb;
+                z-index: 100;
+            }
+            .mobile-bottom-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                font-size: 12px;
+                padding: 4px;
+                cursor: pointer;
+            }
+            .mobile-bottom-item.active { color: #667eea; }
+        }
+        @media (min-width: 769px) {
+            .mobile-header { display: none; }
+            .mobile-bottom-nav { display: none; }
+        }
+        .loading-state, .empty-state { text-align: center; padding: 40px; }
+        .error-message { background: #fee2e2; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 移动端顶部导航（简化） -->
+        <header class="mobile-header" v-if="isMobile">
+            <div class="mobile-logo"><span class="logo-icon">📚</span><span class="logo-text">软考备考</span></div>
+            <button class="menu-toggle" @click="showMobileMenu = !showMobileMenu">☰</button>
+        </header>
+
+        <!-- 桌面端顶部导航 -->
+        <header class="header" v-else>
+            <div class="logo"><span class="logo-icon">📚</span><span class="logo-text">系统集成项目管理工程师备考系统</span></div>
+            <div class="header-right">
+                <div class="progress-info">
+                    <span>学习进度: {{ overallProgress }}%</span>
+                    <div class="progress-bar"><div class="progress-fill" :style="{width: overallProgress + '%'}"></div></div>
+                </div>
+                <button class="btn-secondary" @click="showSettings">⚙️ 设置</button>
+                <button class="btn-secondary" @click="resetDatabase">重置数据</button>
+            </div>
+        </header>
+
+        <!-- 移动端菜单（简化） -->
+        <div class="mobile-menu" v-if="isMobile && showMobileMenu" @click.self="showMobileMenu = false">
+            <div class="mobile-menu-content">
+                <div class="mobile-menu-header"><span>菜单</span><button class="close-menu" @click.stop="showMobileMenu = false">✕</button></div>
+                <nav class="mobile-nav">
+                    <div v-for="item in menuItems" :key="item.id" :class="['mobile-nav-item', {active: currentTab === item.id}]" @click.stop="selectTab(item.id)">
+                        <span class="nav-icon">{{ item.icon }}</span><span class="nav-text">{{ item.text }}</span>
+                    </div>
+                </nav>
+                <div class="mobile-menu-footer">
+                    <button class="btn-secondary btn-block" @click.stop="showSettings">⚙️ 系统设置</button>
+                    <button class="btn-secondary btn-block" @click.stop="resetDatabase">重置数据</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-container" :class="fontSizeClass">
+            <!-- 桌面端侧边栏 -->
+            <aside class="sidebar" v-if="!isMobile">
+                <nav class="nav-menu">
+                    <div v-for="item in menuItems" :key="item.id" :class="['nav-item', {active: currentTab === item.id}]" @click="selectTab(item.id)">
+                        <span class="nav-icon">{{ item.icon }}</span><span class="nav-text">{{ item.text }}</span>
+                    </div>
+                </nav>
+                <div class="daily-tasks"><h3>📅 今日任务</h3><div class="task-list"><div v-for="task in dailyTasks" :key="task.id" :class="['task-item', {completed: task.completed}]"><input type="checkbox" :checked="task.completed" @change="toggleTask(task)"><span>{{ task.text }}</span></div></div></div>
+            </aside>
+
+            <!-- 移动端底部导航 -->
+            <nav class="mobile-bottom-nav" v-if="isMobile">
+                <div v-for="item in menuItems.slice(0,5)" :key="item.id" :class="['mobile-bottom-item', {active: currentTab === item.id}]" @click="selectTab(item.id)">
+                    <span class="nav-icon">{{ item.icon }}</span><span class="nav-text">{{ item.shortText || item.text }}</span>
+                </div>
+            </nav>
+
+            <main class="content" :class="{'mobile-content': isMobile}">
+                <!-- 调试信息（可删除） -->
+                <div style="background: #fef3c7; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px;">
+                    <strong>调试信息 - 当前选中: {{ currentTab }}</strong>
+                    <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button v-for="item in menuItems" :key="item.id" @click="selectTab(item.id)" :style="{padding:'6px 12px',borderRadius:'6px',border:'1px solid #e5e7eb',background: currentTab === item.id ? '#3b82f6' : 'white',color: currentTab === item.id ? 'white' : '#1f2937',cursor:'pointer'}">{{ item.icon }} {{ item.text }}</button>
+                    </div>
+                </div>
+
+                <!-- 真题练习模块（核心） -->
+                <div v-if="currentTab === 'practice'" class="module">
+                    <div class="module-header">
+                        <h2>✍️ 真题练习</h2>
+                        <button class="btn-primary" @click="startRandomPractice">🎯 随机练习</button>
+                    </div>
+                    <div class="practice-filters">
+                        <select v-model="practiceFilter.year" class="filter-select" @change="onFilterChange"><option value="">全部年份</option><option v-for="year in years" :key="year" :value="year">{{ year }}年</option></select>
+                        <select v-model="practiceFilter.type" class="filter-select" @change="onFilterChange"><option value="">全部类型</option><option value="morning">上午</option><option value="afternoon">下午</option></select>
+                        <select v-model="practiceFilter.chapter" class="filter-select" @change="onFilterChange"><option value="">全部章节</option><option v-for="ch in chaptersList" :key="ch.id" :value="ch.id">{{ ch.name }}</option></select>
+                    </div>
+                    <div class="practice-stats">
+                        <div class="stat-card"><div class="stat-value">{{ practiceStats.total }}</div><div class="stat-label">总题数</div></div>
+                        <div class="stat-card"><div class="stat-value">{{ practiceStats.correct }}</div><div class="stat-label">正确数</div></div>
+                        <div class="stat-card"><div class="stat-value">{{ practiceStats.accuracy }}%</div><div class="stat-label">正确率</div></div>
+                    </div>
+                    <div class="questions-grid">
+                        <div v-for="question in filteredQuestions" :key="question.id" class="question-card" @click="startPractice(question)">
+                            <div class="question-header"><span class="question-type" :class="question.type">{{ question.type === 'morning' ? '上午' : '下午' }}</span><span class="question-year">{{ question.year }}年</span><span class="question-chapter">{{ question.chapterName }}</span></div>
+                            <div class="question-title">{{ question.title }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 其他模块（占位，保持结构） -->
+                <div v-if="currentTab === 'plan'" class="module"><h2>学习计划</h2><p>计划功能演示</p></div>
+                <div v-if="currentTab === 'keypoints'" class="module"><h2>学习重点</h2><p>重点功能演示</p></div>
+                <div v-if="currentTab === 'notes'" class="module"><h2>学习笔记</h2><p>笔记功能演示</p></div>
+                <div v-if="currentTab === 'review'" class="module"><h2>冲刺复习</h2><p>复习功能演示</p></div>
+                <div v-if="currentTab === 'exam'" class="module"><h2>模拟考试</h2><p>考试功能演示</p></div>
+                <div v-if="currentTab === 'mistakes'" class="module"><h2>错题本</h2><p>错题本功能演示</p></div>
+            </main>
+        </div>
+
+        <!-- 练习对话框 -->
+        <div v-if="showPracticeDialog" class="dialog-overlay" @click.self="closePracticeDialog">
+            <div class="dialog practice-dialog">
+                <div class="dialog-header"><h3>真题练习</h3><button class="btn-close" @click="closePracticeDialog">×</button></div>
+                <div class="dialog-body">
+                    <div v-if="currentPracticeQuestion" class="practice-content">
+                        <div class="question-info"><span class="question-year">{{ currentPracticeQuestion.year }}年</span><span class="question-type">{{ currentPracticeQuestion.type === 'morning' ? '上午' : '下午' }}</span><span class="question-chapter">{{ currentPracticeQuestion.chapterName }}</span></div>
+                        <div class="question-content"><p style="white-space: pre-wrap;">{{ currentPracticeQuestion.question }}</p></div>
+                        <div v-if="currentPracticeQuestion.type === 'morning'" class="options">
+                            <div v-for="option in currentPracticeQuestion.options" :key="option.label" :class="['option', { selected: practiceAnswer === option.label, correct: practiceResult && option.label === currentPracticeQuestion.answer, wrong: practiceResult && practiceAnswer === option.label && option.label !== currentPracticeQuestion.answer }]" @click="!practiceResult && (practiceAnswer = option.label)">
+                                <span class="option-label">{{ option.label }}</span><span class="option-text">{{ option.text }}</span>
+                            </div>
+                        </div>
+                        <div v-else class="case-answer"><textarea v-model="practiceAnswer" placeholder="请输入你的答案..." rows="10" :disabled="practiceResult"></textarea></div>
+                        <div v-if="practiceResult" class="practice-result-summary">
+                            <div :class="['result-status', practiceResult.isCorrect ? 'correct' : 'wrong']">{{ practiceResult.isCorrect ? '✅ 回答正确' : '❌ 回答错误' }}</div>
+                            <div class="correct-answer"><strong>正确答案：{{ practiceResult.correctAnswer }}</strong></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="dialog-footer">
+                    <button class="btn-secondary" @click="closePracticeDialog">关闭</button>
+                    <button v-if="!practiceResult" class="btn-primary" @click="submitPracticeAnswer">提交答案</button>
+                    <button v-else class="btn-primary" @click="nextPracticeQuestion">下一题</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 设置弹窗（简化） -->
+        <div v-if="showSettingsDialog" class="dialog-overlay" @click.self="closeSettings">
+            <div class="dialog settings-dialog"><div class="dialog-header"><h3>⚙️ 系统设置</h3><button class="btn-close" @click="closeSettings">×</button></div><div class="dialog-body"><div class="settings-section"><h4>字号大小</h4><div class="font-size-options"><button :class="['font-size-btn', {active: settings.fontSize === 'small'}]" @click="changeFontSize('small')">小</button><button :class="['font-size-btn', {active: settings.fontSize === 'medium'}]" @click="changeFontSize('medium')">中</button><button :class="['font-size-btn', {active: settings.fontSize === 'large'}]" @click="changeFontSize('large')">大</button></div></div></div><div class="dialog-footer"><button class="btn-primary" @click="closeSettings">确定</button></div></div>
+        </div>
+    </div>
+
+    <!-- 引入外部 JS 文件（实际使用时请确保这些文件存在并导出所需变量） -->
+    <!-- 假设 questions.js 定义了 window.questionsBank 数组，结构如下示例 -->
+    <!-- 为了演示自动跳转功能，此处提供最小演示数据，实际使用时请替换为真实题库文件 -->
+    <script>
+        // 模拟外部题库数据（实际使用时，请注释掉本段，改为引入真实 questions.js）
+        window.questionsBank = [
+            { id: 1, year: 2023, type: 'morning', chapterId: 1, chapterName: '信息化知识', title: '以下关于信息系统集成项目的说法，错误的是？', question: '以下关于信息系统集成项目的说法，错误的是？\nA. 项目具有临时性\nB. 项目具有独特性\nC. 项目成果可以重复使用\nD. 项目需要逐步细化', options: [{label:'A',text:'项目具有临时性'},{label:'B',text:'项目具有独特性'},{label:'C',text:'项目成果可以重复使用'},{label:'D',text:'项目需要逐步细化'}], answer: 'C', explanation: '项目成果是一次性的，不可重复使用。' },
+            { id: 2, year: 2023, type: 'morning', chapterId: 2, chapterName: '项目管理基础知识', title: '以下哪个不是项目管理的五大过程组？', question: '以下哪个不是项目管理的五大过程组？\nA. 启动过程组\nB. 规划过程组\nC. 执行过程组\nD. 维护过程组', options: [{label:'A',text:'启动过程组'},{label:'B',text:'规划过程组'},{label:'C',text:'执行过程组'},{label:'D',text:'维护过程组'}], answer: 'D', explanation: '五大过程组包括启动、规划、执行、监控、收尾。' }
+        ];
+        // 模拟章节数据
+        window.chaptersData = [
+            { id: 1, name: '信息化知识' },
+            { id: 2, name: '项目管理基础知识' }
+        ];
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <!-- 实际使用时，取消注释以下外部文件引用 -->
+    <!-- <script src="questions.js"></script> -->
+    <!-- <script src="chapters.js"></script> -->
+    <!-- <script src="formulas.js"></script> -->
+    <!-- <script src="mindmap.js"></script> -->
+    <!-- <script src="app.js"></script> -->
+
+    <script>
+        // 应用逻辑（包含自动跳转功能）
+        new Vue({
+            el: '#app',
+            data: {
+                isMobile: window.innerWidth <= 768,
+                showMobileMenu: false,
+                currentTab: 'practice',
+                fontSizeClass: 'font-medium',
+                settings: { fontSize: 'medium' },
+                menuItems: [
+                    { id: 'plan', icon: '📅', text: '学习计划', shortText: '计划' },
+                    { id: 'keypoints', icon: '📚', text: '学习重点', shortText: '重点' },
+                    { id: 'notes', icon: '📝', text: '学习笔记', shortText: '笔记' },
+                    { id: 'practice', icon: '✍️', text: '真题练习', shortText: '练习' },
+                    { id: 'review', icon: '⚡', text: '冲刺复习', shortText: '复习' },
+                    { id: 'exam', icon: '📝', text: '模拟考试', shortText: '考试' },
+                    { id: 'mistakes', icon: '❌', text: '错题本', shortText: '错题' }
+                ],
+                // 真题练习数据
+                allQuestions: window.questionsBank || [],
+                filteredQuestions: [],
+                practiceFilter: { year: '', type: '', chapter: '' },
+                years: [2023, 2022, 2021],
+                chaptersList: window.chaptersData || [],
+                practiceStats: { total: 0, correct: 0, accuracy: 0 },
+                showPracticeDialog: false,
+                currentPracticeQuestion: null,
+                practiceAnswer: '',
+                practiceResult: null,
+                autoNextTimer: null,      // 自动跳转定时器
+                isSubmitting: false,       // 防重复提交
+                // 错题本
+                mistakeBook: [],
+                // 其他数据（简化）
+                dailyTasks: [{ id: 1, text: '完成今日学习计划', completed: false }],
+                overallProgress: 0,
+                showSettingsDialog: false
+            },
+            mounted() {
+                this.loadFromStorage();
+                this.filteredQuestions = [...this.allQuestions];
+                this.updatePracticeStats();
+                window.addEventListener('resize', this.handleResize);
+            },
+            beforeDestroy() {
+                window.removeEventListener('resize', this.handleResize);
+                if (this.autoNextTimer) clearTimeout(this.autoNextTimer);
+            },
+            methods: {
+                handleResize() { this.isMobile = window.innerWidth <= 768; },
+                loadFromStorage() {
+                    const savedStats = localStorage.getItem('practice_stats');
+                    if (savedStats) this.practiceStats = JSON.parse(savedStats);
+                    const savedMistakes = localStorage.getItem('mistake_book');
+                    if (savedMistakes) this.mistakeBook = JSON.parse(savedMistakes);
+                },
+                saveToStorage() {
+                    localStorage.setItem('practice_stats', JSON.stringify(this.practiceStats));
+                    localStorage.setItem('mistake_book', JSON.stringify(this.mistakeBook));
+                },
+                updatePracticeStats() {
+                    this.practiceStats.accuracy = this.practiceStats.total === 0 ? 0 : Math.round((this.practiceStats.correct / this.practiceStats.total) * 100);
+                    this.saveToStorage();
+                },
+                onFilterChange() {
+                    this.filteredQuestions = this.allQuestions.filter(q => {
+                        if (this.practiceFilter.year && q.year != this.practiceFilter.year) return false;
+                        if (this.practiceFilter.type && q.type !== this.practiceFilter.type) return false;
+                        if (this.practiceFilter.chapter && q.chapterId != this.practiceFilter.chapter) return false;
+                        return true;
+                    });
+                },
+                startPractice(question) {
+                    this.currentPracticeQuestion = JSON.parse(JSON.stringify(question));
+                    this.practiceAnswer = '';
+                    this.practiceResult = null;
+                    this.showPracticeDialog = true;
+                },
+                startRandomPractice() {
+                    if (this.allQuestions.length === 0) { alert('暂无题目数据'); return; }
+                    const randomIndex = Math.floor(Math.random() * this.allQuestions.length);
+                    this.currentPracticeQuestion = JSON.parse(JSON.stringify(this.allQuestions[randomIndex]));
+                    this.practiceAnswer = '';
+                    this.practiceResult = null;
+                    this.showPracticeDialog = true;
+                },
+                // 提交答案（核心：正确时自动跳转）
+                submitPracticeAnswer() {
+                    if (this.isSubmitting) return;
+                    if (!this.practiceAnswer && this.currentPracticeQuestion.type === 'morning') {
+                        alert('请选择一个选项');
+                        return;
+                    }
+                    if (!this.practiceAnswer && this.currentPracticeQuestion.type === 'afternoon') {
+                        alert('请输入你的答案');
+                        return;
+                    }
+                    this.isSubmitting = true;
+
+                    const question = this.currentPracticeQuestion;
+                    const userAnswer = this.practiceAnswer;
+                    let isCorrect = false;
+
+                    if (question.type === 'morning') {
+                        isCorrect = (userAnswer === question.answer);
+                    } else {
+                        isCorrect = (userAnswer.trim().toLowerCase() === question.answer.trim().toLowerCase());
+                    }
+
+                    if (isCorrect) this.practiceStats.correct++;
+                    this.practiceStats.total++;
+                    this.updatePracticeStats();
+
+                    this.practiceResult = {
+                        isCorrect: isCorrect,
+                        correctAnswer: question.answer,
+                        explanation: question.explanation
+                    };
+
+                    if (!isCorrect) {
+                        this.addToMistakeBook({
+                            id: question.id,
+                            question: question.question,
+                            userAnswer: userAnswer,
+                            correctAnswer: question.answer,
+                            chapterName: question.chapterName,
+                            date: new Date().toLocaleDateString()
+                        });
+                    }
+
+                    // 回答正确：延迟800ms自动跳转下一题
+                    if (isCorrect) {
+                        if (this.autoNextTimer) clearTimeout(this.autoNextTimer);
+                        this.autoNextTimer = setTimeout(() => {
+                            this.nextPracticeQuestion();
+                        }, 800);
+                    }
+
+                    this.isSubmitting = false;
+                },
+                // 下一题（随机）
+                nextPracticeQuestion() {
+                    if (this.autoNextTimer) {
+                        clearTimeout(this.autoNextTimer);
+                        this.autoNextTimer = null;
+                    }
+                    if (this.allQuestions.length === 0) return;
+                    const randomIndex = Math.floor(Math.random() * this.allQuestions.length);
+                    this.currentPracticeQuestion = JSON.parse(JSON.stringify(this.allQuestions[randomIndex]));
+                    this.practiceAnswer = '';
+                    this.practiceResult = null;
+                },
+                closePracticeDialog() {
+                    this.showPracticeDialog = false;
+                    if (this.autoNextTimer) {
+                        clearTimeout(this.autoNextTimer);
+                        this.autoNextTimer = null;
+                    }
+                    this.isSubmitting = false;
+                },
+                addToMistakeBook(mistake) {
+                    const exists = this.mistakeBook.some(m => m.id === mistake.id);
+                    if (!exists) {
+                        this.mistakeBook.unshift(mistake);
+                        this.saveToStorage();
+                    }
+                },
+                toggleTask(task) { task.completed = !task.completed; },
+                selectTab(tabId) {
+                    this.currentTab = tabId;
+                    if (this.isMobile) this.showMobileMenu = false;
+                },
+                showSettings() { this.showSettingsDialog = true; },
+                closeSettings() { this.showSettingsDialog = false; },
+                changeFontSize(size) {
+                    this.settings.fontSize = size;
+                    if (size === 'small') this.fontSizeClass = 'font-small';
+                    else if (size === 'medium') this.fontSizeClass = 'font-medium';
+                    else this.fontSizeClass = 'font-large';
+                    localStorage.setItem('font_size', size);
+                },
+                resetDatabase() {
+                    if (confirm('重置所有数据将清除练习统计和错题本，是否继续？')) {
+                        localStorage.clear();
+                        location.reload();
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

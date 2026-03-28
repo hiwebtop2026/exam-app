@@ -133,6 +133,8 @@ new Vue({
         showExplanationDialog: false,
         practiceAutoJumpCountdown: 0,  // 自动跳转倒计时
         practiceAutoJumpTimer: null,   // 自动跳转定时器
+        autoNextTimer: null,      // 自动跳转定时器
+        isSubmitting: false,      // 防止重复提交
         
         // 错题本
         mistakeBook: [],
@@ -324,12 +326,12 @@ new Vue({
         },
         
         loadChapters: function() {
-            this.chapters = chaptersData;
+            this.chapters = window.chaptersData || [];
             return Promise.resolve();
         },
         
         loadQuestions: function() {
-            this.questions = questionsData;
+            this.questions = window.questionsData || [];
             return Promise.resolve();
         },
         
@@ -726,6 +728,7 @@ new Vue({
         }, 1000),
         
         startPractice: function(question) {
+            console.log('startPractice called with question:', question.id);
             var self = this;
             // 清除之前的自动跳转定时器
             if (this.practiceAutoJumpTimer) {
@@ -734,57 +737,78 @@ new Vue({
             }
             this.practiceAutoJumpCountdown = 0;
             this.currentPracticeQuestion = question;
+            console.log('Current practice question set to:', question.id);
             this.showPracticeDialog = true;
+            console.log('showPracticeDialog set to:', this.showPracticeDialog);
             this.practiceAnswer = '';
             this.practiceResult = null;
+            console.log('startPractice completed');
         },
         
         // 随机开始练习
         startRandomPractice: function() {
             var self = this;
-            var filteredQuestions = this.filteredQuestions;
+            console.log('startRandomPractice called');
+            console.log('questions length:', this.questions.length);
             
-            if (filteredQuestions.length === 0) {
-                alert('没有符合条件的题目');
+            // 直接使用所有题目，不进行过滤
+            var allQuestions = this.questions;
+            console.log('allQuestions length:', allQuestions.length);
+            
+            if (allQuestions.length === 0) {
+                alert('题库中没有题目');
                 return;
             }
             
             // 随机选择题目
-            var randomIndex = Math.floor(Math.random() * filteredQuestions.length);
-            var randomQuestion = filteredQuestions[randomIndex];
+            var randomIndex = Math.floor(Math.random() * allQuestions.length);
+            var randomQuestion = allQuestions[randomIndex];
+            console.log('selected question:', randomQuestion);
             
+            console.log('Calling startPractice with question:', randomQuestion.id);
             this.startPractice(randomQuestion);
         },
         
         submitPracticeAnswer: function() {
-            var self = this;
-            var question = this.currentPracticeQuestion;
+            // 防止重复提交
+            if (this.isSubmitting) return;
             
-            if (!this.practiceAnswer) {
-                alert('请选择或输入答案');
+            // 检查currentPracticeQuestion是否存在
+            if (!this.currentPracticeQuestion) {
+                console.error('currentPracticeQuestion is null or undefined');
                 return;
             }
             
-            var isCorrect = false;
-            if (question.type === 'morning') {
-                isCorrect = this.practiceAnswer === question.answer;
+            // 验证答案是否为空（根据题型）
+            if (!this.practiceAnswer && this.currentPracticeQuestion.type === 'morning') {
+                alert('请选择一个选项');
+                return;
+            }
+            if (!this.practiceAnswer && this.currentPracticeQuestion.type === 'afternoon') {
+                alert('请输入你的答案');
+                return;
             }
             
+            this.isSubmitting = true;
+            
+            var self = this;
+            var question = this.currentPracticeQuestion;
+            var userAnswer = this.practiceAnswer;
+            var isCorrect = false;
+            
+            if (question.type === 'morning') {
+                isCorrect = (userAnswer === question.answer);
+            } else {
+                // 可根据实际需求调整匹配规则
+                isCorrect = (userAnswer.trim().toLowerCase() === question.answer.trim().toLowerCase());
+            }
+            
+            // 保存练习结果
             this.practiceResult = {
                 isCorrect: isCorrect,
                 correctAnswer: question.answer,
                 explanation: question.explanation
             };
-            
-            // 更新练习统计
-            this.practiceStats.total++;
-            if (isCorrect) {
-                this.practiceStats.correct++;
-            }
-            this.practiceStats.accuracy = Math.round((this.practiceStats.correct / this.practiceStats.total) * 100);
-            
-            // 保存到数据库
-            db.savePracticeStats(this.practiceStats);
             
             // 处理错题本逻辑
             if (!isCorrect) {
@@ -799,7 +823,7 @@ new Vue({
                         questionId: question.id,
                         question: question.question,
                         chapterName: question.chapterName,
-                        userAnswer: this.practiceAnswer,
+                        userAnswer: userAnswer,
                         correctAnswer: question.answer,
                         explanation: question.explanation,
                         date: new Date().toLocaleDateString('zh-CN')
@@ -807,9 +831,13 @@ new Vue({
                     db.addMistake(mistake).then(function(id) {
                         mistake.id = id;
                         self.mistakeBook.unshift(mistake);
+                        self.isSubmitting = false;
                     }).catch(function(error) {
                         console.error('添加错题失败:', error);
+                        self.isSubmitting = false;
                     });
+                } else {
+                    self.isSubmitting = false;
                 }
             } else {
                 // 回答正确，从错题本中删除
@@ -818,36 +846,44 @@ new Vue({
                 });
                 
                 if (mistakeIndex > -1) {
-                    var mistakeId = this.mistakeBook[mistakeIndex].id;
+                    var mistakeId = self.mistakeBook[mistakeIndex].id;
                     db.removeMistake(mistakeId).then(function() {
                         self.mistakeBook.splice(mistakeIndex, 1);
+                        // 回答正确时直接跳题，不需要显示解析
+                        console.log('Answer is correct, preparing to jump to next question');
+                        // 清除已有的定时器
+                        if (self.autoNextTimer) {
+                            clearTimeout(self.autoNextTimer);
+                        }
+                        // 延迟800ms后自动加载下一题
+                        self.autoNextTimer = setTimeout(function() {
+                            console.log('Calling nextPracticeQuestion');
+                            self.nextPracticeQuestion();
+                            self.isSubmitting = false;
+                        }, 800);
                     }).catch(function(error) {
                         console.error('删除错题失败:', error);
+                        self.isSubmitting = false;
                     });
+                } else {
+                    // 回答正确时直接跳题，不需要显示解析
+                    console.log('Answer is correct, preparing to jump to next question');
+                    // 清除已有的定时器
+                    if (self.autoNextTimer) {
+                        clearTimeout(self.autoNextTimer);
+                    }
+                    // 延迟800ms后自动加载下一题
+                    self.autoNextTimer = setTimeout(function() {
+                        console.log('Calling nextPracticeQuestion');
+                        self.nextPracticeQuestion();
+                        self.isSubmitting = false;
+                    }, 800);
                 }
             }
             
-            // 回答正确时直接跳题，不需要显示解析
-            if (isCorrect) {
-                // 启动倒计时
-                this.practiceAutoJumpCountdown = 5;
-                this.practiceAutoJumpTimer = setInterval(() => {
-                    this.practiceAutoJumpCountdown--;
-                    // 强制Vue更新视图
-                    this.$forceUpdate();
-                    if (this.practiceAutoJumpCountdown <= 0) {
-                        clearInterval(this.practiceAutoJumpTimer);
-                        this.practiceAutoJumpTimer = null;
-                        this.showPracticeDialog = false;
-                        this.practiceAnswer = '';
-                        this.practiceResult = null;
-                        this.practiceAutoJumpCountdown = 0;
-                        // 自动开始下一题
-                        this.startRandomPractice();
-                    }
-                }, 1000);
-            } else {
-                // 回答错误时显示答案解析弹窗
+            // 回答错误时显示答案解析弹窗
+            if (!isCorrect) {
+                console.log('Answer is incorrect, showing explanation dialog');
                 this.showExplanationDialog = true;
             }
         },
@@ -867,17 +903,41 @@ new Vue({
             this.startRandomPractice();
         },
         
+        // 下一题（随机）
+        nextPracticeQuestion: function() {
+            // 清除定时器
+            if (this.autoNextTimer) {
+                clearTimeout(this.autoNextTimer);
+                this.autoNextTimer = null;
+            }
+            
+            // 随机抽取下一道题目
+            if (this.questions && this.questions.length > 0) {
+                const randomIndex = Math.floor(Math.random() * this.questions.length);
+                this.currentPracticeQuestion = JSON.parse(JSON.stringify(this.questions[randomIndex]));
+                this.practiceAnswer = '';
+                this.practiceResult = null;
+            } else {
+                console.warn('题库为空，无法自动跳转');
+            }
+        },
+        
         // 关闭练习对话框
         closePracticeDialog: function() {
+            this.showPracticeDialog = false;
             // 清除自动跳转定时器
+            if (this.autoNextTimer) {
+                clearTimeout(this.autoNextTimer);
+                this.autoNextTimer = null;
+            }
             if (this.practiceAutoJumpTimer) {
                 clearInterval(this.practiceAutoJumpTimer);
                 this.practiceAutoJumpTimer = null;
             }
             this.practiceAutoJumpCountdown = 0;
-            this.showPracticeDialog = false;
             this.practiceAnswer = '';
             this.practiceResult = null;
+            this.isSubmitting = false;
         },
         
         // 冲刺复习方法
@@ -1368,6 +1428,26 @@ new Vue({
             }
         },
         
+        // 组件销毁前清理
+        beforeDestroy: function() {
+            // 清除自动跳转定时器
+            if (this.autoNextTimer) {
+                clearTimeout(this.autoNextTimer);
+            }
+            // 清除练习自动跳转定时器
+            if (this.practiceAutoJumpTimer) {
+                clearInterval(this.practiceAutoJumpTimer);
+            }
+            // 清除学习定时器
+            if (this.learningTimer) {
+                clearInterval(this.learningTimer);
+            }
+            // 清除考试定时器
+            if (this.examTimer) {
+                clearInterval(this.examTimer);
+            }
+        },
+        
         // 学习功能
         startLearning: function(chapter) {
             if (!chapter) {
@@ -1543,6 +1623,12 @@ new Vue({
         }
         if (this.learningTimer) {
             clearInterval(this.learningTimer);
+        }
+        if (this.autoNextTimer) {
+            clearTimeout(this.autoNextTimer);
+        }
+        if (this.practiceAutoJumpTimer) {
+            clearInterval(this.practiceAutoJumpTimer);
         }
     }
 });

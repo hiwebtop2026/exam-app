@@ -130,6 +130,8 @@ new Vue({
         practiceAnswer: '',
         practiceResult: null,
         showExplanationDialog: false,
+        practiceAutoJumpCountdown: 0,  // 自动跳转倒计时
+        practiceAutoJumpTimer: null,   // 自动跳转定时器
         
         // 错题本
         mistakeBook: [],
@@ -717,6 +719,12 @@ new Vue({
         
         startPractice: function(question) {
             var self = this;
+            // 清除之前的自动跳转定时器
+            if (this.practiceAutoJumpTimer) {
+                clearInterval(this.practiceAutoJumpTimer);
+                this.practiceAutoJumpTimer = null;
+            }
+            this.practiceAutoJumpCountdown = 0;
             this.currentPracticeQuestion = question;
             this.showPracticeDialog = true;
             this.practiceAnswer = '';
@@ -813,13 +821,21 @@ new Vue({
             
             // 回答正确时直接跳题，不需要显示解析
             if (isCorrect) {
-                setTimeout(function() {
-                    self.showPracticeDialog = false;
-                    self.practiceAnswer = '';
-                    self.practiceResult = null;
-                    // 自动开始下一题
-                    self.startRandomPractice();
-                }, 5000); // 5秒后自动跳题
+                // 启动倒计时
+                self.practiceAutoJumpCountdown = 5;
+                self.practiceAutoJumpTimer = setInterval(function() {
+                    self.practiceAutoJumpCountdown--;
+                    if (self.practiceAutoJumpCountdown <= 0) {
+                        clearInterval(self.practiceAutoJumpTimer);
+                        self.practiceAutoJumpTimer = null;
+                        self.showPracticeDialog = false;
+                        self.practiceAnswer = '';
+                        self.practiceResult = null;
+                        self.practiceAutoJumpCountdown = 0;
+                        // 自动开始下一题
+                        self.startRandomPractice();
+                    }
+                }, 1000);
             } else {
                 // 回答错误时显示答案解析弹窗
                 this.showExplanationDialog = true;
@@ -827,12 +843,31 @@ new Vue({
         },
         
         nextQuestion: function() {
+            // 清除自动跳转定时器
+            if (this.practiceAutoJumpTimer) {
+                clearInterval(this.practiceAutoJumpTimer);
+                this.practiceAutoJumpTimer = null;
+            }
+            this.practiceAutoJumpCountdown = 0;
             this.showExplanationDialog = false;
             this.showPracticeDialog = false;
             this.practiceAnswer = '';
             this.practiceResult = null;
             // 跳转到随机题目
             this.startRandomPractice();
+        },
+        
+        // 关闭练习对话框
+        closePracticeDialog: function() {
+            // 清除自动跳转定时器
+            if (this.practiceAutoJumpTimer) {
+                clearInterval(this.practiceAutoJumpTimer);
+                this.practiceAutoJumpTimer = null;
+            }
+            this.practiceAutoJumpCountdown = 0;
+            this.showPracticeDialog = false;
+            this.practiceAnswer = '';
+            this.practiceResult = null;
         },
         
         // 冲刺复习方法

@@ -2049,6 +2049,122 @@ const questionsData = [
         explanation: '干系人登记册是识别干系人过程的输出，不是输入。输入包括：项目章程、采购文件、事业环境因素、组织过程资产等。',
         tags: ['识别干系人', '干系人管理'],
         difficulty: 'medium'
+    },
+
+    // ===== 2025年真题 =====
+    {
+        id: 'q2025001',
+        year: 2025,
+        type: 'morning',
+        chapter: 'project_integration',
+        chapterName: '项目整体管理',
+        title: '在系统集成项目启动阶段，项目经理首先应完成的工作是',
+        question: '在系统集成项目启动阶段，项目经理首先应完成的工作是\nA. 编制项目章程\nB. 识别干系人\nC. 制定范围管理计划\nD. 召开开工会议',
+        options: [
+            { label: 'A', text: '编制项目章程' },
+            { label: 'B', text: '识别干系人' },
+            { label: 'C', text: '制定范围管理计划' },
+            { label: 'D', text: '召开开工会议' }
+        ],
+        answer: 'A',
+        explanation: '项目章程是启动过程组的标志性输出，它授权项目经理使用组织资源开展后续工作。识别干系人虽在启动阶段完成，但项目章程的批准是前提。',
+        tags: ['项目章程', '启动过程'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2025002',
+        year: 2025,
+        type: 'morning',
+        chapter: 'project_integration',
+        chapterName: '项目整体管理',
+        title: '某智慧城市项目采用"1+N"总包模式，总集成商的首要工作是',
+        question: '某智慧城市项目采用"1+N"总包模式，即1家总集成商加N家专业分包商。项目启动阶段，总集成商的首要工作是\nA. 与每家分包商签订独立合同\nB. 建立统一的项目治理架构\nC. 完成整体技术方案详细设计\nD. 向甲方提交项目章程',
+        options: [
+            { label: 'A', text: '与每家分包商签订独立合同' },
+            { label: 'B', text: '建立统一的项目治理架构' },
+            { label: 'C', text: '完成整体技术方案详细设计' },
+            { label: 'D', text: '向甲方提交项目章程' }
+        ],
+        answer: 'B',
+        explanation: '在多方参与的总包模式中，治理架构是后续一切工作的前提，它决定了决策机制、沟通渠道与风险责任边界。项目章程由甲方与总集成商共同发布，但章程本身不能替代治理设计。',
+        tags: ['项目治理', '总包模式'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2025003',
+        year: 2025,
+        type: 'morning',
+        chapter: 'project_schedule',
+        chapterName: '项目进度管理',
+        title: '某项目在实施过程中，因需求变更导致关键路径延长2周，最适宜的进度压缩方法是',
+        question: '某项目在实施过程中，因需求变更导致关键路径延长2周，此时最适宜的进度压缩方法是？\nA. 快速跟进法\nB. 关键链法\nC. 压缩非关键路径\nD. 增加资源投入',
+        options: [
+            { label: 'A', text: '快速跟进法' },
+            { label: 'B', text: '关键链法' },
+            { label: 'C', text: '压缩非关键路径' },
+            { label: 'D', text: '增加资源投入' }
+        ],
+        answer: 'D',
+        explanation: '增加资源投入（赶工）是最直接有效的进度压缩方法，适用于关键路径延长的情况。快速跟进可能增加风险，压缩非关键路径对关键路径没有影响，关键链法是缓冲管理技术。',
+        tags: ['进度压缩', '赶工'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2025004',
+        year: 2025,
+        type: 'morning',
+        chapter: 'project_integration',
+        chapterName: '项目整体管理',
+        title: '系统集成项目管理的核心目标是实现项目的',
+        question: '系统集成项目管理的核心目标是实现项目的（ ）。\nA. 技术创新\nB. 经济效益最大化\nC. 项目干系人满意\nD. 项目进度提前',
+        options: [
+            { label: 'A', text: '技术创新' },
+            { label: 'B', text: '经济效益最大化' },
+            { label: 'C', text: '项目干系人满意' },
+            { label: 'D', text: '项目进度提前' }
+        ],
+        answer: 'C',
+        explanation: '项目管理的核心目标是满足项目干系人的需求和期望，实现项目干系人满意。技术创新、经济效益、进度提前都是具体目标，最终要服务于干系人满意。',
+        tags: ['项目目标', '干系人满意'],
+        difficulty: 'low'
+    },
+    {
+        id: 'q2025005',
+        year: 2025,
+        type: 'morning',
+        chapter: 'informatization',
+        chapterName: '信息化发展',
+        title: '信息化是人类社会发展的一种高级进程，它的目的是',
+        question: '信息化是人类社会发展的一种高级进程，它的目的是（）。\nA. 建设基于现代信息技术的先进社会生产工具\nB. 创立信息时代的社会生产力\nC. 推动社会生产关系及社会上层建筑的改革\nD. 以上都是',
+        options: [
+            { label: 'A', text: '建设基于现代信息技术的先进社会生产工具' },
+            { label: 'B', text: '创立信息时代的社会生产力' },
+            { label: 'C', text: '推动社会生产关系及社会上层建筑的改革' },
+            { label: 'D', text: '以上都是' }
+        ],
+        answer: 'D',
+        explanation: '信息化的目的包括：建设先进的社会生产工具、创立信息时代的社会生产力、推动社会生产关系和上层建筑的改革。以上选项都是正确的。',
+        tags: ['信息化', '社会发展'],
+        difficulty: 'low'
+    },
+    {
+        id: 'q2025006',
+        year: 2025,
+        type: 'morning',
+        chapter: 'project_agile',
+        chapterName: '项目进度管理',
+        title: '某信息系统集成项目采用敏捷开发模式，产品负责人在迭代评审会上发现当前增量与原始愿景偏差较大，首要的改进措施是',
+        question: '某信息系统集成项目采用敏捷开发模式，产品负责人（PO）在迭代评审会上发现当前增量与原始愿景偏差较大，首要的改进措施是\nA. 立即调整迭代计划，追加开发资源\nB. 召开产品愿景会议，重新确认产品方向\nC. 延长当前迭代周期，确保功能完整性\nD. 直接修改产品待办列表，删除不符合愿景的功能',
+        options: [
+            { label: 'A', text: '立即调整迭代计划，追加开发资源' },
+            { label: 'B', text: '召开产品愿景会议，重新确认产品方向' },
+            { label: 'C', text: '延长当前迭代周期，确保功能完整性' },
+            { label: 'D', text: '直接修改产品待办列表，删除不符合愿景的功能' }
+        ],
+        answer: 'B',
+        explanation: '当发现增量与愿景偏差较大时，首先应该召开产品愿景会议，重新确认产品方向，确保团队对产品愿景有一致的理解。其他措施都是在重新确认方向后的具体行动。',
+        tags: ['敏捷开发', '产品愿景'],
+        difficulty: 'medium'
     }
 ];
 

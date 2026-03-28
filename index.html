@@ -647,7 +647,7 @@
                 <div class="dialog-header">
                     <h3>学习 {{ currentLearningChapter ? currentLearningChapter.name : '章节' }}</h3>
                     <div class="learning-timer">
-                        <span>⏱️ {{ formatLearningTime }}</span>
+                        <span>⏱️ {{ formatLearningTime() }}</span>
                         <button class="btn-icon" @click="toggleLearningPause">
                             {{ isLearningPaused ? '▶️' : '⏸️' }}
                         </button>

@@ -173,23 +173,31 @@ new Vue({
         
         filteredQuestions: function() {
             var self = this;
-            var result = this.questions;
+            // 如果没有题目，返回空数组
+            if (!this.questions || this.questions.length === 0) {
+                return [];
+            }
+            
+            var result = this.questions.slice(); // 创建副本避免修改原数组
             
             if (this.practiceFilter.year && this.practiceFilter.year !== '') {
+                var year = parseInt(this.practiceFilter.year);
                 result = result.filter(function(q) { 
-                    return q.year === parseInt(self.practiceFilter.year); 
+                    return q.year === year; 
                 });
             }
             
             if (this.practiceFilter.type && this.practiceFilter.type !== '') {
+                var type = this.practiceFilter.type;
                 result = result.filter(function(q) { 
-                    return q.type === self.practiceFilter.type; 
+                    return q.type === type; 
                 });
             }
             
             if (this.practiceFilter.chapter && this.practiceFilter.chapter !== '') {
+                var chapter = this.practiceFilter.chapter;
                 result = result.filter(function(q) { 
-                    return q.chapter === self.practiceFilter.chapter; 
+                    return q.chapter === chapter; 
                 });
             }
             
@@ -1182,6 +1190,16 @@ new Vue({
         resumeLearning: function() {
             this.isLearning = true;
             this.startLearningTimer();
+        },
+        
+        toggleLearningPause: function() {
+            if (this.isLearningPaused) {
+                this.resumeLearning();
+                this.isLearningPaused = false;
+            } else {
+                this.pauseLearning();
+                this.isLearningPaused = true;
+            }
         },
         
         finishLearning: function() {

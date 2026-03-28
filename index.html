@@ -256,16 +256,16 @@
                 <!-- 真题练习模块 -->
                 <div v-if="currentTab === 'practice'" class="module">
                     <div class="practice-filters">
-                        <select v-model="practiceFilter.year" class="filter-select">
+                        <select v-model="practiceFilter.year" class="filter-select" @change="onFilterChange">
                             <option value="">全部年份</option>
                             <option v-for="year in years" :key="year" :value="year">{{ year }}年</option>
                         </select>
-                        <select v-model="practiceFilter.type" class="filter-select">
+                        <select v-model="practiceFilter.type" class="filter-select" @change="onFilterChange">
                             <option value="">全部类型</option>
                             <option value="morning">上午</option>
                             <option value="afternoon">下午</option>
                         </select>
-                        <select v-model="practiceFilter.chapter" class="filter-select">
+                        <select v-model="practiceFilter.chapter" class="filter-select" @change="onFilterChange">
                             <option value="">全部章节</option>
                             <option v-for="ch in chaptersList" :key="ch.id" :value="ch.id">{{ ch.name }}</option>
                         </select>

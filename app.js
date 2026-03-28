@@ -237,6 +237,10 @@ new Vue({
                 correct: correct,
                 accuracy: accuracy
             };
+        },
+        
+        formulas: function() {
+            return this.coreFormulas;
         }
     },
     
@@ -1200,6 +1204,13 @@ new Vue({
                 this.pauseLearning();
                 this.isLearningPaused = true;
             }
+        },
+        
+        onFilterChange: function() {
+            // 筛选器改变时自动刷新题目列表
+            console.log('筛选条件已改变，自动刷新题目列表');
+            // 由于使用了计算属性 filteredQuestions，数据会自动更新
+            // 这里可以添加额外的逻辑，如重置页码、显示提示等
         },
         
         finishLearning: function() {

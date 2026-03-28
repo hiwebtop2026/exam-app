@@ -1890,6 +1890,18 @@ body {
     width: 95% !important;
     max-width: 100% !important;
     max-height: 90vh !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.learning-dialog .dialog-body {
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(90vh - 140px);
+}
+
+.learning-content {
+    min-height: 100%;
 }
 
 /* 练习对话框 */

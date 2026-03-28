@@ -83,6 +83,8 @@ new Vue({
         flashcards: [],
         coreFormulas: [],
         
+        // 考试状态
+        examRecords: [],
         inExam: false,
         examType: 'morning',
         examQuestions: [],
@@ -90,7 +92,6 @@ new Vue({
         remainingTime: 150 * 60,
         examTimer: null,
         showExamResult: false,
-        reviewMode: false,
         examResult: {
             score: 0,
             correct: 0,
@@ -100,10 +101,11 @@ new Vue({
             analysis: []
         },
         
-        mistakeBook: [],
-        
-        isLoading: false,
-        errorMessage: '',
+        // 复习状态
+        reviewMode: 'flashcards',
+        flashcardFlipped: false,
+        flashcards: [],
+        currentFlashcard: null,
         
         // 学习状态
         isLearning: false,
@@ -124,25 +126,6 @@ new Vue({
         practiceAnswer: '',
         practiceResult: null,
         showExplanationDialog: false,
-        
-        // 考试状态
-        examRecords: [],
-        inExam: false,
-        examType: 'morning',
-        examQuestions: [],
-        currentQuestionIndex: 0,
-        remainingTime: 150 * 60,
-        examTimer: null,
-        showExamResult: false,
-        reviewMode: false,
-        examResult: {
-            score: 0,
-            correct: 0,
-            total: 0,
-            accuracy: 0,
-            duration: '',
-            analysis: []
-        },
         
         // 复习状态
         reviewMode: 'flashcards',

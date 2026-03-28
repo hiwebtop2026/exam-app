@@ -274,19 +274,23 @@
                     </div>
                     
                     <div class="practice-stats">
-                        <div class="stat-card">
-                            <div class="stat-value">{{ practiceStats.total }}</div>
-                            <div class="stat-label">总题数</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">{{ practiceStats.correct }}</div>
-                            <div class="stat-label">正确数</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">{{ practiceStats.accuracy }}%</div>
-                            <div class="stat-label">正确率</div>
-                        </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ practiceStats.total }}</div>
+                        <div class="stat-label">总题数</div>
                     </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ practiceStats.correct }}</div>
+                        <div class="stat-label">正确数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ practiceStats.accuracy }}%</div>
+                        <div class="stat-label">正确率</div>
+                    </div>
+                </div>
+                
+                <div class="practice-actions">
+                    <button class="btn-primary" @click="startRandomPractice">🎯 随机练习</button>
+                </div>
                     
                     <div class="questions-grid">
                         <div v-for="question in filteredQuestions" 

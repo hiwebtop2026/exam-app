@@ -140,7 +140,7 @@ new Vue({
         
         // 系统设置
         settings: {
-            fontSize: 'medium' // small, medium, large
+            fontSize: 'large' // small, medium, large
         },
         showSettingsDialog: false
     },
@@ -720,6 +720,23 @@ new Vue({
             this.practiceResult = null;
         },
         
+        // 随机开始练习
+        startRandomPractice: function() {
+            var self = this;
+            var filteredQuestions = this.filteredQuestions;
+            
+            if (filteredQuestions.length === 0) {
+                alert('没有符合条件的题目');
+                return;
+            }
+            
+            // 随机选择题目
+            var randomIndex = Math.floor(Math.random() * filteredQuestions.length);
+            var randomQuestion = filteredQuestions[randomIndex];
+            
+            this.startPractice(randomQuestion);
+        },
+        
         submitPracticeAnswer: function() {
             var self = this;
             var question = this.currentPracticeQuestion;
@@ -793,6 +810,18 @@ new Vue({
             
             // 显示答案解析弹窗
             this.showExplanationDialog = true;
+            
+            // 回答正确时自动跳题
+            if (isCorrect) {
+                setTimeout(function() {
+                    self.showExplanationDialog = false;
+                    self.showPracticeDialog = false;
+                    self.practiceAnswer = '';
+                    self.practiceResult = null;
+                    // 自动开始下一题
+                    self.startRandomPractice();
+                }, 2000); // 2秒后自动跳题
+            }
         },
         
         nextQuestion: function() {
@@ -800,6 +829,8 @@ new Vue({
             this.showPracticeDialog = false;
             this.practiceAnswer = '';
             this.practiceResult = null;
+            // 跳转到随机题目
+            this.startRandomPractice();
         },
         
         // 冲刺复习方法

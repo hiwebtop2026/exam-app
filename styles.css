@@ -2666,3 +2666,27 @@ body {
         max-height: 250px;
     }
 }
+
+/* 练习操作按钮 */
+.practice-actions {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.practice-actions .btn-primary {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.practice-actions .btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}

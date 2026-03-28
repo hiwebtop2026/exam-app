@@ -151,6 +151,7 @@ new Vue({
         // 复习状态
         reviewMode: 'flashcards',
         flashcardFlipped: false,
+        flashcards: [],
         currentFlashcard: null,
         
         // 错题本
@@ -728,6 +729,83 @@ new Vue({
             this.showPracticeDialog = false;
             this.practiceAnswer = '';
             this.practiceResult = null;
+        },
+        
+        // 冲刺复习方法
+        flipFlashcard: function() {
+            this.flashcardFlipped = !this.flashcardFlipped;
+        },
+        
+        markFlashcardKnown: function() {
+            if (!this.currentFlashcard) return;
+            
+            // 从flashcards中移除
+            var index = this.flashcards.findIndex(function(c) { 
+                return c.id === this.currentFlashcard.id; 
+            }.bind(this));
+            
+            if (index > -1) {
+                this.flashcards.splice(index, 1);
+            }
+            
+            // 更新数据库状态
+            if (db.updateFlashcardStatus) {
+                db.updateFlashcardStatus(this.currentFlashcard.id, 'known');
+            }
+            
+            // 重置状态
+            this.flashcardFlipped = false;
+            this.currentFlashcard = this.flashcards.length > 0 ? this.flashcards[0] : null;
+        },
+        
+        markFlashcardUnknown: function() {
+            if (!this.currentFlashcard) return;
+            
+            // 将卡片放到队列末尾，稍后复习
+            var card = this.currentFlashcard;
+            this.flashcards.push(card);
+            this.flashcards.shift();
+            
+            // 更新数据库状态
+            if (db.updateFlashcardStatus) {
+                db.updateFlashcardStatus(card.id, 'unknown');
+            }
+            
+            // 重置状态
+            this.flashcardFlipped = false;
+            this.currentFlashcard = this.flashcards.length > 0 ? this.flashcards[0] : null;
+        },
+        
+        resetFlashcards: function() {
+            // 重新加载所有flashcards
+            this.loadFlashcards();
+            this.flashcardFlipped = false;
+        },
+        
+        loadFlashcards: function() {
+            // 从关键知识点生成复习卡片
+            var flashcards = [];
+            var id = 1;
+            
+            this.chapters.forEach(function(chapter) {
+                chapter.keypoints.forEach(function(point) {
+                    if (point.level === 'high' || point.level === 'medium') {
+                        flashcards.push({
+                            id: id++,
+                            question: point.title,
+                            answer: point.content || '请查看详细内容',
+                            chapterId: chapter.id,
+                            chapterName: chapter.name
+                        });
+                    }
+                });
+            });
+            
+            // 随机打乱顺序
+            flashcards.sort(function() { return Math.random() - 0.5; });
+            
+            this.flashcards = flashcards;
+            this.currentFlashcard = flashcards.length > 0 ? flashcards[0] : null;
         },
         
         markCard: function(card, status) {

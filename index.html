@@ -619,41 +619,24 @@
                                       :disabled="practiceResult"></textarea>
                         </div>
                         
+                        <div v-if="practiceResult" class="practice-result">
+                            <div :class="['result-status', practiceResult.isCorrect ? 'correct' : 'wrong']">
+                                {{ practiceResult.isCorrect ? '✅ 回答正确' : '❌ 回答错误' }}
+                            </div>
+                            <div class="correct-answer">
+                                <strong>正确答案：{{ practiceResult.correctAnswer }}</strong>
+                            </div>
+                            <div class="explanation">
+                                <h4>解析：</h4>
+                                <p style="white-space: pre-wrap;">{{ practiceResult.explanation }}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="dialog-footer">
                     <button class="btn-secondary" @click="showPracticeDialog = false">关闭</button>
                     <button v-if="!practiceResult" class="btn-primary" @click="submitPracticeAnswer">提交答案</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 答案解析弹出窗口 -->
-        <div v-if="showExplanationDialog" class="dialog-overlay explanation-overlay" @click.self="showExplanationDialog = false">
-            <div class="dialog explanation-dialog">
-                <div class="dialog-header">
-                    <h3>📖 答案解析</h3>
-                    <button class="btn-close" @click="showExplanationDialog = false">×</button>
-                </div>
-                <div class="dialog-body explanation-body">
-                    <div class="explanation-result-header">
-                        <div :class="['explanation-status', practiceResult && practiceResult.isCorrect ? 'correct' : 'wrong']">
-                            {{ practiceResult && practiceResult.isCorrect ? '✅ 回答正确' : '❌ 回答错误' }}
-                        </div>
-                        <div class="explanation-correct-answer">
-                            <strong>正确答案：{{ practiceResult ? practiceResult.correctAnswer : '' }}</strong>
-                        </div>
-                    </div>
-                    <div class="explanation-content-box">
-                        <h4>解析内容</h4>
-                        <div class="explanation-scroll-content">
-                            <p>{{ practiceResult ? practiceResult.explanation : '' }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="dialog-footer">
-                    <button class="btn-secondary" @click="showExplanationDialog = false">关闭</button>
-                    <button class="btn-primary" @click="nextQuestion">下一题</button>
+                    <button v-else class="btn-primary" @click="showPracticeDialog = false">完成</button>
                 </div>
             </div>
         </div>

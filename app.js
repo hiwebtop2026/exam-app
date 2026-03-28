@@ -77,11 +77,7 @@ new Vue({
             type: '',
             chapter: ''
         },
-        practiceStats: {
-            total: 0,
-            correct: 0,
-            accuracy: 0
-        },
+
         years: [2024, 2023, 2022, 2021, 2020],
         
         flashcards: [],
@@ -219,6 +215,20 @@ new Vue({
         
         chaptersList: function() {
             return this.chapters;
+        },
+        
+        practiceStats: function() {
+            var total = this.filteredQuestions.length;
+            var correct = this.filteredQuestions.filter(function(q) { 
+                return q.answered && q.isCorrect; 
+            }).length;
+            var accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+            
+            return {
+                total: total,
+                correct: correct,
+                accuracy: accuracy
+            };
         }
     },
     

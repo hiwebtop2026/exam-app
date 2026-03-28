@@ -105,6 +105,7 @@ new Vue({
             duration: '',
             analysis: []
         },
+        examReviewMode: false,
         
         // 学习状态
         isLearning: false,
@@ -870,6 +871,7 @@ new Vue({
             this.examType = type;
             this.inExam = true;
             this.showExamResult = false;
+            this.examReviewMode = false;
             this.currentQuestionIndex = 0;
             this.remainingTime = 150 * 60;
             
@@ -1025,11 +1027,11 @@ new Vue({
             });
             
             // 显示解析模式
-            this.reviewMode = true;
+            this.examReviewMode = true;
         },
         
         exitReviewMode: function() {
-            this.reviewMode = false;
+            this.examReviewMode = false;
             this.inExam = false;
             this.showExamResult = true;
         },

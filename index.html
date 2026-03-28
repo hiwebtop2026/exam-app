@@ -388,14 +388,14 @@
                         <div class="exam-header">
                             <div class="exam-info">
                                 <span>{{ examType === 'morning' ? '上午考试' : '下午考试' }}</span>
-                                <span v-if="!reviewMode">题目: {{ currentQuestionIndex + 1 }}/{{ examQuestions.length }}</span>
-                                <span v-if="reviewMode" class="review-badge">解析模式</span>
+                                <span v-if="!examReviewMode">题目: {{ currentQuestionIndex + 1 }}/{{ examQuestions.length }}</span>
+                                <span v-if="examReviewMode" class="review-badge">解析模式</span>
                             </div>
-                            <div class="exam-timer" v-if="!reviewMode">
+                            <div class="exam-timer" v-if="!examReviewMode">
                                 剩余时间: {{ formatTime(remainingTime) }}
                             </div>
-                            <button v-if="!reviewMode" class="btn-submit" @click="confirmSubmit() && submitExam()">交卷</button>
-                            <button v-if="reviewMode" class="btn-secondary" @click="exitReviewMode">退出解析</button>
+                            <button v-if="!examReviewMode" class="btn-submit" @click="confirmSubmit() && submitExam()">交卷</button>
+                            <button v-if="examReviewMode" class="btn-secondary" @click="exitReviewMode">退出解析</button>
                         </div>
                         
                         <div class="exam-progress">
@@ -404,8 +404,8 @@
                                  :class="['progress-dot', {
                                      answered: q.answered,
                                      current: index === currentQuestionIndex,
-                                     correct: reviewMode && q.isCorrect,
-                                     wrong: reviewMode && !q.isCorrect
+                                     correct: examReviewMode && q.isCorrect,
+                                     wrong: examReviewMode && !q.isCorrect
                                  }]"
                                  @click="goToQuestion(index)">
                                 {{ index + 1 }}
@@ -416,7 +416,7 @@
                             <div class="question-content">
                                 <div class="question-header-row">
                                     <h3>第{{ currentQuestionIndex + 1 }}题</h3>
-                                    <span v-if="reviewMode" :class="['review-status', currentExamQuestion.isCorrect ? 'correct' : 'wrong']">
+                                    <span v-if="examReviewMode" :class="['review-status', currentExamQuestion.isCorrect ? 'correct' : 'wrong']">
                                         {{ currentExamQuestion.isCorrect ? '✅ 正确' : '❌ 错误' }}
                                     </span>
                                 </div>
@@ -427,10 +427,10 @@
                                          :key="option.label"
                                          :class="['option', {
                                              selected: currentExamQuestion.selected === option.label,
-                                             correct: reviewMode && option.label === currentExamQuestion.answer,
-                                             wrong: reviewMode && currentExamQuestion.selected === option.label && option.label !== currentExamQuestion.answer
+                                             correct: examReviewMode && option.label === currentExamQuestion.answer,
+                                             wrong: examReviewMode && currentExamQuestion.selected === option.label && option.label !== currentExamQuestion.answer
                                          }]"
-                                         @click="!reviewMode && selectAnswer(option.label)">
+                                         @click="!examReviewMode && selectAnswer(option.label)">
                                         <span class="option-label">{{ option.label }}</span>
                                         <span class="option-text">{{ option.text }}</span>
                                     </div>
@@ -440,10 +440,10 @@
                                     <textarea v-model="currentExamQuestion.answer" 
                                               placeholder="请输入你的答案..."
                                               rows="10"
-                                              :disabled="reviewMode"></textarea>
+                                              :disabled="examReviewMode"></textarea>
                                 </div>
                                 
-                                <div v-if="reviewMode" class="question-analysis">
+                                <div v-if="examReviewMode" class="question-analysis">
                                     <div class="analysis-section">
                                         <h4>📋 题目信息</h4>
                                         <div class="info-row">

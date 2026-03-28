@@ -811,19 +811,18 @@ new Vue({
                 }
             }
             
-            // 显示答案解析弹窗
-            this.showExplanationDialog = true;
-            
-            // 回答正确时自动跳题
+            // 回答正确时直接跳题，不需要显示解析
             if (isCorrect) {
                 setTimeout(function() {
-                    self.showExplanationDialog = false;
                     self.showPracticeDialog = false;
                     self.practiceAnswer = '';
                     self.practiceResult = null;
                     // 自动开始下一题
                     self.startRandomPractice();
                 }, 5000); // 5秒后自动跳题
+            } else {
+                // 回答错误时显示答案解析弹窗
+                this.showExplanationDialog = true;
             }
         },
         

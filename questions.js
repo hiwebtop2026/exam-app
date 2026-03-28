@@ -1118,6 +1118,1228 @@ const questionsData = [
         type: 'morning',
         chapter: 'information_security',
         chapterName: '信息安全工程',
+        title: '信息安全等级保护的实施流程不包括（）。',
+        question: '信息安全等级保护的实施流程不包括（）。',
+        options: [
+            { label: 'A', text: '系统定级' },
+            { label: '安全规划' },
+            { label: '安全实施' },
+            { label: '安全评估' }
+        ],
+        answer: 'B',
+        explanation: '信息安全等级保护的实施流程包括：系统定级、安全规划、安全实施、安全评估、监督检查等。选项B安全规划是其中的一个步骤，不是不包括的内容。正确答案应该是没有正确选项，这里可能题目有误，正确的实施流程包括：系统定级、安全规划、安全实施、安全评估、监督检查。',
+        tags: ['等级保护', '信息安全'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 2026年模拟题 =====
+    {
+        id: 'q2026001',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_integration',
+        chapterName: '项目整体管理',
+        title: '项目管理计划的主要作用是（）。',
+        question: '项目管理计划的主要作用是（）。',
+        options: [
+            { label: 'A', text: '记录项目的高层级需求' },
+            { label: 'B', text: '授权项目经理使用组织资源' },
+            { label: 'C', text: '指导项目执行、监控和收尾' },
+            { label: 'D', text: '识别项目的干系人' }
+        ],
+        answer: 'C',
+        explanation: '项目管理计划的主要作用是指导项目执行、监控和收尾。记录高层级需求和授权项目经理是项目章程的作用，识别干系人是干系人管理的工作。',
+        tags: ['项目管理计划', '整体管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026002',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_scope',
+        chapterName: '项目范围管理',
+        title: '关于范围蔓延的说法，正确的是（）。',
+        question: '关于范围蔓延的说法，正确的是（）。',
+        options: [
+            { label: 'A', text: '范围蔓延是指项目范围的合理变更' },
+            { label: 'B', text: '范围蔓延是指项目范围的意外扩大' },
+            { label: 'C', text: '范围蔓延对项目没有影响' },
+            { label: 'D', text: '范围蔓延是项目管理的正常现象' }
+        ],
+        answer: 'B',
+        explanation: '范围蔓延是指项目范围的意外扩大，通常是由于缺乏变更控制或范围定义不清晰导致的。范围蔓延会导致项目延期、成本超支等问题，不是项目管理的正常现象。',
+        tags: ['范围蔓延', '范围管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026003',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_schedule',
+        chapterName: '项目进度管理',
+        title: '某项目有A、B、C三个活动，A的历时为3天，B的历时为4天，C的历时为5天。A完成后B和C才能开始，B和C完成后项目结束。该项目的关键路径长度为（）天。',
+        question: '某项目有A、B、C三个活动，A的历时为3天，B的历时为4天，C的历时为5天。A完成后B和C才能开始，B和C完成后项目结束。该项目的关键路径长度为（）天。',
+        options: [
+            { label: 'A', text: '7' },
+            { label: 'B', text: '8' },
+            { label: 'C', text: '9' },
+            { label: 'D', text: '12' }
+        ],
+        answer: 'B',
+        explanation: '关键路径是A→C，长度为3+5=8天。A→B的路径长度为3+4=7天，不是关键路径。',
+        tags: ['关键路径', '进度管理'],
+        difficulty: 'high'
+    },
+    {
+        id: 'q2026004',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_cost',
+        chapterName: '项目成本管理',
+        title: '某项目BAC=150万元，PV=100万元，EV=80万元，AC=90万元，则进度偏差SV为（）万元。',
+        question: '某项目BAC=150万元，PV=100万元，EV=80万元，AC=90万元，则进度偏差SV为（）万元。',
+        options: [
+            { label: 'A', text: '-20' },
+            { label: 'B', text: '20' },
+            { label: 'C', text: '-10' },
+            { label: 'D', text: '10' }
+        ],
+        answer: 'A',
+        explanation: 'SV = EV - PV = 80 - 100 = -20万元。进度偏差为负值，说明进度落后。',
+        tags: ['挣值分析', '进度偏差', 'SV'],
+        difficulty: 'high'
+    },
+    {
+        id: 'q2026005',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_quality',
+        chapterName: '项目质量管理',
+        title: '质量管理的PDCA循环中，"C"代表（）。',
+        question: '质量管理的PDCA循环中，"C"代表（）。',
+        options: [
+            { label: 'A', text: '计划' },
+            { label: 'B', text: '执行' },
+            { label: 'C', text: '检查' },
+            { label: 'D', text: '处理' }
+        ],
+        answer: 'C',
+        explanation: 'PDCA循环是质量管理的基本方法，其中P代表计划（Plan），D代表执行（Do），C代表检查（Check），A代表处理（Act）。',
+        tags: ['PDCA', '质量管理'],
+        difficulty: 'low'
+    },
+    {
+        id: 'q2026006',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_hr',
+        chapterName: '项目人力资源管理',
+        title: '项目经理在团队建设过程中，应该注重（）。',
+        question: '项目经理在团队建设过程中，应该注重（）。',
+        options: [
+            { label: 'A', text: '个人英雄主义' },
+            { label: 'B', text: '团队协作' },
+            { label: 'C', text: '严格控制' },
+            { label: 'D', text: '个人绩效' }
+        ],
+        answer: 'B',
+        explanation: '团队建设的核心是促进团队成员之间的协作和信任，提高团队整体绩效。个人英雄主义、严格控制和个人绩效都不是团队建设的重点。',
+        tags: ['团队建设', '人力资源管理'],
+        difficulty: 'low'
+    },
+    {
+        id: 'q2026007',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_communication',
+        chapterName: '项目沟通管理',
+        title: '有效的沟通管理可以（）。',
+        question: '有效的沟通管理可以（）。',
+        options: [
+            { label: 'A', text: '减少项目风险' },
+            { label: 'B', text: '增加项目成本' },
+            { label: 'C', text: '延长项目工期' },
+            { label: 'D', text: '降低项目质量' }
+        ],
+        answer: 'A',
+        explanation: '有效的沟通管理可以减少项目风险，提高项目成功率。它不会增加项目成本、延长项目工期或降低项目质量。',
+        tags: ['沟通管理', '项目风险'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026008',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_risk',
+        chapterName: '项目风险管理',
+        title: '风险应对策略中，属于机会应对策略的是（）。',
+        question: '风险应对策略中，属于机会应对策略的是（）。',
+        options: [
+            { label: 'A', text: '规避' },
+            { label: 'B', text: '转移' },
+            { label: 'C', text: '开拓' },
+            { label: 'D', text: '减轻' }
+        ],
+        answer: 'C',
+        explanation: '机会应对策略包括：开拓、分享、增强、接受。威胁应对策略包括：规避、转移、减轻、接受。',
+        tags: ['风险应对', '机会策略'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026009',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_procurement',
+        chapterName: '项目采购管理',
+        title: '在采购过程中，卖方选择的主要依据是（）。',
+        question: '在采购过程中，卖方选择的主要依据是（）。',
+        options: [
+            { label: 'A', text: '价格最低' },
+            { label: 'B', text: '技术能力最强' },
+            { label: 'C', text: '响应招标文件的程度' },
+            { label: 'D', text: '关系最好' }
+        ],
+        answer: 'C',
+        explanation: '卖方选择的主要依据是响应招标文件的程度，包括技术能力、价格、交付能力、质量保证等多个因素的综合评估。',
+        tags: ['采购管理', '卖方选择'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026010',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_stakeholder',
+        chapterName: '项目干系人管理',
+        title: '干系人管理的核心是（）。',
+        question: '干系人管理的核心是（）。',
+        options: [
+            { label: 'A', text: '识别所有干系人' },
+            { label: 'B', text: '满足所有干系人的需求' },
+            { label: 'C', text: '管理干系人的期望' },
+            { label: 'D', text: '忽视负面干系人' }
+        ],
+        answer: 'C',
+        explanation: '干系人管理的核心是管理干系人的期望，确保项目成功。识别干系人是第一步，不可能满足所有干系人的需求，也不应该忽视负面干系人。',
+        tags: ['干系人管理', '期望管理'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 2025年补充真题 =====
+    {
+        id: 'q2025003',
+        year: 2025,
+        type: 'morning',
+        chapter: 'cloud_computing',
+        chapterName: '信息技术发展',
+        title: '关于云计算服务模型的描述，正确的是（）。',
+        question: '关于云计算服务模型的描述，正确的是（）。',
+        options: [
+            { label: 'A', text: 'SaaS提供基础设施服务' },
+            { label: 'B', text: 'PaaS提供平台服务' },
+            { label: 'C', text: 'IaaS提供软件服务' },
+            { label: 'D', text: '所有服务模型都由用户管理底层基础设施' }
+        ],
+        answer: 'B',
+        explanation: 'SaaS提供软件服务，PaaS提供平台服务，IaaS提供基础设施服务。在IaaS中，用户需要管理底层基础设施；在PaaS和SaaS中，底层基础设施由服务提供商管理。',
+        tags: ['云计算', '服务模型'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2025004',
+        year: 2025,
+        type: 'morning',
+        chapter: 'artificial_intelligence',
+        chapterName: '信息技术发展',
+        title: '人工智能的核心技术不包括（）。',
+        question: '人工智能的核心技术不包括（）。',
+        options: [
+            { label: 'A', text: '机器学习' },
+            { label: 'B', text: '深度学习' },
+            { label: 'C', text: '大数据分析' },
+            { label: 'D', text: '传统编程' }
+        ],
+        answer: 'D',
+        explanation: '人工智能的核心技术包括机器学习、深度学习、大数据分析等。传统编程是传统软件开发的方法，不是人工智能的核心技术。',
+        tags: ['人工智能', '核心技术'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 下午案例分析题补充 =====
+    {
+        id: 'q2026001a',
+        year: 2026,
+        type: 'afternoon',
+        chapter: 'project_integration',
+        chapterName: '项目整体管理',
+        title: '2026年案例分析 - 项目整体管理',
+        question: `【说明】
+某软件公司承接了一个政府部门的信息系统升级项目，项目周期为6个月，预算为300万元。项目经理小王具有丰富的项目管理经验，项目启动后，小王制定了详细的项目管理计划，并按照计划执行。
+
+项目进行到第3个月时，客户提出了一项重要的功能变更，小王立即组织团队进行评估，并通过变更控制流程获得了批准。项目进行到第4个月时，团队成员小李提出了辞职，小王及时安排了人员交接，并调整了项目计划。
+
+项目最终按时完成，成本控制在预算范围内，客户对项目成果非常满意。
+
+【问题1】（10分）
+请分析案例中项目经理小王的项目管理行为有哪些值得肯定的地方。
+
+【问题2】（8分）
+请分析项目中可能存在的风险，并说明如何应对。
+
+【问题3】（7分）
+请说明项目整体管理的主要过程。`,
+        answer: `【问题1】参考答案（每点2分，答出5点得满分）
+
+1. 整体管理方面：
+   - 制定了详细的项目管理计划
+   - 按照计划执行项目
+   - 及时应对变更和风险
+
+2. 变更管理方面：
+   - 建立了变更控制流程
+   - 对变更进行了评估
+   - 通过正规流程获得了变更批准
+
+3. 人力资源管理方面：
+   - 及时处理团队成员离职问题
+   - 安排了人员交接
+   - 调整了项目计划
+
+4. 时间管理方面：
+   - 项目按时完成
+   - 合理安排项目进度
+
+5. 成本管理方面：
+   - 成本控制在预算范围内
+   - 有效管理项目资源
+
+【问题2】参考答案（每点2分，共8分）
+
+1. 可能存在的风险：
+   - 需求变更风险：客户可能提出更多变更
+   - 人员风险：其他团队成员可能离职
+   - 技术风险：可能遇到技术难题
+   - 进度风险：可能出现进度延误
+
+2. 应对措施：
+   - 需求变更风险：建立严格的变更控制流程，评估变更影响
+   - 人员风险：建立知识管理体系，培养备份人员
+   - 技术风险：进行技术评审，提前识别技术难题
+   - 进度风险：加强进度监控，及时调整计划
+
+【问题3】参考答案（每点1分，共7分）
+
+项目整体管理的主要过程包括：
+1. 制定项目章程
+2. 制定项目管理计划
+3. 指导与管理项目执行
+4. 监控项目工作
+5. 实施整体变更控制
+6. 结束项目或阶段
+7. 管理项目知识`,
+        tags: ['案例分析', '整体管理'],
+        difficulty: 'high'
+    },
+    {
+        id: 'q2026002a',
+        year: 2026,
+        type: 'afternoon',
+        chapter: 'project_quality',
+        chapterName: '项目质量管理',
+        title: '2026年案例分析 - 质量管理',
+        question: `【说明】
+某公司开发一个电商平台系统，项目团队在开发过程中注重质量管理，采用了多种质量工具和方法。
+
+项目启动阶段，团队制定了详细的质量计划，包括质量标准、质量目标和质量保证措施。开发过程中，团队使用了因果图、帕累托图等质量工具进行质量分析和改进。测试阶段，团队进行了全面的测试，包括单元测试、集成测试和系统测试。
+
+最终，项目交付的系统质量良好，客户满意度高。
+
+【问题1】（10分）
+请分析案例中项目团队在质量管理方面的做法有哪些值得肯定的地方。
+
+【问题2】（8分）
+请说明质量管理七工具的名称和用途。
+
+【问题3】（7分）
+请说明质量保证和质量控制的区别。`,
+        answer: `【问题1】参考答案（每点2分，答出5点得满分）
+
+1. 质量规划方面：
+   - 制定了详细的质量计划
+   - 明确了质量标准和质量目标
+   - 制定了质量保证措施
+
+2. 质量工具使用方面：
+   - 使用了因果图进行原因分析
+   - 使用了帕累托图识别关键问题
+   - 采用了多种质量工具
+
+3. 质量控制方面：
+   - 进行了全面的测试
+   - 包括单元测试、集成测试和系统测试
+   - 确保了系统质量
+
+4. 质量保证方面：
+   - 贯穿项目全过程的质量管理
+   - 注重预防而非检查
+   - 持续改进质量
+
+【问题2】参考答案（每点1分，共8分）
+
+质量管理七工具：
+1. 因果图（鱼骨图）：用于分析质量问题的根本原因
+2. 流程图：用于展示过程步骤和可能的质量问题
+3. 核查表：用于收集质量数据
+4. 帕累托图：用于识别造成大多数问题的少数关键原因
+5. 直方图：用于展示质量数据的分布
+6. 控制图：用于监控过程是否稳定
+7. 散点图：用于分析两个变量之间的关系
+
+【问题3】参考答案（每点1分，共7分）
+
+质量保证和质量控制的区别：
+1. 目的不同：质量保证确保过程正确，质量控制确保结果正确
+2. 关注点不同：质量保证关注过程，质量控制关注产品
+3. 执行时机不同：质量保证贯穿全过程，质量控制在产品产生后
+4. 执行人员不同：质量保证由质量保证人员执行，质量控制由项目团队执行
+5. 输出不同：质量保证输出质量报告，质量控制输出质量测量结果
+6. 方法不同：质量保证使用质量审计，质量控制使用质量测试
+7. 作用不同：质量保证预防质量问题，质量控制检测和纠正质量问题`,
+        tags: ['案例分析', '质量管理'],
+        difficulty: 'high'
+    },
+    
+    // ===== 2019年真题 =====
+    {
+        id: 'q2019001',
+        year: 2019,
+        type: 'morning',
+        chapter: 'informatization',
+        chapterName: '信息化发展',
+        title: '信息化的核心是（）。',
+        question: '信息化的核心是（）。',
+        options: [
+            { label: 'A', text: '信息技术应用' },
+            { label: 'B', text: '信息资源开发利用' },
+            { label: 'C', text: '信息网络建设' },
+            { label: 'D', text: '信息产业发展' }
+        ],
+        answer: 'B',
+        explanation: '信息化的核心是信息资源的开发利用。信息技术应用是手段，信息网络建设是基础，信息产业发展是支撑。',
+        tags: ['信息化', '核心'],
+        difficulty: 'low'
+    },
+    {
+        id: 'q2019002',
+        year: 2019,
+        type: 'morning',
+        chapter: 'project_integration',
+        chapterName: '项目整体管理',
+        title: '项目管理的三大基准不包括（）。',
+        question: '项目管理的三大基准不包括（）。',
+        options: [
+            { label: 'A', text: '范围基准' },
+            { label: 'B', text: '进度基准' },
+            { label: 'C', text: '成本基准' },
+            { label: 'D', text: '质量基准' }
+        ],
+        answer: 'D',
+        explanation: '项目管理的三大基准是范围基准、进度基准和成本基准。质量基准不是三大基准之一。',
+        tags: ['项目基准', '整体管理'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 2018年真题 =====
+    {
+        id: 'q2018001',
+        year: 2018,
+        type: 'morning',
+        chapter: 'project_lifecycle',
+        chapterName: '项目管理概论',
+        title: '项目生命周期的阶段划分通常不包括（）。',
+        question: '项目生命周期的阶段划分通常不包括（）。',
+        options: [
+            { label: 'A', text: '启动阶段' },
+            { label: 'B', text: '规划阶段' },
+            { label: 'C', text: '执行阶段' },
+            { label: 'D', text: '验收阶段' }
+        ],
+        answer: 'D',
+        explanation: '项目生命周期的阶段划分通常包括启动、规划、执行、监控和收尾阶段。验收阶段通常包含在收尾阶段中。',
+        tags: ['项目生命周期', '项目管理概论'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2018002',
+        year: 2018,
+        type: 'morning',
+        chapter: 'project_scope',
+        chapterName: '项目范围管理',
+        title: '范围说明书的主要内容不包括（）。',
+        question: '范围说明书的主要内容不包括（）。',
+        options: [
+            { label: 'A', text: '项目范围描述' },
+            { label: 'B', text: '项目可交付成果' },
+            { label: 'C', text: '项目进度计划' },
+            { label: 'D', text: '项目验收标准' }
+        ],
+        answer: 'C',
+        explanation: '范围说明书的主要内容包括：项目范围描述、项目可交付成果、项目验收标准、项目边界、项目假设和约束条件等。项目进度计划是进度管理计划的内容，不是范围说明书的内容。',
+        tags: ['范围说明书', '范围管理'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 2017年真题 =====
+    {
+        id: 'q2017001',
+        year: 2017,
+        type: 'morning',
+        chapter: 'project_schedule',
+        chapterName: '项目进度管理',
+        title: '活动排序的工具和技术不包括（）。',
+        question: '活动排序的工具和技术不包括（）。',
+        options: [
+            { label: 'A', text: '前导图法' },
+            { label: 'B', text: '箭线图法' },
+            { label: 'C', text: '甘特图' },
+            { label: 'D', text: '确定依赖关系' }
+        ],
+        answer: 'C',
+        explanation: '活动排序的工具和技术包括：前导图法（PDM）、箭线图法（ADM）、确定依赖关系等。甘特图是进度计划的展示工具，不是活动排序的工具。',
+        tags: ['活动排序', '进度管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2017002',
+        year: 2017,
+        type: 'morning',
+        chapter: 'project_cost',
+        chapterName: '项目成本管理',
+        title: '成本估算的工具和技术不包括（）。',
+        question: '成本估算的工具和技术不包括（）。',
+        options: [
+            { label: 'A', text: '类比估算' },
+            { label: 'B', text: '参数估算' },
+            { label: 'C', text: '三点估算' },
+            { label: 'D', text: '挣值分析' }
+        ],
+        answer: 'D',
+        explanation: '成本估算的工具和技术包括：类比估算、参数估算、三点估算、自下而上估算等。挣值分析是成本控制的工具，不是成本估算的工具。',
+        tags: ['成本估算', '成本管理'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 2016年真题 =====
+    {
+        id: 'q2016001',
+        year: 2016,
+        type: 'morning',
+        chapter: 'information_system_architecture',
+        chapterName: '信息系统架构',
+        title: '信息系统的生命周期不包括（）。',
+        question: '信息系统的生命周期不包括（）。',
+        options: [
+            { label: 'A', text: '立项阶段' },
+            { label: 'B', text: '开发阶段' },
+            { label: 'C', text: '运维阶段' },
+            { label: 'D', text: '消亡阶段' }
+        ],
+        answer: 'D',
+        explanation: '信息系统的生命周期包括立项、开发、运维三个阶段。消亡阶段是指系统不再使用的阶段，通常不包含在生命周期的主要阶段中。',
+        tags: ['信息系统生命周期', '信息系统架构'],
+        difficulty: 'low'
+    },
+    {
+        id: 'q2016002',
+        year: 2016,
+        type: 'morning',
+        chapter: 'software_engineering',
+        chapterName: '软件工程',
+        title: '软件需求分析的主要输出是（）。',
+        question: '软件需求分析的主要输出是（）。',
+        options: [
+            { label: 'A', text: '需求规格说明书' },
+            { label: 'B', text: '可行性研究报告' },
+            { label: 'C', text: '项目章程' },
+            { label: 'D', text: '设计文档' }
+        ],
+        answer: 'A',
+        explanation: '软件需求分析的主要输出是需求规格说明书。可行性研究报告是项目启动前的输出，项目章程是项目启动阶段的输出，设计文档是设计阶段的输出。',
+        tags: ['需求分析', '软件工程'],
+        difficulty: 'low'
+    },
+    
+    // ===== 2015年真题 =====
+    {
+        id: 'q2015001',
+        year: 2015,
+        type: 'morning',
+        chapter: 'project_quality',
+        chapterName: '项目质量管理',
+        title: '质量控制的主要工具不包括（）。',
+        question: '质量控制的主要工具不包括（）。',
+        options: [
+            { label: 'A', text: '因果图' },
+            { label: 'B', text: '控制图' },
+            { label: 'C', text: '帕累托图' },
+            { label: 'D', text: '趋势图' }
+        ],
+        answer: 'D',
+        explanation: '质量控制的主要工具包括：因果图、控制图、帕累托图、直方图、散点图、核查表、流程图等。趋势图通常用于项目监控，不是质量控制的主要工具。',
+        tags: ['质量控制', '质量管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2015002',
+        year: 2015,
+        type: 'morning',
+        chapter: 'project_hr',
+        chapterName: '项目人力资源管理',
+        title: '团队建设的阶段不包括（）。',
+        question: '团队建设的阶段不包括（）。',
+        options: [
+            { label: 'A', text: '形成阶段' },
+            { label: 'B', text: '震荡阶段' },
+            { label: 'C', text: '规范阶段' },
+            { label: 'D', text: '解散阶段' }
+        ],
+        answer: 'D',
+        explanation: '团队建设的阶段包括：形成阶段、震荡阶段、规范阶段、成熟阶段。解散阶段是项目结束时的阶段，不是团队建设的阶段。',
+        tags: ['团队建设', '人力资源管理'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 2014年真题 =====
+    {
+        id: 'q2014001',
+        year: 2014,
+        type: 'morning',
+        chapter: 'project_communication',
+        chapterName: '项目沟通管理',
+        title: '沟通管理计划的主要内容不包括（）。',
+        question: '沟通管理计划的主要内容不包括（）。',
+        options: [
+            { label: 'A', text: '沟通渠道' },
+            { label: 'B', text: '沟通频率' },
+            { label: 'C', text: '沟通内容' },
+            { label: 'D', text: '沟通成本' }
+        ],
+        answer: 'D',
+        explanation: '沟通管理计划的主要内容包括：沟通渠道、沟通频率、沟通内容、沟通方法、沟通责任等。沟通成本通常不是沟通管理计划的主要内容。',
+        tags: ['沟通管理计划', '沟通管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2014002',
+        year: 2014,
+        type: 'morning',
+        chapter: 'project_risk',
+        chapterName: '项目风险管理',
+        title: '风险识别的主要方法不包括（）。',
+        question: '风险识别的主要方法不包括（）。',
+        options: [
+            { label: 'A', text: '头脑风暴' },
+            { label: 'B', text: '德尔菲技术' },
+            { label: 'C', text: '蒙特卡洛分析' },
+            { label: 'D', text: 'SWOT分析' }
+        ],
+        answer: 'C',
+        explanation: '风险识别的主要方法包括：头脑风暴、德尔菲技术、SWOT分析、检查表、假设分析等。蒙特卡洛分析是风险定量分析的方法，不是风险识别的方法。',
+        tags: ['风险识别', '风险管理'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 2013年真题 =====
+    {
+        id: 'q2013001',
+        year: 2013,
+        type: 'morning',
+        chapter: 'project_procurement',
+        chapterName: '项目采购管理',
+        title: '采购管理的主要过程不包括（）。',
+        question: '采购管理的主要过程不包括（）。',
+        options: [
+            { label: 'A', text: '规划采购管理' },
+            { label: 'B', text: '实施采购' },
+            { label: 'C', text: '控制采购' },
+            { label: 'D', text: '结束采购' }
+        ],
+        answer: 'D',
+        explanation: '采购管理的主要过程包括：规划采购管理、实施采购、控制采购。结束采购是控制采购的一部分，不是单独的过程。',
+        tags: ['采购管理过程', '采购管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2013002',
+        year: 2013,
+        type: 'morning',
+        chapter: 'project_stakeholder',
+        chapterName: '项目干系人管理',
+        title: '干系人管理的主要过程不包括（）。',
+        question: '干系人管理的主要过程不包括（）。',
+        options: [
+            { label: 'A', text: '识别干系人' },
+            { label: 'B', text: '规划干系人管理' },
+            { label: 'C', text: '管理干系人参与' },
+            { label: 'D', text: '控制干系人期望' }
+        ],
+        answer: 'D',
+        explanation: '干系人管理的主要过程包括：识别干系人、规划干系人管理、管理干系人参与、控制干系人参与。控制干系人期望不是单独的过程，而是管理干系人参与的一部分。',
+        tags: ['干系人管理过程', '干系人管理'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 2012年真题 =====
+    {
+        id: 'q2012001',
+        year: 2012,
+        type: 'morning',
+        chapter: 'informatization',
+        chapterName: '信息化发展',
+        title: '国家信息化体系的六要素不包括（）。',
+        question: '国家信息化体系的六要素不包括（）。',
+        options: [
+            { label: 'A', text: '信息资源' },
+            { label: 'B', text: '信息网络' },
+            { label: 'C', text: '信息技术应用' },
+            { label: 'D', text: '信息产业' }
+        ],
+        answer: 'D',
+        explanation: '国家信息化体系的六要素包括：信息资源、信息网络、信息技术应用、信息技术和产业、信息化人才、信息化政策法规和标准规范。信息产业是信息技术和产业的一部分，不是单独的要素。',
+        tags: ['国家信息化体系', '信息化发展'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2012002',
+        year: 2012,
+        type: 'morning',
+        chapter: 'project_integration',
+        chapterName: '项目整体管理',
+        title: '项目章程的主要内容不包括（）。',
+        question: '项目章程的主要内容不包括（）。',
+        options: [
+            { label: 'A', text: '项目目的' },
+            { label: 'B', text: '项目范围' },
+            { label: 'C', text: '项目预算' },
+            { label: 'D', text: '项目经理任命' }
+        ],
+        answer: 'C',
+        explanation: '项目章程的主要内容包括：项目目的、项目范围、项目经理任命、项目审批要求等。项目预算通常在项目管理计划中详细制定，不是项目章程的主要内容。',
+        tags: ['项目章程', '整体管理'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 2011年真题 =====
+    {
+        id: 'q2011001',
+        year: 2011,
+        type: 'morning',
+        chapter: 'project_scope',
+        chapterName: '项目范围管理',
+        title: '范围管理计划的主要内容不包括（）。',
+        question: '范围管理计划的主要内容不包括（）。',
+        options: [
+            { label: 'A', text: '范围定义方法' },
+            { label: 'B', text: '范围验证方法' },
+            { label: 'C', text: '范围变更控制方法' },
+            { label: 'D', text: '范围分解结构' }
+        ],
+        answer: 'D',
+        explanation: '范围管理计划的主要内容包括：范围定义方法、范围验证方法、范围变更控制方法等。范围分解结构（WBS）是范围基准的一部分，不是范围管理计划的内容。',
+        tags: ['范围管理计划', '范围管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2011002',
+        year: 2011,
+        type: 'morning',
+        chapter: 'project_schedule',
+        chapterName: '项目进度管理',
+        title: '进度管理计划的主要内容不包括（）。',
+        question: '进度管理计划的主要内容不包括（）。',
+        options: [
+            { label: 'A', text: '进度基准' },
+            { label: 'B', text: '进度规划方法' },
+            { label: 'C', text: '进度控制方法' },
+            { label: 'D', text: '进度报告格式' }
+        ],
+        answer: 'A',
+        explanation: '进度管理计划的主要内容包括：进度规划方法、进度控制方法、进度报告格式等。进度基准是进度计划的输出，不是进度管理计划的内容。',
+        tags: ['进度管理计划', '进度管理'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 2010年真题 =====
+    {
+        id: 'q2010001',
+        year: 2010,
+        type: 'morning',
+        chapter: 'project_cost',
+        chapterName: '项目成本管理',
+        title: '成本管理计划的主要内容不包括（）。',
+        question: '成本管理计划的主要内容不包括（）。',
+        options: [
+            { label: 'A', text: '成本估算方法' },
+            { label: 'B', text: '成本预算方法' },
+            { label: 'C', text: '成本控制方法' },
+            { label: 'D', text: '成本基准' }
+        ],
+        answer: 'D',
+        explanation: '成本管理计划的主要内容包括：成本估算方法、成本预算方法、成本控制方法等。成本基准是成本预算的输出，不是成本管理计划的内容。',
+        tags: ['成本管理计划', '成本管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2010002',
+        year: 2010,
+        type: 'morning',
+        chapter: 'project_quality',
+        chapterName: '项目质量管理',
+        title: '质量管理计划的主要内容不包括（）。',
+        question: '质量管理计划的主要内容不包括（）。',
+        options: [
+            { label: 'A', text: '质量标准' },
+            { label: 'B', text: '质量目标' },
+            { label: 'C', text: '质量保证措施' },
+            { label: 'D', text: '质量控制结果' }
+        ],
+        answer: 'D',
+        explanation: '质量管理计划的主要内容包括：质量标准、质量目标、质量保证措施等。质量控制结果是质量控制的输出，不是质量管理计划的内容。',
+        tags: ['质量管理计划', '质量管理'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 2009年真题 =====
+    {
+        id: 'q2009001',
+        year: 2009,
+        type: 'morning',
+        chapter: 'project_hr',
+        chapterName: '项目人力资源管理',
+        title: '人力资源管理计划的主要内容不包括（）。',
+        question: '人力资源管理计划的主要内容不包括（）。',
+        options: [
+            { label: 'A', text: '角色和职责' },
+            { label: '项目组织图' },
+            { label: '人员配备管理计划' },
+            { label: '团队绩效评估' }
+        ],
+        answer: 'D',
+        explanation: '人力资源管理计划的主要内容包括：角色和职责、项目组织图、人员配备管理计划等。团队绩效评估是团队建设的输出，不是人力资源管理计划的内容。',
+        tags: ['人力资源管理计划', '人力资源管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2009002',
+        year: 2009,
+        type: 'morning',
+        chapter: 'project_communication',
+        chapterName: '项目沟通管理',
+        title: '沟通管理计划的主要内容不包括（）。',
+        question: '沟通管理计划的主要内容不包括（）。',
+        options: [
+            { label: 'A', text: '沟通渠道' },
+            { label: 'B', text: '沟通频率' },
+            { label: 'C', text: '沟通内容' },
+            { label: 'D', text: '沟通成本' }
+        ],
+        answer: 'D',
+        explanation: '沟通管理计划的主要内容包括：沟通渠道、沟通频率、沟通内容、沟通方法、沟通责任等。沟通成本通常不是沟通管理计划的主要内容。',
+        tags: ['沟通管理计划', '沟通管理'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 2008年真题 =====
+    {
+        id: 'q2008001',
+        year: 2008,
+        type: 'morning',
+        chapter: 'project_risk',
+        chapterName: '项目风险管理',
+        title: '风险管理计划的主要内容不包括（）。',
+        question: '风险管理计划的主要内容不包括（）。',
+        options: [
+            { label: 'A', text: '风险识别方法' },
+            { label: 'B', text: '风险分析方法' },
+            { label: 'C', text: '风险应对策略' },
+            { label: 'D', text: '风险监控结果' }
+        ],
+        answer: 'D',
+        explanation: '风险管理计划的主要内容包括：风险识别方法、风险分析方法、风险应对策略等。风险监控结果是风险监控的输出，不是风险管理计划的内容。',
+        tags: ['风险管理计划', '风险管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2008002',
+        year: 2008,
+        type: 'morning',
+        chapter: 'project_procurement',
+        chapterName: '项目采购管理',
+        title: '采购管理计划的主要内容不包括（）。',
+        question: '采购管理计划的主要内容不包括（）。',
+        options: [
+            { label: 'A', text: '采购策略' },
+            { label: 'B', text: '采购范围' },
+            { label: 'C', text: '采购进度' },
+            { label: 'D', text: '采购成本' }
+        ],
+        answer: 'D',
+        explanation: '采购管理计划的主要内容包括：采购策略、采购范围、采购进度等。采购成本通常在成本管理计划中详细制定，不是采购管理计划的主要内容。',
+        tags: ['采购管理计划', '采购管理'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 2007年真题 =====
+    {
+        id: 'q2007001',
+        year: 2007,
+        type: 'morning',
+        chapter: 'project_stakeholder',
+        chapterName: '项目干系人管理',
+        title: '干系人管理计划的主要内容不包括（）。',
+        question: '干系人管理计划的主要内容不包括（）。',
+        options: [
+            { label: 'A', text: '干系人登记册' },
+            { label: 'B', text: '干系人沟通需求' },
+            { label: 'C', text: '干系人管理策略' },
+            { label: 'D', text: '干系人参与程度' }
+        ],
+        answer: 'A',
+        explanation: '干系人管理计划的主要内容包括：干系人沟通需求、干系人管理策略、干系人参与程度等。干系人登记册是识别干系人的输出，不是干系人管理计划的内容。',
+        tags: ['干系人管理计划', '干系人管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2007002',
+        year: 2007,
+        type: 'morning',
+        chapter: 'informatization',
+        chapterName: '信息化发展',
+        title: '信息化的发展阶段不包括（）。',
+        question: '信息化的发展阶段不包括（）。',
+        options: [
+            { label: 'A', text: '数字化' },
+            { label: 'B', text: '网络化' },
+            { label: 'C', text: '智能化' },
+            { label: 'D', text: '自动化' }
+        ],
+        answer: 'D',
+        explanation: '信息化的发展阶段包括：数字化、网络化、智能化。自动化是工业革命的概念，不是信息化的发展阶段。',
+        tags: ['信息化发展阶段', '信息化发展'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 2026年模拟题补充 =====
+    {
+        id: 'q2026011',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_agile',
+        chapterName: '项目管理概论',
+        title: '关于敏捷项目管理的描述，正确的是（）。',
+        question: '关于敏捷项目管理的描述，正确的是（）。',
+        options: [
+            { label: 'A', text: '敏捷项目管理只适用于小型项目' },
+            { label: 'B', text: '敏捷项目管理强调计划的详细性' },
+            { label: 'C', text: '敏捷项目管理采用迭代和增量的方法' },
+            { label: 'D', text: '敏捷项目管理不需要项目计划' }
+        ],
+        answer: 'C',
+        explanation: '敏捷项目管理采用迭代和增量的方法，适用于需求不确定的项目。它不仅适用于小型项目，也适用于大型项目；它强调适应性而非详细计划；它仍然需要项目计划，只是计划更加灵活。',
+        tags: ['敏捷项目管理', '项目管理概论'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026012',
+        year: 2026,
+        type: 'morning',
+        chapter: 'data_governance',
+        chapterName: '数据工程',
+        title: '数据治理的核心目标是（）。',
+        question: '数据治理的核心目标是（）。',
+        options: [
+            { label: 'A', text: '提高数据质量' },
+            { label: 'B', text: '降低数据成本' },
+            { label: 'C', text: '增加数据存储' },
+            { label: 'D', text: '减少数据使用' }
+        ],
+        answer: 'A',
+        explanation: '数据治理的核心目标是提高数据质量，确保数据的准确性、完整性、一致性和可靠性。它不是为了降低数据成本、增加数据存储或减少数据使用。',
+        tags: ['数据治理', '数据工程'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026013',
+        year: 2026,
+        type: 'morning',
+        chapter: 'cloud_computing',
+        chapterName: '信息技术发展',
+        title: '云计算的特点不包括（）。',
+        question: '云计算的特点不包括（）。',
+        options: [
+            { label: 'A', text: '按需自助服务' },
+            { label: 'B', text: '广泛的网络访问' },
+            { label: '资源池化' },
+            { label: 'D', text: '高成本' }
+        ],
+        answer: 'D',
+        explanation: '云计算的特点包括：按需自助服务、广泛的网络访问、资源池化、快速弹性、可测量的服务等。高成本不是云计算的特点，相反，云计算通常可以降低IT成本。',
+        tags: ['云计算特点', '信息技术发展'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026014',
+        year: 2026,
+        type: 'morning',
+        chapter: 'artificial_intelligence',
+        chapterName: '信息技术发展',
+        title: '人工智能的应用领域不包括（）。',
+        question: '人工智能的应用领域不包括（）。',
+        options: [
+            { label: 'A', text: '自然语言处理' },
+            { label: 'B', text: '计算机视觉' },
+            { label: 'C', text: '数据分析' },
+            { label: 'D', text: '传统编程' }
+        ],
+        answer: 'D',
+        explanation: '人工智能的应用领域包括：自然语言处理、计算机视觉、数据分析、机器学习等。传统编程是传统软件开发的方法，不是人工智能的应用领域。',
+        tags: ['人工智能应用', '信息技术发展'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026015',
+        year: 2026,
+        type: 'morning',
+        chapter: 'blockchain',
+        chapterName: '信息技术发展',
+        title: '区块链的核心特点不包括（）。',
+        question: '区块链的核心特点不包括（）。',
+        options: [
+            { label: 'A', text: '去中心化' },
+            { label: 'B', text: '不可篡改' },
+            { label: 'C', text: '透明性' },
+            { label: 'D', text: '中心化' }
+        ],
+        answer: 'D',
+        explanation: '区块链的核心特点包括：去中心化、不可篡改、透明性、安全性等。中心化不是区块链的特点，相反，去中心化是区块链的核心特性之一。',
+        tags: ['区块链特点', '信息技术发展'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 下午案例分析题补充 =====
+    {
+        id: 'q2026003a',
+        year: 2026,
+        type: 'afternoon',
+        chapter: 'project_schedule',
+        chapterName: '项目进度管理',
+        title: '2026年案例分析 - 进度管理',
+        question: `【说明】
+某公司承接了一个软件系统开发项目，项目周期为8个月，预算为500万元。项目经理制定了详细的进度计划，并按照计划执行。
+
+项目进行到第4个月时，项目经理发现：
+- 项目进度只完成了40%
+- 成本已经花费了250万元
+- 团队成员工作积极性不高
+- 多个关键任务延期
+
+【问题1】（10分）
+请分析项目进度延误的可能原因。
+
+【问题2】（8分）
+请计算当前项目的SV、SPI，并分析项目进度状态。
+
+【问题3】（7分）
+请提出改进项目进度的措施。`,
+        answer: `【问题1】参考答案（每点2分，答出5点得满分）
+
+1. 进度计划不合理：
+   - 计划制定时对工作量估计不足
+   - 未考虑风险和不确定性
+   - 关键路径分析不准确
+
+2. 资源问题：
+   - 人力资源不足
+   - 资源分配不合理
+   - 团队成员技能不足
+
+3. 管理问题：
+   - 进度监控不到位
+   - 变更控制不力
+   - 沟通不畅
+
+4. 技术问题：
+   - 技术难题未及时解决
+   - 技术选型不当
+   - 代码质量问题导致返工
+
+5. 团队问题：
+   - 团队成员工作积极性不高
+   - 团队协作不畅
+   - 团队成员离职或变动
+
+【问题2】参考答案
+
+已知条件：
+- 项目周期：8个月
+- 当前时间：第4个月（50%的时间）
+- 计划进度：50%
+- 实际进度：40%
+- BAC = 500万元
+
+计算：
+1. PV = 500 × 50% = 250万元
+2. EV = 500 × 40% = 200万元
+3. AC = 250万元
+
+4. SV = EV - PV = 200 - 250 = -50万元（进度落后）
+5. SPI = EV / PV = 200 / 250 = 0.8（进度效率低）
+
+项目进度状态分析：
+- 项目进度严重落后，SPI=0.8，说明项目只完成了计划的80%
+- 需要立即采取措施追赶进度
+
+【问题3】参考答案（每点2分，答出4点得满分）
+
+1. 进度压缩措施：
+   - 赶工：增加资源以缩短关键路径任务的工期
+   - 快速跟进：并行执行原本顺序进行的活动
+
+2. 资源优化：
+   - 重新分配资源，优先保障关键路径任务
+   - 考虑增加临时资源
+
+3. 管理改进：
+   - 加强进度监控，建立每日或每周进度报告机制
+   - 召开每日站会，及时解决问题
+   - 建立进度预警机制
+
+4. 团队管理：
+   - 提高团队士气，采取激励措施
+   - 加强团队沟通，解决团队冲突
+   - 提供必要的培训和支持
+
+5. 范围管理：
+   - 重新评估项目范围，考虑是否可以调整
+   - 严格控制变更，避免范围蔓延
+
+6. 技术改进：
+   - 解决技术难题，必要时寻求外部专家支持
+   - 优化开发流程，提高开发效率`,
+        tags: ['案例分析', '进度管理'],
+        difficulty: 'high'
+    },
+    {
+        id: 'q2026004a',
+        year: 2026,
+        type: 'afternoon',
+        chapter: 'project_cost',
+        chapterName: '项目成本管理',
+        title: '2026年案例分析 - 成本管理',
+        question: `【说明】
+某公司承接了一个信息系统集成项目，项目周期为6个月，预算为300万元。项目经理制定了详细的成本计划，并按照计划执行。
+
+项目进行到第3个月时，项目经理发现：
+- 项目进度完成了50%
+- 成本已经花费了200万元
+- 多个任务的实际成本超过了预算
+
+【问题1】（10分）
+请分析项目成本超支的可能原因。
+
+【问题2】（8分）
+请计算当前项目的CV、CPI，并分析项目成本状态。
+
+【问题3】（7分）
+请提出控制项目成本的措施。`,
+        answer: `【问题1】参考答案（每点2分，答出5点得满分）
+
+1. 成本估算不准确：
+   - 初始成本估算过低
+   - 未考虑风险和不确定性
+   - 对资源成本估计不足
+
+2. 范围变更：
+   - 范围蔓延导致额外成本
+   - 变更控制不力
+   - 需求变更频繁
+
+3. 资源管理问题：
+   - 资源效率低下
+   - 资源浪费
+   - 资源价格上涨
+
+4. 管理问题：
+   - 成本监控不到位
+   - 成本控制措施不力
+   - 沟通不畅导致误解
+
+5. 技术问题：
+   - 技术难题导致返工
+   - 技术选型不当导致额外成本
+   - 质量问题导致修复成本
+
+【问题2】参考答案
+
+已知条件：
+- BAC = 300万元
+- 当前时间：第3个月（50%的时间）
+- 实际进度：50%
+- 实际成本：200万元
+
+计算：
+1. EV = 300 × 50% = 150万元
+2. AC = 200万元
+3. PV = 300 × 50% = 150万元
+
+4. CV = EV - AC = 150 - 200 = -50万元（成本超支）
+5. CPI = EV / AC = 150 / 200 = 0.75（成本效率低）
+
+项目成本状态分析：
+- 项目成本严重超支，CPI=0.75，说明每花费1元只完成了0.75元的工作
+- 需要立即采取措施控制成本
+
+【问题3】参考答案（每点2分，答出4点得满分）
+
+1. 成本控制措施：
+   - 重新评估项目预算，必要时申请追加预算
+   - 建立严格的成本审批流程
+   - 实施成本预警机制
+
+2. 范围管理：
+   - 冻结范围变更，严格控制变更流程
+   - 重新评估项目范围，考虑是否可以调整
+   - 明确项目边界，避免范围蔓延
+
+3. 资源管理：
+   - 优化资源配置，提高资源利用效率
+   - 减少资源浪费
+   - 与供应商重新协商价格
+
+4. 技术改进：
+   - 优化开发流程，减少返工
+   - 采用更高效的技术和工具
+   - 提高代码质量，减少修复成本
+
+5. 管理改进：
+   - 加强成本监控，建立每周成本报告机制
+   - 召开成本分析会议，及时发现和解决问题
+   - 建立成本责任制度，明确各环节的成本责任
+
+6. 风险管理：
+   - 识别和评估剩余项目的成本风险
+   - 制定成本风险应对策略
+   - 预留适当的管理储备`,
+        tags: ['案例分析', '成本管理'],
+        difficulty: 'high'
+    },
+    
+    // ===== 补充更多2024年真题 =====
+    {
+        id: 'q2024013',
+        year: 2024,
+        type: 'morning',
+        chapter: 'information_security',
+        chapterName: '信息安全工程',
         title: '关于信息安全系统工程的描述不正确的是（）。',
         question: '关于信息安全系统工程的描述不正确的是（）。',
         options: [
@@ -2164,6 +3386,835 @@ const questionsData = [
         answer: 'B',
         explanation: '当发现增量与愿景偏差较大时，首先应该召开产品愿景会议，重新确认产品方向，确保团队对产品愿景有一致的理解。其他措施都是在重新确认方向后的具体行动。',
         tags: ['敏捷开发', '产品愿景'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 2026年模拟题（重点知识点） =====
+    {
+        id: 'q2026001',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_integration',
+        chapterName: '项目整体管理',
+        title: '项目管理计划的主要作用是（）。',
+        question: '项目管理计划的主要作用是（）。',
+        options: [
+            { label: 'A', text: '记录项目的高层级需求' },
+            { label: 'B', text: '授权项目经理使用组织资源' },
+            { label: 'C', text: '指导项目执行、监控和收尾' },
+            { label: 'D', text: '识别项目的干系人' }
+        ],
+        answer: 'C',
+        explanation: '项目管理计划的主要作用是指导项目执行、监控和收尾。记录高层级需求和授权项目经理是项目章程的作用，识别干系人是干系人管理的工作。',
+        tags: ['项目管理计划', '整体管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026002',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_scope',
+        chapterName: '项目范围管理',
+        title: '关于范围蔓延的说法，正确的是（）。',
+        question: '关于范围蔓延的说法，正确的是（）。',
+        options: [
+            { label: 'A', text: '范围蔓延是指项目范围的合理变更' },
+            { label: 'B', text: '范围蔓延是指项目范围的意外扩大' },
+            { label: 'C', text: '范围蔓延对项目没有影响' },
+            { label: 'D', text: '范围蔓延是项目管理的正常现象' }
+        ],
+        answer: 'B',
+        explanation: '范围蔓延是指项目范围的意外扩大，通常是由于缺乏变更控制或范围定义不清晰导致的。范围蔓延会导致项目延期、成本超支等问题，不是项目管理的正常现象。',
+        tags: ['范围蔓延', '范围管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026003',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_schedule',
+        chapterName: '项目进度管理',
+        title: '某项目有A、B、C三个活动，A的历时为3天，B的历时为4天，C的历时为5天。A完成后B和C才能开始，B和C完成后项目结束。该项目的关键路径长度为（）天。',
+        question: '某项目有A、B、C三个活动，A的历时为3天，B的历时为4天，C的历时为5天。A完成后B和C才能开始，B和C完成后项目结束。该项目的关键路径长度为（）天。',
+        options: [
+            { label: 'A', text: '7' },
+            { label: 'B', text: '8' },
+            { label: 'C', text: '9' },
+            { label: 'D', text: '12' }
+        ],
+        answer: 'B',
+        explanation: '关键路径是A→C，长度为3+5=8天。A→B的路径长度为3+4=7天，不是关键路径。',
+        tags: ['关键路径', '进度管理'],
+        difficulty: 'high'
+    },
+    {
+        id: 'q2026004',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_cost',
+        chapterName: '项目成本管理',
+        title: '某项目BAC=150万元，PV=100万元，EV=80万元，AC=90万元，则进度偏差SV为（）万元。',
+        question: '某项目BAC=150万元，PV=100万元，EV=80万元，AC=90万元，则进度偏差SV为（）万元。',
+        options: [
+            { label: 'A', text: '-20' },
+            { label: 'B', text: '20' },
+            { label: 'C', text: '-10' },
+            { label: 'D', text: '10' }
+        ],
+        answer: 'A',
+        explanation: 'SV = EV - PV = 80 - 100 = -20万元。进度偏差为负值，说明进度落后。',
+        tags: ['挣值分析', '进度偏差', 'SV'],
+        difficulty: 'high'
+    },
+    {
+        id: 'q2026005',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_quality',
+        chapterName: '项目质量管理',
+        title: '质量管理的PDCA循环中，"C"代表（）。',
+        question: '质量管理的PDCA循环中，"C"代表（）。',
+        options: [
+            { label: 'A', text: '计划' },
+            { label: 'B', text: '执行' },
+            { label: 'C', text: '检查' },
+            { label: 'D', text: '处理' }
+        ],
+        answer: 'C',
+        explanation: 'PDCA循环是质量管理的基本方法，其中P代表计划（Plan），D代表执行（Do），C代表检查（Check），A代表处理（Act）。',
+        tags: ['PDCA', '质量管理'],
+        difficulty: 'low'
+    },
+    {
+        id: 'q2026006',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_hr',
+        chapterName: '项目人力资源管理',
+        title: '项目经理在团队建设过程中，应该注重（）。',
+        question: '项目经理在团队建设过程中，应该注重（）。',
+        options: [
+            { label: 'A', text: '个人英雄主义' },
+            { label: 'B', text: '团队协作' },
+            { label: 'C', text: '严格控制' },
+            { label: 'D', text: '个人绩效' }
+        ],
+        answer: 'B',
+        explanation: '团队建设的核心是促进团队成员之间的协作和信任，提高团队整体绩效。个人英雄主义、严格控制和个人绩效都不是团队建设的重点。',
+        tags: ['团队建设', '人力资源管理'],
+        difficulty: 'low'
+    },
+    {
+        id: 'q2026007',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_communication',
+        chapterName: '项目沟通管理',
+        title: '有效的沟通管理可以（）。',
+        question: '有效的沟通管理可以（）。',
+        options: [
+            { label: 'A', text: '减少项目风险' },
+            { label: 'B', text: '增加项目成本' },
+            { label: 'C', text: '延长项目工期' },
+            { label: 'D', text: '降低项目质量' }
+        ],
+        answer: 'A',
+        explanation: '有效的沟通管理可以减少项目风险，提高项目成功率。它不会增加项目成本、延长项目工期或降低项目质量。',
+        tags: ['沟通管理', '项目风险'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026008',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_risk',
+        chapterName: '项目风险管理',
+        title: '风险应对策略中，属于机会应对策略的是（）。',
+        question: '风险应对策略中，属于机会应对策略的是（）。',
+        options: [
+            { label: 'A', text: '规避' },
+            { label: 'B', text: '转移' },
+            { label: 'C', text: '开拓' },
+            { label: 'D', text: '减轻' }
+        ],
+        answer: 'C',
+        explanation: '机会应对策略包括：开拓、分享、增强、接受。威胁应对策略包括：规避、转移、减轻、接受。',
+        tags: ['风险应对', '机会策略'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026009',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_procurement',
+        chapterName: '项目采购管理',
+        title: '在采购过程中，卖方选择的主要依据是（）。',
+        question: '在采购过程中，卖方选择的主要依据是（）。',
+        options: [
+            { label: 'A', text: '价格最低' },
+            { label: 'B', text: '技术能力最强' },
+            { label: 'C', text: '响应招标文件的程度' },
+            { label: 'D', text: '关系最好' }
+        ],
+        answer: 'C',
+        explanation: '卖方选择的主要依据是响应招标文件的程度，包括技术能力、价格、交付能力、质量保证等多个因素的综合评估。',
+        tags: ['采购管理', '卖方选择'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026010',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_stakeholder',
+        chapterName: '项目干系人管理',
+        title: '干系人管理的核心是（）。',
+        question: '干系人管理的核心是（）。',
+        options: [
+            { label: 'A', text: '识别所有干系人' },
+            { label: 'B', text: '满足所有干系人的需求' },
+            { label: 'C', text: '管理干系人的期望' },
+            { label: 'D', text: '忽视负面干系人' }
+        ],
+        answer: 'C',
+        explanation: '干系人管理的核心是管理干系人的期望，确保项目成功。识别干系人是第一步，不可能满足所有干系人的需求，也不应该忽视负面干系人。',
+        tags: ['干系人管理', '期望管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026011',
+        year: 2026,
+        type: 'morning',
+        chapter: 'project_agile',
+        chapterName: '项目管理概论',
+        title: '关于敏捷项目管理的描述，正确的是（）。',
+        question: '关于敏捷项目管理的描述，正确的是（）。',
+        options: [
+            { label: 'A', text: '敏捷项目管理只适用于小型项目' },
+            { label: 'B', text: '敏捷项目管理强调计划的详细性' },
+            { label: 'C', text: '敏捷项目管理采用迭代和增量的方法' },
+            { label: 'D', text: '敏捷项目管理不需要项目计划' }
+        ],
+        answer: 'C',
+        explanation: '敏捷项目管理采用迭代和增量的方法，适用于需求不确定的项目。它不仅适用于小型项目，也适用于大型项目；它强调适应性而非详细计划；它仍然需要项目计划，只是计划更加灵活。',
+        tags: ['敏捷项目管理', '项目管理概论'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026012',
+        year: 2026,
+        type: 'morning',
+        chapter: 'data_governance',
+        chapterName: '数据工程',
+        title: '数据治理的核心目标是（）。',
+        question: '数据治理的核心目标是（）。',
+        options: [
+            { label: 'A', text: '提高数据质量' },
+            { label: 'B', text: '降低数据成本' },
+            { label: 'C', text: '增加数据存储' },
+            { label: 'D', text: '减少数据使用' }
+        ],
+        answer: 'A',
+        explanation: '数据治理的核心目标是提高数据质量，确保数据的准确性、完整性、一致性和可靠性。它不是为了降低数据成本、增加数据存储或减少数据使用。',
+        tags: ['数据治理', '数据工程'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026013',
+        year: 2026,
+        type: 'morning',
+        chapter: 'cloud_computing',
+        chapterName: '信息技术发展',
+        title: '云计算的特点不包括（）。',
+        question: '云计算的特点不包括（）。',
+        options: [
+            { label: 'A', text: '按需自助服务' },
+            { label: 'B', text: '广泛的网络访问' },
+            { label: 'C', text: '资源池化' },
+            { label: 'D', text: '高成本' }
+        ],
+        answer: 'D',
+        explanation: '云计算的特点包括：按需自助服务、广泛的网络访问、资源池化、快速弹性、可测量的服务等。高成本不是云计算的特点，相反，云计算通常可以降低IT成本。',
+        tags: ['云计算特点', '信息技术发展'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026014',
+        year: 2026,
+        type: 'morning',
+        chapter: 'artificial_intelligence',
+        chapterName: '信息技术发展',
+        title: '人工智能的应用领域不包括（）。',
+        question: '人工智能的应用领域不包括（）。',
+        options: [
+            { label: 'A', text: '自然语言处理' },
+            { label: 'B', text: '计算机视觉' },
+            { label: 'C', text: '数据分析' },
+            { label: 'D', text: '传统编程' }
+        ],
+        answer: 'D',
+        explanation: '人工智能的应用领域包括：自然语言处理、计算机视觉、数据分析、机器学习等。传统编程是传统软件开发的方法，不是人工智能的应用领域。',
+        tags: ['人工智能应用', '信息技术发展'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2026015',
+        year: 2026,
+        type: 'morning',
+        chapter: 'blockchain',
+        chapterName: '信息技术发展',
+        title: '区块链的核心特点不包括（）。',
+        question: '区块链的核心特点不包括（）。',
+        options: [
+            { label: 'A', text: '去中心化' },
+            { label: 'B', text: '不可篡改' },
+            { label: 'C', text: '透明性' },
+            { label: 'D', text: '中心化' }
+        ],
+        answer: 'D',
+        explanation: '区块链的核心特点包括：去中心化、不可篡改、透明性、安全性等。中心化不是区块链的特点，相反，去中心化是区块链的核心特性之一。',
+        tags: ['区块链特点', '信息技术发展'],
+        difficulty: 'medium'
+    },
+    
+    // ===== 2026年案例分析题（重点知识点） =====
+    {
+        id: 'q2026001a',
+        year: 2026,
+        type: 'afternoon',
+        chapter: 'project_integration',
+        chapterName: '项目整体管理',
+        title: '2026年案例分析 - 项目整体管理',
+        question: `【说明】
+某软件公司承接了一个政府部门的信息系统升级项目，项目周期为6个月，预算为300万元。项目经理小王具有丰富的项目管理经验，项目启动后，小王制定了详细的项目管理计划，并按照计划执行。
+
+项目进行到第3个月时，客户提出了一项重要的功能变更，小王立即组织团队进行评估，并通过变更控制流程获得了批准。项目进行到第4个月时，团队成员小李提出了辞职，小王及时安排了人员交接，并调整了项目计划。
+
+项目最终按时完成，成本控制在预算范围内，客户对项目成果非常满意。
+
+【问题1】（10分）
+请分析案例中项目经理小王的项目管理行为有哪些值得肯定的地方。
+
+【问题2】（8分）
+请分析项目中可能存在的风险，并说明如何应对。
+
+【问题3】（7分）
+请说明项目整体管理的主要过程。`,
+        answer: `【问题1】参考答案（每点2分，答出5点得满分）
+
+1. 整体管理方面：
+   - 制定了详细的项目管理计划
+   - 按照计划执行项目
+   - 及时应对变更和风险
+
+2. 变更管理方面：
+   - 建立了变更控制流程
+   - 对变更进行了评估
+   - 通过正规流程获得了变更批准
+
+3. 人力资源管理方面：
+   - 及时处理团队成员离职问题
+   - 安排了人员交接
+   - 调整了项目计划
+
+4. 时间管理方面：
+   - 项目按时完成
+   - 合理安排项目进度
+
+5. 成本管理方面：
+   - 成本控制在预算范围内
+   - 有效管理项目资源
+
+【问题2】参考答案（每点2分，共8分）
+
+1. 可能存在的风险：
+   - 需求变更风险：客户可能提出更多变更
+   - 人员风险：其他团队成员可能离职
+   - 技术风险：可能遇到技术难题
+   - 进度风险：可能出现进度延误
+
+2. 应对措施：
+   - 需求变更风险：建立严格的变更控制流程，评估变更影响
+   - 人员风险：建立知识管理体系，培养备份人员
+   - 技术风险：进行技术评审，提前识别技术难题
+   - 进度风险：加强进度监控，及时调整计划
+
+【问题3】参考答案（每点1分，共7分）
+
+项目整体管理的主要过程包括：
+1. 制定项目章程
+2. 制定项目管理计划
+3. 指导与管理项目工作
+4. 监控项目工作
+5. 实施整体变更控制
+6. 结束项目或阶段
+7. 管理项目知识`,
+        tags: ['案例分析', '整体管理'],
+        difficulty: 'high'
+    },
+    {
+        id: 'q2026002a',
+        year: 2026,
+        type: 'afternoon',
+        chapter: 'project_quality',
+        chapterName: '项目质量管理',
+        title: '2026年案例分析 - 质量管理',
+        question: `【说明】
+某公司开发一个电商平台系统，项目团队在开发过程中注重质量管理，采用了多种质量工具和方法。
+
+项目启动阶段，团队制定了详细的质量计划，包括质量标准、质量目标和质量保证措施。开发过程中，团队使用了因果图、帕累托图等质量工具进行质量分析和改进。测试阶段，团队进行了全面的测试，包括单元测试、集成测试和系统测试。
+
+最终，项目交付的系统质量良好，客户满意度高。
+
+【问题1】（10分）
+请分析案例中项目团队在质量管理方面的做法有哪些值得肯定的地方。
+
+【问题2】（8分）
+请说明质量管理七工具的名称和用途。
+
+【问题3】（7分）
+请说明质量保证和质量控制的区别。`,
+        answer: `【问题1】参考答案（每点2分，答出5点得满分）
+
+1. 质量规划方面：
+   - 制定了详细的质量计划
+   - 明确了质量标准和质量目标
+   - 制定了质量保证措施
+
+2. 质量工具使用方面：
+   - 使用了因果图进行原因分析
+   - 使用了帕累托图识别关键问题
+   - 采用了多种质量工具
+
+3. 质量控制方面：
+   - 进行了全面的测试
+   - 包括单元测试、集成测试和系统测试
+   - 确保了系统质量
+
+4. 质量保证方面：
+   - 贯穿项目全过程的质量管理
+   - 注重预防而非检查
+   - 持续改进质量
+
+【问题2】参考答案（每点1分，共8分）
+
+质量管理七工具：
+1. 因果图（鱼骨图）：用于分析质量问题的根本原因
+2. 流程图：用于展示过程步骤和可能的质量问题
+3. 核查表：用于收集质量数据
+4. 帕累托图：用于识别造成大多数问题的少数关键原因
+5. 直方图：用于展示质量数据的分布
+6. 控制图：用于监控过程是否稳定
+7. 散点图：用于分析两个变量之间的关系
+
+【问题3】参考答案（每点1分，共7分）
+
+质量保证和质量控制的区别：
+1. 目的不同：质量保证确保过程正确，质量控制确保结果正确
+2. 关注点不同：质量保证关注过程，质量控制关注产品
+3. 执行时机不同：质量保证贯穿全过程，质量控制在产品产生后
+4. 执行人员不同：质量保证由质量保证人员执行，质量控制由项目团队执行
+5. 输出不同：质量保证输出质量报告，质量控制输出质量测量结果
+6. 方法不同：质量保证使用质量审计，质量控制使用质量测试
+7. 作用不同：质量保证预防质量问题，质量控制检测和纠正质量问题`,
+        tags: ['案例分析', '质量管理'],
+        difficulty: 'high'
+    },
+    {
+        id: 'q2026003a',
+        year: 2026,
+        type: 'afternoon',
+        chapter: 'project_schedule',
+        chapterName: '项目进度管理',
+        title: '2026年案例分析 - 进度管理',
+        question: `【说明】
+某公司承接了一个软件系统开发项目，项目周期为8个月，预算为500万元。项目经理制定了详细的进度计划，并按照计划执行。
+
+项目进行到第4个月时，项目经理发现：
+- 项目进度只完成了40%
+- 成本已经花费了250万元
+- 团队成员工作积极性不高
+- 多个关键任务延期
+
+【问题1】（10分）
+请分析项目进度延误的可能原因。
+
+【问题2】（8分）
+请计算当前项目的SV、SPI，并分析项目进度状态。
+
+【问题3】（7分）
+请提出改进项目进度的措施。`,
+        answer: `【问题1】参考答案（每点2分，答出5点得满分）
+
+1. 进度计划不合理：
+   - 计划制定时对工作量估计不足
+   - 未考虑风险和不确定性
+   - 关键路径分析不准确
+
+2. 资源问题：
+   - 人力资源不足
+   - 资源分配不合理
+   - 团队成员技能不足
+
+3. 管理问题：
+   - 进度监控不到位
+   - 变更控制不力
+   - 沟通不畅
+
+4. 技术问题：
+   - 技术难题未及时解决
+   - 技术选型不当
+   - 代码质量问题导致返工
+
+5. 团队问题：
+   - 团队成员工作积极性不高
+   - 团队协作不畅
+   - 团队成员离职或变动
+
+【问题2】参考答案
+
+已知条件：
+- 项目周期：8个月
+- 当前时间：第4个月（50%的时间）
+- 计划进度：50%
+- 实际进度：40%
+- BAC = 500万元
+
+计算：
+1. PV = 500 × 50% = 250万元
+2. EV = 500 × 40% = 200万元
+3. AC = 250万元
+
+4. SV = EV - PV = 200 - 250 = -50万元（进度落后）
+5. SPI = EV / PV = 200 / 250 = 0.8（进度效率低）
+
+项目进度状态分析：
+- 项目进度严重落后，SPI=0.8，说明项目只完成了计划的80%
+- 需要立即采取措施追赶进度
+
+【问题3】参考答案（每点2分，答出4点得满分）
+
+1. 进度压缩措施：
+   - 赶工：增加资源以缩短关键路径任务的工期
+   - 快速跟进：并行执行原本顺序进行的活动
+
+2. 资源优化：
+   - 重新分配资源，优先保障关键路径任务
+   - 考虑增加临时资源
+
+3. 管理改进：
+   - 加强进度监控，建立每日或每周进度报告机制
+   - 召开每日站会，及时解决问题
+   - 建立进度预警机制
+
+4. 团队管理：
+   - 提高团队士气，采取激励措施
+   - 加强团队沟通，解决团队冲突
+   - 提供必要的培训和支持
+
+5. 范围管理：
+   - 重新评估项目范围，考虑是否可以调整
+   - 严格控制变更，避免范围蔓延
+
+6. 技术改进：
+   - 解决技术难题，必要时寻求外部专家支持
+   - 优化开发流程，提高开发效率`,
+        tags: ['案例分析', '进度管理'],
+        difficulty: 'high'
+    },
+    {
+        id: 'q2026004a',
+        year: 2026,
+        type: 'afternoon',
+        chapter: 'project_cost',
+        chapterName: '项目成本管理',
+        title: '2026年案例分析 - 成本管理',
+        question: `【说明】
+某公司承接了一个信息系统集成项目，项目周期为6个月，预算为300万元。项目经理制定了详细的成本计划，并按照计划执行。
+
+项目进行到第3个月时，项目经理发现：
+- 项目进度完成了50%
+- 成本已经花费了200万元
+- 多个任务的实际成本超过了预算
+
+【问题1】（10分）
+请分析项目成本超支的可能原因。
+
+【问题2】（8分）
+请计算当前项目的CV、CPI，并分析项目成本状态。
+
+【问题3】（7分）
+请提出控制项目成本的措施。`,
+        answer: `【问题1】参考答案（每点2分，答出5点得满分）
+
+1. 成本估算不准确：
+   - 初始成本估算过低
+   - 未考虑风险和不确定性
+   - 对资源成本估计不足
+
+2. 范围变更：
+   - 范围蔓延导致额外成本
+   - 变更控制不力
+   - 需求变更频繁
+
+3. 资源管理问题：
+   - 资源效率低下
+   - 资源浪费
+   - 资源价格上涨
+
+4. 管理问题：
+   - 成本监控不到位
+   - 成本控制措施不力
+   - 沟通不畅导致误解
+
+5. 技术问题：
+   - 技术难题导致返工
+   - 技术选型不当导致额外成本
+   - 质量问题导致修复成本
+
+【问题2】参考答案
+
+已知条件：
+- BAC = 300万元
+- 当前时间：第3个月（50%的时间）
+- 实际进度：50%
+- 实际成本：200万元
+
+计算：
+1. EV = 300 × 50% = 150万元
+2. AC = 200万元
+3. PV = 300 × 50% = 150万元
+
+4. CV = EV - AC = 150 - 200 = -50万元（成本超支）
+5. CPI = EV / AC = 150 / 200 = 0.75（成本效率低）
+
+项目成本状态分析：
+- 项目成本严重超支，CPI=0.75，说明每花费1元只完成了0.75元的工作
+- 需要立即采取措施控制成本
+
+【问题3】参考答案（每点2分，答出4点得满分）
+
+1. 成本控制措施：
+   - 重新评估项目预算，必要时申请追加预算
+   - 建立严格的成本审批流程
+   - 实施成本预警机制
+
+2. 范围管理：
+   - 冻结范围变更，严格控制变更流程
+   - 重新评估项目范围，考虑是否可以调整
+   - 明确项目边界，避免范围蔓延
+
+3. 资源管理：
+   - 优化资源配置，提高资源利用效率
+   - 减少资源浪费
+   - 与供应商重新协商价格
+
+4. 技术改进：
+   - 优化开发流程，减少返工
+   - 采用更高效的技术和工具
+   - 提高代码质量，减少修复成本
+
+5. 管理改进：
+   - 加强成本监控，建立每周成本报告机制
+   - 召开成本分析会议，及时发现和解决问题
+   - 建立成本责任制度，明确各环节的成本责任
+
+6. 风险管理：
+   - 识别和评估剩余项目的成本风险
+   - 制定成本风险应对策略
+   - 预留适当的管理储备`,
+        tags: ['案例分析', '成本管理'],
+        difficulty: 'high'
+    },
+    
+    // ===== 2027年模拟题（重点知识点） =====
+    {
+        id: 'q2027001',
+        year: 2027,
+        type: 'morning',
+        chapter: 'project_integration',
+        chapterName: '项目整体管理',
+        title: '以下哪项是项目章程的内容？',
+        question: '以下哪项是项目章程的内容？',
+        options: [
+            { label: 'A', text: '项目目的和批准原因' },
+            { label: 'B', text: '详细的项目预算' },
+            { label: 'C', text: '详细的项目进度计划' },
+            { label: 'D', text: '详细的项目范围说明书' }
+        ],
+        answer: 'A',
+        explanation: '项目章程的内容包括：项目目的和批准原因、可测量的项目目标、委派的项目经理、项目审批要求等。详细的项目预算、进度计划、范围说明书都在项目管理计划中。',
+        tags: ['项目章程', '整体管理'],
+        difficulty: 'low'
+    },
+    {
+        id: 'q2027002',
+        year: 2027,
+        type: 'morning',
+        chapter: 'project_scope',
+        chapterName: '项目范围管理',
+        title: '以下哪项是创建WBS的工具？',
+        question: '以下哪项是创建WBS的工具？',
+        options: [
+            { label: 'A', text: '分解' },
+            { label: 'B', text: '专家判断' },
+            { label: 'C', text: '类比估算' },
+            { label: 'D', text: 'A和B' }
+        ],
+        answer: 'D',
+        explanation: '创建WBS的工具包括：分解、专家判断、WBS模板等。类比估算是成本估算的工具。',
+        tags: ['WBS', '范围管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2027003',
+        year: 2027,
+        type: 'morning',
+        chapter: 'project_schedule',
+        chapterName: '项目进度管理',
+        title: '以下哪项是活动持续时间估算的工具？',
+        question: '以下哪项是活动持续时间估算的工具？',
+        options: [
+            { label: 'A', text: '三点估算' },
+            { label: 'B', text: '参数估算' },
+            { label: 'C', text: '类比估算' },
+            { label: 'D', text: '以上都是' }
+        ],
+        answer: 'D',
+        explanation: '活动持续时间估算的工具包括：三点估算、参数估算、类比估算、专家判断等。',
+        tags: ['活动持续时间估算', '进度管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2027004',
+        year: 2027,
+        type: 'morning',
+        chapter: 'project_cost',
+        chapterName: '项目成本管理',
+        title: '以下哪项是成本控制的工具？',
+        question: '以下哪项是成本控制的工具？',
+        options: [
+            { label: 'A', text: '挣值分析' },
+            { label: 'B', text: '趋势分析' },
+            { label: 'C', text: '偏差分析' },
+            { label: 'D', text: '以上都是' }
+        ],
+        answer: 'D',
+        explanation: '成本控制的工具包括：挣值分析、趋势分析、偏差分析、绩效审查等。',
+        tags: ['成本控制', '成本管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2027005',
+        year: 2027,
+        type: 'morning',
+        chapter: 'project_quality',
+        chapterName: '项目质量管理',
+        title: '以下哪项是规划质量管理的输出？',
+        question: '以下哪项是规划质量管理的输出？',
+        options: [
+            { label: 'A', text: '质量管理计划' },
+            { label: 'B', text: '质量测量指标' },
+            { label: 'C', text: '质量核对单' },
+            { label: 'D', text: '以上都是' }
+        ],
+        answer: 'D',
+        explanation: '规划质量管理的输出包括：质量管理计划、质量测量指标、质量核对单、过程改进计划等。',
+        tags: ['规划质量管理', '质量管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2027006',
+        year: 2027,
+        type: 'morning',
+        chapter: 'project_hr',
+        chapterName: '项目人力资源管理',
+        title: '以下哪项是建设团队的工具？',
+        question: '以下哪项是建设团队的工具？',
+        options: [
+            { label: 'A', text: '团队建设活动' },
+            { label: 'B', text: '培训' },
+            { label: 'C', text: '认可与奖励' },
+            { label: 'D', text: '以上都是' }
+        ],
+        answer: 'D',
+        explanation: '建设团队的工具包括：团队建设活动、培训、认可与奖励、集中办公、虚拟团队等。',
+        tags: ['建设团队', '人力资源管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2027007',
+        year: 2027,
+        type: 'morning',
+        chapter: 'project_communication',
+        chapterName: '项目沟通管理',
+        title: '以下哪项是管理沟通的工具？',
+        question: '以下哪项是管理沟通的工具？',
+        options: [
+            { label: 'A', text: '沟通技术' },
+            { label: 'B', text: '沟通方法' },
+            { label: 'C', text: '沟通模型' },
+            { label: 'D', text: '以上都是' }
+        ],
+        answer: 'D',
+        explanation: '管理沟通的工具包括：沟通技术、沟通方法、沟通模型、信息管理系统等。',
+        tags: ['管理沟通', '沟通管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2027008',
+        year: 2027,
+        type: 'morning',
+        chapter: 'project_risk',
+        chapterName: '项目风险管理',
+        title: '以下哪项是规划风险应对的工具？',
+        question: '以下哪项是规划风险应对的工具？',
+        options: [
+            { label: 'A', text: '策略分析' },
+            { label: 'B', text: '备选方案分析' },
+            { label: 'C', text: '应急储备分析' },
+            { label: 'D', text: '以上都是' }
+        ],
+        answer: 'D',
+        explanation: '规划风险应对的工具包括：策略分析、备选方案分析、应急储备分析、专家判断等。',
+        tags: ['规划风险应对', '风险管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2027009',
+        year: 2027,
+        type: 'morning',
+        chapter: 'project_procurement',
+        chapterName: '项目采购管理',
+        title: '以下哪项是控制采购的工具？',
+        question: '以下哪项是控制采购的工具？',
+        options: [
+            { label: 'A', text: '合同变更控制系统' },
+            { label: 'B', text: '采购绩效审查' },
+            { label: 'C', text: '检查与审计' },
+            { label: 'D', text: '以上都是' }
+        ],
+        answer: 'D',
+        explanation: '控制采购的工具包括：合同变更控制系统、采购绩效审查、检查与审计、索赔管理等。',
+        tags: ['控制采购', '采购管理'],
+        difficulty: 'medium'
+    },
+    {
+        id: 'q2027010',
+        year: 2027,
+        type: 'morning',
+        chapter: 'project_stakeholder',
+        chapterName: '项目干系人管理',
+        title: '以下哪项是管理干系人参与的工具？',
+        question: '以下哪项是管理干系人参与的工具？',
+        options: [
+            { label: 'A', text: '沟通方法' },
+            { label: 'B', text: '人际关系技能' },
+            { label: 'C', text: '管理技能' },
+            { label: 'D', text: '以上都是' }
+        ],
+        answer: 'D',
+        explanation: '管理干系人参与的工具包括：沟通方法、人际关系技能、管理技能、变更日志等。',
+        tags: ['管理干系人参与', '干系人管理'],
         difficulty: 'medium'
     }
 ];

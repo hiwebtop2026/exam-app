@@ -83,6 +83,11 @@ new Vue({
         flashcards: [],
         coreFormulas: [],
         
+        // 冲刺复习状态
+        reviewMode: 'flashcards',
+        currentFlashcard: null,
+        flashcardFlipped: false,
+        
         // 考试状态
         examRecords: [],
         inExam: false,
@@ -100,12 +105,6 @@ new Vue({
             duration: '',
             analysis: []
         },
-        
-        // 复习状态
-        reviewMode: 'flashcards',
-        flashcardFlipped: false,
-        flashcards: [],
-        currentFlashcard: null,
         
         // 学习状态
         isLearning: false,
@@ -126,12 +125,6 @@ new Vue({
         practiceAnswer: '',
         practiceResult: null,
         showExplanationDialog: false,
-        
-        // 复习状态
-        reviewMode: 'flashcards',
-        flashcardFlipped: false,
-        flashcards: [],
-        currentFlashcard: null,
         
         // 错题本
         mistakeBook: []
@@ -266,19 +259,21 @@ new Vue({
             var self = this;
             this.isLoading = true;
             this.errorMessage = '';
-            
+
             try {
                 await db.init();
                 console.log('数据库初始化成功');
-                
-                // 并行加载静态数据
+
+                // 首先加载 chapters（flashcards 依赖 chapters）
+                await self.loadChapters();
+
+                // 并行加载其他静态数据
                 await Promise.all([
-                    self.loadChapters(),
                     self.loadQuestions(),
                     self.loadFormulas(),
                     self.loadFlashcards()
                 ]);
-                
+
                 // 并行加载用户数据
                 await Promise.all([
                     self.loadStudyPlan(),
@@ -287,7 +282,7 @@ new Vue({
                     self.loadProgress(),
                     self.loadPracticeStats()
                 ]);
-                
+
                 console.log('应用初始化完成');
             } catch (error) {
                 console.error('初始化失败:', error);
@@ -311,7 +306,20 @@ new Vue({
             var allFormulas = [];
             for (var category in formulasData) {
                 if (formulasData.hasOwnProperty(category)) {
-                    allFormulas = allFormulas.concat(formulasData[category]);
+                    var formulas = formulasData[category].map(function(f) {
+                        return {
+                            id: f.id,
+                            name: f.name,
+                            category: f.category,
+                            formula: f.expression,
+                            description: f.explanation,
+                            example: f.variables ? f.variables.map(function(v) {
+                                return v.name + ': ' + v.desc;
+                            }).join('；') : '',
+                            variables: f.variables
+                        };
+                    });
+                    allFormulas = allFormulas.concat(formulas);
                 }
             }
             this.coreFormulas = allFormulas.slice(0, 12);
@@ -800,29 +808,49 @@ new Vue({
         },
         
         loadFlashcards: function() {
+            var self = this;
             // 从关键知识点生成复习卡片
             var flashcards = [];
             var id = 1;
-            
-            this.chapters.forEach(function(chapter) {
-                chapter.keypoints.forEach(function(point) {
-                    if (point.level === 'high' || point.level === 'medium') {
-                        flashcards.push({
-                            id: id++,
-                            question: point.title,
-                            answer: point.content || '请查看详细内容',
-                            chapterId: chapter.id,
-                            chapterName: chapter.name
-                        });
-                    }
-                });
+
+            // 如果 chapters 还没有加载，使用 flashcardsData 作为备用
+            var chapters = this.chapters && this.chapters.length > 0 ? this.chapters : [];
+
+            chapters.forEach(function(chapter) {
+                if (chapter.keypoints) {
+                    chapter.keypoints.forEach(function(point) {
+                        if (point.level === 'high' || point.level === 'medium') {
+                            flashcards.push({
+                                id: id++,
+                                question: point.title,
+                                answer: point.content || '请查看详细内容',
+                                chapterId: chapter.id,
+                                chapterName: chapter.name
+                            });
+                        }
+                    });
+                }
             });
-            
+
+            // 如果 chapters 没有生成卡片，使用 flashcardsData 作为备用
+            if (flashcards.length === 0 && typeof flashcardsData !== 'undefined') {
+                flashcards = flashcardsData.map(function(card, index) {
+                    return {
+                        id: card.id || index + 1,
+                        question: card.question,
+                        answer: card.answer,
+                        chapterId: card.chapter || 'general',
+                        chapterName: card.chapter || '通用'
+                    };
+                });
+            }
+
             // 随机打乱顺序
             flashcards.sort(function() { return Math.random() - 0.5; });
-            
+
             this.flashcards = flashcards;
             this.currentFlashcard = flashcards.length > 0 ? flashcards[0] : null;
+            console.log('Flashcards loaded:', flashcards.length, 'Current:', this.currentFlashcard ? this.currentFlashcard.id : 'none');
         },
         
         markCard: function(card, status) {

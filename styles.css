@@ -968,6 +968,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
 }
 
 .flashcard-front {
@@ -979,12 +980,47 @@ body {
     background: white;
     border: 2px solid var(--primary-color);
     transform: rotateY(180deg);
+    overflow-y: auto;
+    justify-content: flex-start;
+    align-items: flex-start;
+    text-align: left;
+}
+
+.flashcard-back::-webkit-scrollbar {
+    width: 6px;
+}
+
+.flashcard-back::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.flashcard-back::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
 }
 
 .flashcard h3 {
     text-align: center;
     font-size: 18px;
     margin-bottom: 16px;
+    word-wrap: break-word;
+    max-width: 100%;
+}
+
+.flashcard-back h3 {
+    text-align: left;
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: var(--primary-color);
+}
+
+.flashcard-back p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    word-wrap: break-word;
+    max-width: 100%;
 }
 
 .flashcard-hint {
@@ -997,6 +1033,7 @@ body {
     gap: 12px;
     margin-top: 20px;
     width: 100%;
+    flex-shrink: 0;
 }
 
 .review-complete {

@@ -115,12 +115,46 @@ new Vue({
         currentLearningChapter: null,
         showLearningDialog: false,
         learningStartTime: null,
+        learningTimer: null,
+        isLearningPaused: false,
+        
+        // 笔记编辑状态
+        noteTitle: '',
+        noteContent: '',
         
         // 练习状态
         showPracticeDialog: false,
         currentPracticeQuestion: null,
         practiceAnswer: '',
-        practiceResult: null
+        practiceResult: null,
+        showExplanationDialog: false,
+        
+        // 考试状态
+        examRecords: [],
+        inExam: false,
+        examType: 'morning',
+        examQuestions: [],
+        currentQuestionIndex: 0,
+        remainingTime: 150 * 60,
+        examTimer: null,
+        showExamResult: false,
+        reviewMode: false,
+        examResult: {
+            score: 0,
+            correct: 0,
+            total: 0,
+            accuracy: 0,
+            duration: '',
+            analysis: []
+        },
+        
+        // 复习状态
+        reviewMode: 'flashcards',
+        flashcardFlipped: false,
+        currentFlashcard: null,
+        
+        // 错题本
+        mistakeBook: []
     },
     
     computed: {
@@ -565,6 +599,37 @@ new Vue({
             }
         },
         
+        selectNote: function(note) {
+            this.currentNote = note.id;
+            this.noteTitle = note.title;
+            this.noteContent = note.content;
+        },
+        
+        createNewNote: function() {
+            var self = this;
+            var newNote = {
+                title: '新建笔记',
+                content: '',
+                chapter: '',
+                createdAt: new Date().toISOString()
+            };
+            
+            db.saveNote(newNote).then(function(id) {
+                newNote.id = id;
+                newNote.date = new Date().toLocaleDateString('zh-CN');
+                self.notes.unshift(newNote);
+                self.currentNote = id;
+                self.noteTitle = newNote.title;
+                self.noteContent = newNote.content;
+            });
+        },
+        
+        closeNoteEditor: function() {
+            this.currentNote = null;
+            this.noteTitle = '';
+            this.noteContent = '';
+        },
+        
         showMindMapView: function(mindMapData) {
             // 生成思维导图HTML
             var html = MindMapGenerator.toHTML(mindMapData);
@@ -653,6 +718,16 @@ new Vue({
                 db.addMistake(mistake);
                 this.mistakeBook.unshift(mistake);
             }
+            
+            // 显示答案解析弹窗
+            this.showExplanationDialog = true;
+        },
+        
+        nextQuestion: function() {
+            this.showExplanationDialog = false;
+            this.showPracticeDialog = false;
+            this.practiceAnswer = '';
+            this.practiceResult = null;
         },
         
         markCard: function(card, status) {

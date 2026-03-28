@@ -44,6 +44,7 @@
                         <div class="progress-fill" :style="{width: overallProgress + '%'}"></div>
                     </div>
                 </div>
+                <button class="btn-secondary" @click="showSettings">⚙️ 设置</button>
                 <button class="btn-secondary" @click="resetDatabase">重置数据</button>
             </div>
         </header>
@@ -65,12 +66,13 @@
                     </div>
                 </nav>
                 <div class="mobile-menu-footer">
+                    <button class="btn-secondary btn-block" @click.stop="showSettings">⚙️ 系统设置</button>
                     <button class="btn-secondary btn-block" @click.stop="resetDatabase">重置数据</button>
                 </div>
             </div>
         </div>
 
-        <div class="main-container">
+        <div class="main-container" :class="fontSizeClass">
             <!-- 桌面端侧边栏 -->
             <aside class="sidebar" v-if="!isMobile">
                 <nav class="nav-menu">
@@ -542,7 +544,7 @@
                 <div v-if="currentTab === 'mistakes'" class="module">
                     <div class="module-header">
                         <h2>❌ 错题本</h2>
-                        <button class="btn-secondary" @click="clearAllMistakes" v-if="mistakeBook.length > 0">清空错题本</button>
+                        <button class="btn-secondary" @click="clearMistakes" v-if="mistakeBook.length > 0">清空错题本</button>
                     </div>
                     
                     <div v-if="mistakeBook.length === 0" class="empty-state">
@@ -765,6 +767,44 @@
                 <div class="dialog-footer">
                     <button class="btn-secondary" @click="showPlanDialog = false">取消</button>
                     <button class="btn-primary" @click="createPlan">确定</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 系统设置弹窗 -->
+        <div v-if="showSettingsDialog" class="dialog-overlay" @click.self="closeSettings">
+            <div class="dialog settings-dialog">
+                <div class="dialog-header">
+                    <h3>⚙️ 系统设置</h3>
+                    <button class="btn-close" @click="closeSettings">×</button>
+                </div>
+                <div class="dialog-body">
+                    <div class="settings-section">
+                        <h4>字号大小</h4>
+                        <div class="font-size-options">
+                            <button 
+                                :class="['font-size-btn', {active: settings.fontSize === 'small'}]"
+                                @click="changeFontSize('small')"
+                            >
+                                <span class="font-size-preview small">小</span>
+                            </button>
+                            <button 
+                                :class="['font-size-btn', {active: settings.fontSize === 'medium'}]"
+                                @click="changeFontSize('medium')"
+                            >
+                                <span class="font-size-preview medium">中</span>
+                            </button>
+                            <button 
+                                :class="['font-size-btn', {active: settings.fontSize === 'large'}]"
+                                @click="changeFontSize('large')"
+                            >
+                                <span class="font-size-preview large">大</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="dialog-footer">
+                    <button class="btn-primary" @click="closeSettings">确定</button>
                 </div>
             </div>
         </div>

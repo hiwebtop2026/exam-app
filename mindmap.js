@@ -330,5 +330,4 @@ window.downloadMindMap = function() {
     }
 };
 
-// 导出
-window.MindMapGenerator = MindMapGenerator;
+// 全局变量已在文件顶部定义

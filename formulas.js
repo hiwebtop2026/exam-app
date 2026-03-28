@@ -275,6 +275,4 @@ const flashcardsData = [
     }
 ];
 
-// 导出数据
-window.formulasData = formulasData;
-window.flashcardsData = flashcardsData;
+// 全局变量已在文件顶部定义

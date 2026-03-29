@@ -562,6 +562,164 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- 案例分析模板模块 -->
+                <div v-if="currentTab === 'caseAnalysis'" class="module">
+                    <div class="module-header">
+                        <h2>📋 案例分析答题模板</h2>
+                    </div>
+                    
+                    <!-- 题型分类 -->
+                    <div class="case-analysis-section">
+                        <h3>题型分类</h3>
+                        <div class="question-types-grid">
+                            <div v-for="type in caseAnalysisData.questionTypes" :key="type.id" class="question-type-card">
+                                <h4>{{ type.name }}</h4>
+                                <p>{{ type.desc }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 通用答题模板 -->
+                    <div class="case-analysis-section">
+                        <h3>通用答题模板</h3>
+                        <div class="template-tabs">
+                            <button v-for="template in caseAnalysisData.generalTemplates" :key="template.id"
+                                    :class="['template-tab', {active: currentTemplate === template.id}]"
+                                    @click="selectTemplate(template.id)">
+                                {{ template.name }}
+                            </button>
+                        </div>
+                        <div v-if="currentTemplateData" class="template-content">
+                            <div class="template-format">
+                                <h4>答题格式</h4>
+                                <pre>{{ currentTemplateData.format }}</pre>
+                            </div>
+                            <div class="template-example">
+                                <h4>示例答案</h4>
+                                <pre>{{ currentTemplateData.example }}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 知识领域常见问题 -->
+                    <div class="case-analysis-section">
+                        <h3>各知识领域常见问题</h3>
+                        <div class="knowledge-areas-grid">
+                            <div v-for="(area, key) in caseAnalysisData.knowledgeAreaProblems" :key="key" class="knowledge-area-card">
+                                <div class="area-header" @click="toggleArea(key)">
+                                    <span class="area-icon">{{ area.icon }}</span>
+                                    <span class="area-name">{{ area.name }}</span>
+                                    <span class="expand-icon">{{ expandedAreas[key] ? '▼' : '▶' }}</span>
+                                </div>
+                                <div v-if="expandedAreas[key]" class="area-problems">
+                                    <div v-for="(problem, pKey) in area.problems" :key="pKey" class="problem-category">
+                                        <h5>{{ problem.title }}</h5>
+                                        <ul>
+                                            <li v-for="(item, index) in problem.items" :key="index">{{ item }}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 计算题模板 -->
+                    <div class="case-analysis-section">
+                        <h3>计算题模板</h3>
+                        <div class="calculation-types">
+                            <button v-for="(calc, key) in caseAnalysisData.calculationTemplates" :key="key"
+                                    :class="['calc-tab', {active: currentCalcTemplate === key}]"
+                                    @click="selectCalcTemplate(key)">
+                                <span class="calc-icon">{{ calc.icon }}</span>
+                                <span class="calc-name">{{ calc.name }}</span>
+                            </button>
+                        </div>
+                        <div v-if="currentCalcTemplateData" class="calculation-content">
+                            <div class="formulas-section">
+                                <h4>常用公式</h4>
+                                <div class="formulas-list">
+                                    <div v-for="(formula, index) in currentCalcTemplateData.formulas" :key="index" class="formula-item">
+                                        <div class="formula-name">{{ formula.name }}</div>
+                                        <div class="formula-expr">{{ formula.formula }}</div>
+                                        <div class="formula-desc">{{ formula.desc }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="steps-section">
+                                <h4>答题步骤</h4>
+                                <ol>
+                                    <li v-for="(step, index) in currentCalcTemplateData.steps" :key="index">{{ step }}</li>
+                                </ol>
+                            </div>
+                            <div class="example-section">
+                                <h4>{{ currentCalcTemplateData.example.title }}</h4>
+                                <pre>{{ currentCalcTemplateData.example.content }}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 综合分析框架 -->
+                    <div class="case-analysis-section">
+                        <h3>综合分析框架</h3>
+                        <div class="framework-steps">
+                            <div v-for="(step, index) in caseAnalysisData.comprehensiveFramework.steps" :key="index" class="framework-step">
+                                <div class="step-number">{{ index + 1 }}</div>
+                                <div class="step-content">
+                                    <h4>{{ step.title }}</h4>
+                                    <p class="step-desc">{{ step.desc }}</p>
+                                    <ul>
+                                        <li v-for="(point, pIndex) in step.points" :key="pIndex">{{ point }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 案例类型快速识别 -->
+                    <div class="case-analysis-section">
+                        <h3>案例类型快速识别</h3>
+                        <div class="case-recognition-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>案例特征</th>
+                                        <th>涉及知识领域</th>
+                                        <th>关键答题要点</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(item, index) in caseAnalysisData.caseTypeRecognition" :key="index">
+                                        <td>{{ item.feature }}</td>
+                                        <td>{{ item.areas }}</td>
+                                        <td>{{ item.keyPoints }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 答题技巧 -->
+                    <div class="case-analysis-section">
+                        <h3>答题技巧</h3>
+                        <div class="tips-container">
+                            <div class="tips-must-do">
+                                <h4>✅ 必须做到</h4>
+                                <ul>
+                                    <li v-for="(tip, index) in caseAnalysisData.answeringTips.mustDo" :key="index">
+                                        <strong>{{ tip.title }}：</strong>{{ tip.desc }}
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="tips-avoid">
+                                <h4>❌ 避免错误</h4>
+                                <ul>
+                                    <li v-for="(item, index) in caseAnalysisData.answeringTips.avoid" :key="index">{{ item }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
 
@@ -802,6 +960,7 @@
     <script src="chapters.js"></script>
     <script src="formulas.js"></script>
     <script src="mindmap.js"></script>
+    <script src="case_templates.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

@@ -48,7 +48,8 @@ new Vue({
             { id: 'practice', icon: '✍️', text: '真题练习', shortText: '练习' },
             { id: 'review', icon: '🚀', text: '冲刺复习', shortText: '复习' },
             { id: 'exam', icon: '📊', text: '模拟考试', shortText: '考试' },
-            { id: 'mistakes', icon: '❌', text: '错题本', shortText: '错题' }
+            { id: 'mistakes', icon: '❌', text: '错题本', shortText: '错题' },
+            { id: 'caseAnalysis', icon: '📋', text: '案例模板', shortText: '案例' }
         ],
         
         showMobileMenu: false,
@@ -147,7 +148,13 @@ new Vue({
         settings: {
             fontSize: 'large' // small, medium, large
         },
-        showSettingsDialog: false
+        showSettingsDialog: false,
+        
+        // 案例分析模板数据
+        caseAnalysisData: window.caseAnalysisTemplates || {},
+        currentTemplate: 'template_find_error',
+        currentCalcTemplate: 'earned_value',
+        expandedAreas: {}
     },
     
     computed: {
@@ -253,6 +260,17 @@ new Vue({
         
         fontSizeClass: function() {
             return 'font-size-' + this.settings.fontSize;
+        },
+        
+        // 案例分析模板计算属性
+        currentTemplateData: function() {
+            var templates = this.caseAnalysisData.generalTemplates || [];
+            return templates.find(function(t) { return t.id === this.currentTemplate; }.bind(this));
+        },
+        
+        currentCalcTemplateData: function() {
+            var templates = this.caseAnalysisData.calculationTemplates || {};
+            return templates[this.currentCalcTemplate];
         }
     },
     
@@ -1414,6 +1432,19 @@ new Vue({
         
         closeSettings: function() {
             this.showSettingsDialog = false;
+        },
+        
+        // 案例分析模板方法
+        selectTemplate: function(templateId) {
+            this.currentTemplate = templateId;
+        },
+        
+        selectCalcTemplate: function(templateKey) {
+            this.currentCalcTemplate = templateKey;
+        },
+        
+        toggleArea: function(areaKey) {
+            this.$set(this.expandedAreas, areaKey, !this.expandedAreas[areaKey]);
         },
         
         // 加载系统设置

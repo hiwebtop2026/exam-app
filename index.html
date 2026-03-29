@@ -9,7 +9,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="theme-color" content="#667eea">
     <title>系统集成项目管理工程师备考系统</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=3">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
 </head>
 <body>
@@ -720,6 +720,105 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- 教材课后习题模块 -->
+                <div v-if="currentTab === 'textbook'" class="module">
+                    <div class="module-header">
+                        <h2>📖 教材课后习题</h2>
+                    </div>
+                    
+                    <!-- 题目类型切换 -->
+                    <div class="tab-container">
+                        <button :class="['tab-btn', {active: textbookTab === 'single'}]" @click="textbookTab = 'single'">单选题</button>
+                        <button :class="['tab-btn', {active: textbookTab === 'short'}]" @click="textbookTab = 'short'">简答题</button>
+                    </div>
+                    
+                    <!-- 章节选择和学习按钮 -->
+                    <div class="textbook-actions">
+                        <div class="chapter-selector">
+                            <label>选择章节：</label>
+                            <select v-model="selectedTextbookChapter" class="form-input">
+                                <option v-for="chapter in textbookChapters" :key="chapter.id" :value="chapter.id">{{ chapter.name }}</option>
+                            </select>
+                        </div>
+                        <button v-if="textbookTab === 'single'" class="btn-primary" @click="startTextbookTest" :disabled="!selectedTextbookChapter && textbookChapters.length > 0">📝 开始测试</button>
+                        <button v-else class="btn-primary" @click="startTextbookLearning" :disabled="!selectedTextbookChapter && textbookChapters.length > 0">🎯 开始学习</button>
+                    </div>
+                    
+                    <div class="textbook-chapters">
+                        <div v-for="chapter in textbookChapters.filter(c => c.id === selectedTextbookChapter)" :key="chapter.id" class="chapter-card">
+                            <div class="chapter-header" @click="toggleTextbookChapter(chapter.id)">
+                                <h3>{{ chapter.name }}</h3>
+                                <span class="chapter-questions">{{ chapter.questions.filter(q => q.type === textbookTab).length }} 题</span>
+                                <span v-if="textbookTab === 'single' && textbookSubmitted" class="chapter-score">得分: {{ textbookScore }}/{{ chapter.questions.filter(q => q.type === 'single').length }}</span>
+                                <span class="expand-icon">{{ expandedTextbookChapters[chapter.id] ? '▼' : '▶' }}</span>
+                            </div>
+                            <div v-if="expandedTextbookChapters[chapter.id]" class="chapter-questions-list">
+                                <!-- 单选题答题模式 -->
+                                <div v-if="textbookTab === 'single'">
+                                    <div v-for="question in chapter.questions.filter(q => q.type === textbookTab)" :key="question.id" class="question-item">
+                                        <div class="question-header">
+                                            <span class="question-number">第{{ question.questionNumber }}题</span>
+                                            <span class="question-type" :class="question.type">单选题</span>
+                                        </div>
+                                        <div class="question-content">
+                                            <p style="white-space: pre-wrap;">{{ question.question }}</p>
+                                            <div v-if="question.options && question.options.length > 0" class="options">
+                                                <div v-for="option in question.options" 
+                                                     :key="option.label"
+                                                     :class="['option', { 
+                                                         selected: textbookAnswers[question.id] === option.label,
+                                                         correct: textbookSubmitted && option.label === question.answer,
+                                                         wrong: textbookSubmitted && textbookAnswers[question.id] === option.label && option.label !== question.answer
+                                                     }]"
+                                                     @click="!textbookSubmitted && $set(textbookAnswers, question.id, option.label)">
+                                                    <span class="option-label">{{ option.label }}</span>
+                                                    <span class="option-text">{{ option.text }}</span>
+                                                </div>
+                                            </div>
+                                            <!-- 交卷后显示答案和解析 -->
+                                            <div v-if="textbookSubmitted" class="answer-explanation">
+                                                <div class="correct-answer">
+                                                    <strong>正确答案：</strong>{{ question.answer }}
+                                                </div>
+                                                <div v-if="question.explanation" class="explanation">
+                                                    <strong>解析：</strong>
+                                                    <p style="white-space: pre-wrap;">{{ question.explanation }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- 交卷和重置按钮 -->
+                                    <div class="textbook-actions" style="margin-top: 20px;">
+                                        <button v-if="!textbookSubmitted" class="btn-primary" @click="submitTextbookAnswers">📝 交卷</button>
+                                        <button v-if="textbookSubmitted" class="btn-primary" @click="resetTextbookAnswers">🔄 重新答题</button>
+                                    </div>
+                                </div>
+                                <!-- 简答题显示模式 -->
+                                <div v-else>
+                                    <div v-for="question in chapter.questions.filter(q => q.type === textbookTab)" :key="question.id" class="question-item">
+                                        <div class="question-header">
+                                            <span class="question-number">第{{ question.questionNumber }}题</span>
+                                            <span class="question-type" :class="question.type">简答题</span>
+                                        </div>
+                                        <div class="question-content">
+                                            <p style="white-space: pre-wrap;">{{ question.question }}</p>
+                                            <div v-if="question.options && question.options.length > 0" class="options">
+                                                <div v-for="option in question.options" :key="option.label" class="option">
+                                                    <span class="option-label">{{ option.label }}</span>
+                                                    <span class="option-text">{{ option.text }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="question-actions">
+                                            <button class="btn-primary" @click="startTextbookPractice(question)">开始练习</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
 
@@ -956,11 +1055,11 @@
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
     <script src="db.js"></script>
-    <script src="questions.js"></script>
+    <script src="questions.js?v=7"></script>
     <script src="chapters.js"></script>
     <script src="formulas.js"></script>
     <script src="mindmap.js"></script>
     <script src="case_templates.js"></script>
-    <script src="app.js"></script>
+    <script src="app.js?v=9"></script>
 </body>
 </html>

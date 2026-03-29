@@ -46,6 +46,7 @@ new Vue({
             { id: 'keypoints', icon: '📚', text: '学习重点', shortText: '学习' },
             { id: 'notes', icon: '📝', text: '学习笔记', shortText: '笔记' },
             { id: 'practice', icon: '✍️', text: '真题练习', shortText: '练习' },
+            { id: 'textbook', icon: '📖', text: '教材习题', shortText: '教材' },
             { id: 'review', icon: '🚀', text: '冲刺复习', shortText: '复习' },
             { id: 'exam', icon: '📊', text: '模拟考试', shortText: '考试' },
             { id: 'mistakes', icon: '❌', text: '错题本', shortText: '错题' },
@@ -154,7 +155,17 @@ new Vue({
         caseAnalysisData: window.caseAnalysisTemplates || {},
         currentTemplate: 'template_find_error',
         currentCalcTemplate: 'earned_value',
-        expandedAreas: {}
+        expandedAreas: {},
+        
+        // 教材课后习题数据
+        textbookChapters: [],
+        expandedTextbookChapters: {},
+        textbookTab: 'single',
+        selectedTextbookChapter: 'chapter1',
+        // 教材习题答题状态
+        textbookAnswers: {}, // 存储用户答案 { questionId: answer }
+        textbookSubmitted: false, // 是否已交卷
+        textbookScore: 0 // 得分
     },
     
     computed: {
@@ -271,6 +282,17 @@ new Vue({
         currentCalcTemplateData: function() {
             var templates = this.caseAnalysisData.calculationTemplates || {};
             return templates[this.currentCalcTemplate];
+        },
+        
+        // 过滤教材课后习题
+        filteredTextbookQuestions: function() {
+            var self = this;
+            return function(questions) {
+                if (!questions) return [];
+                return questions.filter(function(question) {
+                    return question.type === self.textbookTab;
+                });
+            };
         }
     },
     
@@ -326,7 +348,8 @@ new Vue({
                     self.loadQuestions(),
                     self.loadFormulas(),
                     self.loadFlashcards(),
-                    self.loadMistakes()
+                    self.loadMistakes(),
+                    self.loadTextbookExercises()
                 ]);
                 console.log('静态数据加载完成');
                 console.log('错题本数据加载完成，共', self.mistakeBook.length, '条');
@@ -489,6 +512,193 @@ new Vue({
         
         loadMistakes: async function() {
             this.mistakeBook = await db.getMistakes();
+        },
+        
+        // 加载教材课后习题数据
+        loadTextbookExercises: function() {
+            console.log('loadTextbookExercises 被调用');
+            console.log('window.textbookExercisesData 是否存在:', !!window.textbookExercisesData);
+            if (window.textbookExercisesData) {
+                console.log('window.textbookExercisesData 长度:', window.textbookExercisesData.length);
+                this.textbookChapters = window.textbookExercisesData;
+                console.log('this.textbookChapters 已设置，长度:', this.textbookChapters.length);
+                // 默认展开第一个章节
+                if (this.textbookChapters.length > 0) {
+                    this.expandedTextbookChapters[this.textbookChapters[0].id] = true;
+                }
+            } else {
+                console.error('window.textbookExercisesData 未找到!');
+            }
+            return Promise.resolve();
+        },
+        
+        // 切换教材章节的展开/折叠状态
+        toggleTextbookChapter: function(chapterId) {
+            this.expandedTextbookChapters[chapterId] = !this.expandedTextbookChapters[chapterId];
+        },
+        
+        // 开始教材习题练习
+        startTextbookPractice: function(question) {
+            console.log('开始教材习题练习:', question.id);
+            this.currentPracticeQuestion = question;
+            this.showPracticeDialog = true;
+            this.practiceAnswer = '';
+            this.practiceResult = null;
+        },
+        
+        // 开始教材习题学习（随机生成题目）
+        startTextbookLearning: function() {
+            if (!this.selectedTextbookChapter) {
+                alert('请选择一个章节');
+                return;
+            }
+            
+            // 找到选中的章节
+            var selectedChapter = this.textbookChapters.find(function(chapter) {
+                return chapter.id === this.selectedTextbookChapter;
+            }.bind(this));
+            
+            if (!selectedChapter || !selectedChapter.questions || selectedChapter.questions.length === 0) {
+                alert('所选章节没有题目');
+                return;
+            }
+            
+            // 随机选择一个题目
+            var randomIndex = Math.floor(Math.random() * selectedChapter.questions.length);
+            var randomQuestion = selectedChapter.questions[randomIndex];
+            
+            // 开始练习
+            this.startTextbookPractice(randomQuestion);
+        },
+        
+        // 开始教材习题测试模式（单选题）
+        startTextbookTest: function() {
+            if (!this.selectedTextbookChapter) {
+                alert('请选择一个章节');
+                return;
+            }
+            
+            // 找到选中的章节
+            var selectedChapter = this.textbookChapters.find(function(chapter) {
+                return chapter.id === this.selectedTextbookChapter;
+            }.bind(this));
+            
+            if (!selectedChapter || !selectedChapter.questions || selectedChapter.questions.length === 0) {
+                alert('所选章节没有题目');
+                return;
+            }
+            
+            // 检查是否有单选题
+            var singleChoiceQuestions = selectedChapter.questions.filter(function(q) {
+                return q.type === 'single';
+            });
+            
+            if (singleChoiceQuestions.length === 0) {
+                alert('该章节没有单选题');
+                return;
+            }
+            
+            // 重置答题状态
+            this.resetTextbookAnswers();
+            
+            // 展开章节
+            this.expandedTextbookChapters[this.selectedTextbookChapter] = true;
+            
+            // 滚动到题目区域
+            this.$nextTick(function() {
+                var chapterElement = document.querySelector('.textbook-chapters');
+                if (chapterElement) {
+                    chapterElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        },
+        
+        // 提交教材习题答案
+        submitTextbookAnswers: function() {
+            var self = this;
+            var selectedChapter = this.textbookChapters.find(function(chapter) {
+                return chapter.id === this.selectedTextbookChapter;
+            }.bind(this));
+            
+            if (!selectedChapter) {
+                alert('请选择一个章节');
+                return;
+            }
+            
+            var singleChoiceQuestions = selectedChapter.questions.filter(function(q) {
+                return q.type === 'single';
+            });
+            
+            if (singleChoiceQuestions.length === 0) {
+                alert('该章节没有单选题');
+                return;
+            }
+            
+            // 检查是否所有题目都已作答
+            var unanswered = singleChoiceQuestions.filter(function(q) {
+                return !this.textbookAnswers[q.id];
+            }.bind(this));
+            
+            if (unanswered.length > 0) {
+                if (!confirm('还有 ' + unanswered.length + ' 道题未作答，确定要交卷吗？')) {
+                    return;
+                }
+            }
+            
+            // 计算得分并收集错题
+            var correctCount = 0;
+            var wrongQuestions = [];
+            singleChoiceQuestions.forEach(function(q) {
+                if (this.textbookAnswers[q.id] === q.answer) {
+                    correctCount++;
+                } else {
+                    wrongQuestions.push(q);
+                }
+            }.bind(this));
+            
+            this.textbookScore = correctCount;
+            this.textbookSubmitted = true;
+            
+            // 自动将答错的题目加入错题本
+            if (wrongQuestions.length > 0) {
+                wrongQuestions.forEach(function(q) {
+                    // 检查是否已在错题本中
+                    var existingMistakeIndex = self.mistakeBook.findIndex(function(m) {
+                        return m.questionId === q.id;
+                    });
+                    
+                    if (existingMistakeIndex === -1) {
+                        // 不在错题本中，添加
+                        var mistake = {
+                            questionId: q.id,
+                            question: q.question,
+                            options: q.options,
+                            correctAnswer: q.answer,
+                            userAnswer: self.textbookAnswers[q.id] || '未作答',
+                            explanation: q.explanation,
+                            chapterName: q.chapterName,
+                            type: 'textbook',
+                            timestamp: new Date().toISOString()
+                        };
+                        db.addMistake(mistake).then(function(id) {
+                            mistake.id = id;
+                            self.mistakeBook.unshift(mistake);
+                        }).catch(function(error) {
+                            console.error('添加错题失败:', error);
+                        });
+                    }
+                });
+            }
+            
+            alert('交卷成功！您答对了 ' + correctCount + '/' + singleChoiceQuestions.length + ' 题' + 
+                  (wrongQuestions.length > 0 ? '，答错的 ' + wrongQuestions.length + ' 道题已自动加入错题本' : ''));
+        },
+        
+        // 重置教材习题答题
+        resetTextbookAnswers: function() {
+            this.textbookAnswers = {};
+            this.textbookSubmitted = false;
+            this.textbookScore = 0;
         },
         
         loadProgress: async function() {
@@ -930,13 +1140,41 @@ new Vue({
             }
             
             // 随机抽取下一道题目
-            if (this.questions && this.questions.length > 0) {
-                const randomIndex = Math.floor(Math.random() * this.questions.length);
-                this.currentPracticeQuestion = JSON.parse(JSON.stringify(this.questions[randomIndex]));
-                this.practiceAnswer = '';
-                this.practiceResult = null;
+            if (this.currentPracticeQuestion) {
+                // 检查是否是教材习题
+                if (this.currentPracticeQuestion.id && this.currentPracticeQuestion.id.startsWith('textbook_')) {
+                    // 对于教材习题，只在当前章节中选择题目
+                    const currentChapter = this.currentPracticeQuestion.chapterName;
+                    let currentChapterQuestions = [];
+                    
+                    // 从textbookChapters中找到当前章节的题目
+                    this.textbookChapters.forEach(function(chapter) {
+                        if (chapter.name === currentChapter) {
+                            currentChapterQuestions = chapter.questions;
+                        }
+                    });
+                    
+                    if (currentChapterQuestions && currentChapterQuestions.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * currentChapterQuestions.length);
+                        this.currentPracticeQuestion = JSON.parse(JSON.stringify(currentChapterQuestions[randomIndex]));
+                        this.practiceAnswer = '';
+                        this.practiceResult = null;
+                    } else {
+                        console.warn('当前章节题库为空，无法自动跳转');
+                    }
+                } else {
+                    // 对于真题练习，从所有题目中选择
+                    if (this.questions && this.questions.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * this.questions.length);
+                        this.currentPracticeQuestion = JSON.parse(JSON.stringify(this.questions[randomIndex]));
+                        this.practiceAnswer = '';
+                        this.practiceResult = null;
+                    } else {
+                        console.warn('题库为空，无法自动跳转');
+                    }
+                }
             } else {
-                console.warn('题库为空，无法自动跳转');
+                console.warn('当前没有练习题目，无法自动跳转');
             }
         },
         
@@ -1315,6 +1553,7 @@ new Vue({
                 userAnswer: question.selected || '未作答',
                 correctAnswer: question.answer,
                 explanation: question.explanation,
+                options: question.options, // 保存选项数据
                 date: new Date().toLocaleDateString('zh-CN')
             };
             
@@ -1346,7 +1585,7 @@ new Vue({
             if (question) {
                 this.startPractice(question);
             } else {
-                // 如果找不到原题，创建一个模拟题目
+                // 如果找不到原题，使用错题中保存的数据创建模拟题目
                 var mockQuestion = {
                     id: mistake.questionId || 'mock-' + Date.now(),
                     year: new Date().getFullYear(),
@@ -1355,7 +1594,7 @@ new Vue({
                     chapterName: mistake.chapterName || '未知章节',
                     title: '错题复习',
                     question: mistake.question,
-                    options: [
+                    options: mistake.options || [
                         { label: 'A', text: '选项A' },
                         { label: 'B', text: '选项B' },
                         { label: 'C', text: '选项C' },
@@ -1641,6 +1880,23 @@ new Vue({
             } else {
                 this.showLearningDialog = false;
             }
+        }
+    },
+    
+    watch: {
+        // 监听教材章节选择变化
+        selectedTextbookChapter: function(newChapterId, oldChapterId) {
+            console.log('选中章节变化:', oldChapterId, '→', newChapterId);
+            // 自动展开新选中的章节
+            this.expandedTextbookChapters = {};
+            this.expandedTextbookChapters[newChapterId] = true;
+            // 重置答题状态
+            this.resetTextbookAnswers();
+        },
+        // 监听题型切换
+        textbookTab: function() {
+            // 重置答题状态
+            this.resetTextbookAnswers();
         }
     },
     

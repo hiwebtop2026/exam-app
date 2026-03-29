@@ -2871,3 +2871,61 @@ body {
     color: #ef4444;
 }
 
+
+
+/* 案例分析答题模板样式 - 修复文字溢出问题 */
+
+.case-analysis-section {
+    overflow: hidden;
+}
+
+/* 修复文字溢出 */
+pre, code {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-x: auto;
+    max-height: 400px;
+}
+
+/* 修复表格文字溢出 */
+.case-recognition-table {
+    overflow-x: auto;
+}
+
+.case-recognition-table table {
+    word-wrap: break-word;
+}
+
+.case-recognition-table td {
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+/* 修复容器溢出 */
+.template-content,
+.calculation-content,
+.area-problems {
+    overflow: hidden;
+}
+
+/* 修复标题文字溢出 */
+h3, h4, h5 {
+    word-wrap: break-word;
+}
+
+/* 修复列表文字溢出 */
+li {
+    word-wrap: break-word;
+}
+
+/* 修复标签页文字溢出 */
+.template-tab,
+.calc-tab {
+    word-wrap: break-word;
+}
+
+/* 修复知识领域标题溢出 */
+.area-name {
+    word-wrap: break-word;
+}
+

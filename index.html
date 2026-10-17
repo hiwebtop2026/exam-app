@@ -294,6 +294,215 @@
                     </div>
                 </div>
 
+                <!-- 考点冲刺模块（选择题考点冲刺手册 1-7章 + 9-15章） -->
+                <div v-if="currentTab === 'sprint'" class="module">
+                    <!-- 总览页 -->
+                    <div v-if="sprintView === 'overview'" class="sprint-overview">
+                        <div class="sprint-hero">
+                            <div class="sprint-hero-badge">2026.10 考前冲刺</div>
+                            <h2>🎯 选择题考点冲刺手册</h2>
+                            <p>依据《26.10集成1-17章速记卡片（羽仪老师）》全面提炼，覆盖1-7章技术篇与9-15章管理篇全部选择题题眼</p>
+                        </div>
+
+                        <!-- 统计卡片 -->
+                        <div class="sprint-stats-grid">
+                            <div class="sprint-stat-card">
+                                <div class="sprint-stat-value">{{ sprintTotalStats.kps }}</div>
+                                <div class="sprint-stat-label">核心考点</div>
+                            </div>
+                            <div class="sprint-stat-card">
+                                <div class="sprint-stat-value">{{ sprintTotalStats.chapters }}</div>
+                                <div class="sprint-stat-label">章节 · 附录</div>
+                            </div>
+                            <div class="sprint-stat-card">
+                                <div class="sprint-stat-value">{{ sprintTotalStats.tables }}</div>
+                                <div class="sprint-stat-label">对比表格</div>
+                            </div>
+                            <div class="sprint-stat-card">
+                                <div class="sprint-stat-value">{{ sprintTotalStats.mnemonics + sprintTotalStats.traps }}</div>
+                                <div class="sprint-stat-label">口诀 · 易错</div>
+                            </div>
+                            <div class="sprint-stat-card sprint-stat-mark">
+                                <div class="sprint-stat-value">{{ sprintMarkedCount }}</div>
+                                <div class="sprint-stat-label">⭐ 重点标记</div>
+                            </div>
+                        </div>
+
+                        <!-- 部分切换 -->
+                        <div class="sprint-part-tabs">
+                            <button v-for="part in sprintParts"
+                                    :key="part.id"
+                                    :class="['sprint-part-tab', {active: sprintPartId === part.id}]"
+                                    @click="switchSprintPart(part.id)">
+                                <span class="sprint-part-icon">{{ part.icon }}</span>
+                                <span class="sprint-part-text">{{ part.title }}</span>
+                            </button>
+                        </div>
+
+                        <!-- 章节卡片网格 -->
+                        <h3 class="sprint-block-title">📖 章节考点</h3>
+                        <div class="sprint-chapter-grid">
+                            <div v-for="card in sprintChapterCards"
+                                 :key="card.id"
+                                 class="sprint-chapter-card"
+                                 @click="openSprintChapter(currentSprintPart.chapters.find(function(c){return c.id === card.id}))">
+                                <div class="sprint-ch-top">
+                                    <span class="sprint-ch-num">CH{{ card.num }}</span>
+                                    <span v-if="card.highCount > 0" class="sprint-ch-hot">{{ card.highCount }}个高频</span>
+                                </div>
+                                <h4>{{ card.title }}</h4>
+                                <div class="sprint-ch-en">{{ card.en }}</div>
+                                <div class="sprint-ch-meta">
+                                    <span>📌 {{ card.kpCount }} 考点</span>
+                                    <span>📑 {{ card.sectionCount }} 分区</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 附录卡片 -->
+                        <h3 class="sprint-block-title">🗂️ 附录速记</h3>
+                        <div class="sprint-appendix-grid" v-if="currentSprintPart && currentSprintPart.appendices.length">
+                            <div v-for="ap in currentSprintPart.appendices"
+                                 :key="ap.id"
+                                 class="sprint-appendix-card"
+                                 @click="openSprintAppendix(ap)">
+                                <span class="sprint-ap-badge">{{ ap.num }}</span>
+                                <div class="sprint-ap-text">
+                                    <h4>{{ ap.title }}</h4>
+                                    <div class="sprint-ch-en">{{ ap.en }}</div>
+                                </div>
+                                <span class="sprint-ap-arrow">→</span>
+                            </div>
+                        </div>
+
+                        <!-- 使用说明 -->
+                        <div class="sprint-howto">
+                            <h3>📌 使用说明</h3>
+                            <div class="sprint-howto-grid">
+                                <div class="sprint-howto-item"><b>概念关键词题</b>锁定红色题眼，命题人最爱在限定词上偷换</div>
+                                <div class="sprint-howto-item"><b>归属分类题</b>蓝色标注分类归属，重点记“最/核心/基础/前提”</div>
+                                <div class="sprint-howto-item"><b>对应匹配题</b>层次↔设备、模型↔工具，全部以表格成对呈现</div>
+                                <div class="sprint-howto-item"><b>数字排序题</b>距离、百分比、等级顺序见金色口诀框与附录数字表</div>
+                            </div>
+                            <div class="sprint-howto-tags">
+                                <span class="hb-freq f5">高频</span> 近五年反复出现
+                                <span class="hb-freq f4">中频</span> 轮换考查
+                                <span class="hb-freq f3">基础</span> 理解打底
+                                <span class="hb-box-tag trap">易错</span> 命题人常设陷阱
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 章节详情页 -->
+                    <div v-if="sprintView === 'chapter' && currentSprintChapter" class="sprint-detail">
+                        <div class="sprint-detail-bar">
+                            <button class="btn-secondary sprint-back-btn" @click="backSprintOverview">← 返回总览</button>
+                            <div class="sprint-detail-title">
+                                <span class="sprint-detail-num">{{ currentSprintChapter.num }}</span>
+                                <div>
+                                    <h2>{{ currentSprintChapter.title }}</h2>
+                                    <div class="sprint-ch-en">{{ currentSprintChapter.en }}</div>
+                                </div>
+                            </div>
+                            <button class="btn-secondary" @click="toggleSprintAll">{{ sprintAllExpanded ? '📕 全部收起' : '📖 全部展开' }}</button>
+                        </div>
+
+                        <div class="sprint-toolbar">
+                            <input v-model="sprintSearch"
+                                   placeholder="🔍 搜索考点（标题 / 内容 / 编号）..."
+                                   class="sprint-search-input" />
+                            <div class="sprint-freq-filter">
+                                <button :class="['sprint-freq-btn', {active: sprintFreqFilter === 'all'}]"
+                                        @click="sprintFreqFilter = 'all'">全部</button>
+                                <button :class="['sprint-freq-btn f5', {active: sprintFreqFilter === '5'}]"
+                                        @click="sprintFreqFilter = '5'">高频</button>
+                                <button :class="['sprint-freq-btn f4', {active: sprintFreqFilter === '4'}]"
+                                        @click="sprintFreqFilter = '4'">中频</button>
+                                <button :class="['sprint-freq-btn f3', {active: sprintFreqFilter === '3'}]"
+                                        @click="sprintFreqFilter = '3'">基础</button>
+                            </div>
+                            <button :class="['btn-secondary', 'sprint-mark-only-btn', {active: sprintFreqFilter === 'marked'}]"
+                                    @click="sprintFreqFilter = (sprintFreqFilter === 'marked' ? 'all' : 'marked')">
+                                ⭐ 只看重点
+                            </button>
+                        </div>
+
+                        <div v-for="sec in filteredSprintSections"
+                             :key="sec.title || 'main'"
+                             class="sprint-section-block">
+                            <h3 v-if="sec.title" class="sprint-block-title">{{ sec.title }}</h3>
+                            <div v-if="sec.html" class="hb-content hb-appendix-block" v-html="sec.html"></div>
+                            <div v-if="sec.points.length" class="sprint-point-grid">
+                                <div v-for="p in sec.points"
+                                     :key="p.id"
+                                     :class="['sprint-point-card', {marked: isSprintMarked(p)}]">
+                                    <div class="sprint-point-head" @click="toggleSprintPoint(p)">
+                                        <span class="hb-kpid">{{ p.id }}</span>
+                                        <span class="sprint-point-title">{{ p.title }}</span>
+                                        <span :class="['hb-freq', 'f' + p.freq]">{{ p.freqText }}</span>
+                                        <span class="sprint-point-toggle">{{ isSprintPointExpanded(p) ? '▾' : '▸' }}</span>
+                                    </div>
+                                    <button class="sprint-mark-btn"
+                                            :class="{active: isSprintMarked(p)}"
+                                            :title="isSprintMarked(p) ? '取消重点标记' : '标记为重点'"
+                                            @click.stop="toggleSprintMark(p)">{{ isSprintMarked(p) ? '⭐' : '☆' }}</button>
+                                    <div v-show="isSprintPointExpanded(p)" class="hb-content sprint-point-body" v-html="p.html"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div v-if="filteredSprintSections.length === 0" class="sprint-empty">
+                            <p>🔍 未找到匹配的考点</p>
+                            <button class="btn-secondary" @click="sprintSearch = ''; sprintFreqFilter = 'all'">清除筛选</button>
+                        </div>
+                    </div>
+
+                    <!-- 附录详情页 -->
+                    <div v-if="sprintView === 'appendix' && currentSprintAppendix" class="sprint-detail">
+                        <div class="sprint-detail-bar">
+                            <button class="btn-secondary sprint-back-btn" @click="backSprintOverview">← 返回总览</button>
+                            <div class="sprint-detail-title">
+                                <span class="sprint-detail-num">{{ currentSprintAppendix.num }}</span>
+                                <div>
+                                    <h2>{{ currentSprintAppendix.title }}</h2>
+                                    <div class="sprint-ch-en">{{ currentSprintAppendix.en }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sprint-toolbar">
+                            <input v-model="sprintSearch"
+                                   placeholder="🔍 搜索速记内容..."
+                                   class="sprint-search-input" />
+                        </div>
+                        <div v-for="sec in filteredSprintAppendixSections"
+                             :key="sec.title || 'main'"
+                             class="sprint-section-block">
+                            <h3 v-if="sec.title" class="sprint-block-title">{{ sec.title }}</h3>
+                            <div v-if="sec.points.length" class="sprint-point-grid">
+                                <div v-for="p in sec.points"
+                                     :key="p.id"
+                                     :class="['sprint-point-card', {marked: isSprintMarked(p)}]">
+                                    <div class="sprint-point-head" @click="toggleSprintPoint(p)">
+                                        <span class="hb-kpid">{{ p.id }}</span>
+                                        <span class="sprint-point-title">{{ p.title }}</span>
+                                        <span :class="['hb-freq', 'f' + p.freq]">{{ p.freqText }}</span>
+                                        <span class="sprint-point-toggle">{{ isSprintPointExpanded(p) ? '▾' : '▸' }}</span>
+                                    </div>
+                                    <button class="sprint-mark-btn"
+                                            :class="{active: isSprintMarked(p)}"
+                                            @click.stop="toggleSprintMark(p)">{{ isSprintMarked(p) ? '⭐' : '☆' }}</button>
+                                    <div v-show="isSprintPointExpanded(p)" class="hb-content sprint-point-body" v-html="p.html"></div>
+                                </div>
+                            </div>
+                            <div v-else class="hb-content hb-appendix-block" v-html="sec.html"></div>
+                        </div>
+                        <div v-if="filteredSprintAppendixSections.length === 0" class="sprint-empty">
+                            <p>🔍 未找到匹配的内容</p>
+                            <button class="btn-secondary" @click="sprintSearch = ''">清除筛选</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 冲刺复习模块 -->
                 <div v-if="currentTab === 'review'" class="module">
                     <div class="review-mode-selector">
@@ -1060,6 +1269,7 @@
     <script src="formulas.js"></script>
     <script src="mindmap.js"></script>
     <script src="case_templates.js"></script>
-    <script src="app.js?v=9"></script>
+    <script src="handbook_data.js?v=2"></script>
+    <script src="app.js?v=11"></script>
 </body>
 </html>

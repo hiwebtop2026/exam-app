@@ -46,6 +46,7 @@ new Vue({
             { id: 'keypoints', icon: '📚', text: '学习重点', shortText: '学习' },
             { id: 'notes', icon: '📝', text: '学习笔记', shortText: '笔记' },
             { id: 'practice', icon: '✍️', text: '真题练习', shortText: '练习' },
+            { id: 'sprint', icon: '🎯', text: '考点冲刺', shortText: '冲刺' },
             { id: 'textbook', icon: '📖', text: '教材习题', shortText: '教材' },
             { id: 'review', icon: '🚀', text: '冲刺复习', shortText: '复习' },
             { id: 'exam', icon: '📊', text: '模拟考试', shortText: '考试' },
@@ -165,7 +166,19 @@ new Vue({
         // 教材习题答题状态
         textbookAnswers: {}, // 存储用户答案 { questionId: answer }
         textbookSubmitted: false, // 是否已交卷
-        textbookScore: 0 // 得分
+        textbookScore: 0, // 得分
+
+        // 考点冲刺（选择题考点冲刺手册 1-7章 + 9-15章）
+        handbookData: window.handbookData || null,
+        sprintView: 'overview',             // overview 总览 / chapter 章节 / appendix 附录
+        sprintPartId: 'part17',             // 当前浏览的部分
+        currentSprintChapter: null,         // 当前章节
+        currentSprintAppendix: null,        // 当前附录
+        sprintSearch: '',                   // 考点搜索关键词
+        sprintFreqFilter: 'all',            // all / 5高频 / 4中频 / 3基础
+        sprintMarks: {},                    // 收藏/重点标记 { pointId: true }
+        sprintExpanded: {},                 // 考点展开状态 { pointId: true }
+        sprintAllExpanded: true             // 是否全部展开
     },
     
     computed: {
@@ -293,6 +306,99 @@ new Vue({
                     return question.type === self.textbookTab;
                 });
             };
+        },
+
+        // ===== 考点冲刺 computed =====
+        sprintParts: function() {
+            return this.handbookData ? this.handbookData.parts : [];
+        },
+
+        currentSprintPart: function() {
+            var self = this;
+            return this.sprintParts.find(function(p) { return p.id === self.sprintPartId; }) || null;
+        },
+
+        sprintTotalStats: function() {
+            var chapters = 0, kps = 0, tables = 0, mnemonics = 0, traps = 0;
+            this.sprintParts.forEach(function(p) {
+                chapters += p.chapters.length + p.appendices.length;
+                kps += p.stats.kps;
+                tables += p.stats.tables;
+                mnemonics += p.stats.mnemonics;
+                traps += p.stats.traps;
+            });
+            return { chapters: chapters, kps: kps, tables: tables, mnemonics: mnemonics, traps: traps };
+        },
+
+        // 总览页每个部分的章节卡片（含考点数与分区数）
+        sprintChapterCards: function() {
+            var self = this;
+            if (!this.currentSprintPart) return [];
+            return this.currentSprintPart.chapters.map(function(c) {
+                var kpCount = 0;
+                c.sections.forEach(function(s) { kpCount += s.points.length; });
+                var highCount = 0;
+                c.sections.forEach(function(s) {
+                    s.points.forEach(function(p) { if (p.freq === 5) highCount++; });
+                });
+                return {
+                    id: c.id,
+                    num: c.num,
+                    title: c.title,
+                    en: c.en,
+                    kpCount: kpCount,
+                    highCount: highCount,
+                    sectionCount: c.sections.length
+                };
+            });
+        },
+
+        // 当前章节考点（按搜索词与频度过滤）
+        filteredSprintSections: function() {
+            if (!this.currentSprintChapter) return [];
+            var self = this;
+            var keyword = this.sprintSearch.trim().toLowerCase();
+            return this.currentSprintChapter.sections.map(function(sec) {
+                var points = sec.points.filter(function(p) {
+                    if (self.sprintFreqFilter === 'marked') {
+                        if (!self.sprintMarks[p.id]) return false;
+                    } else if (self.sprintFreqFilter !== 'all' && p.freq !== parseInt(self.sprintFreqFilter)) {
+                        return false;
+                    }
+                    if (!keyword) return true;
+                    var title = (p.title || '').toLowerCase();
+                    var body = self._sprintPointText(p);
+                    var kpid = (p.id || '').toLowerCase();
+                    return title.indexOf(keyword) > -1 || body.indexOf(keyword) > -1 || kpid.indexOf(keyword) > -1;
+                });
+                return { title: sec.title, html: sec.html, points: points };
+            }).filter(function(sec) {
+                // 无搜索时保留空分区；有搜索时只保留命中的分区（附录html块也算命中）
+                if (!keyword) return true;
+                if (sec.points.length > 0) return true;
+                if (sec.html && sec.html.toLowerCase().indexOf(keyword) > -1) return true;
+                return false;
+            });
+        },
+
+        // 附录分区内容
+        filteredSprintAppendixSections: function() {
+            if (!this.currentSprintAppendix) return [];
+            var self = this;
+            var keyword = this.sprintSearch.trim().toLowerCase();
+            return this.currentSprintAppendix.sections.map(function(sec) {
+                var match = true;
+                if (keyword) {
+                    match = (sec.title || '').toLowerCase().indexOf(keyword) > -1 ||
+                            (sec.html || '').toLowerCase().indexOf(keyword) > -1;
+                }
+                return { title: sec.title, html: sec.html, points: sec.points || [], match: match };
+            }).filter(function(sec) { return sec.match; });
+        },
+
+        sprintMarkedCount: function() {
+            var self = this;
+            return Object.keys(this.sprintMarks).filter(function(k) { return self.sprintMarks[k]; }).length;
         }
     },
     
@@ -306,6 +412,101 @@ new Vue({
             this.currentTab = tabId;
             this.showMobileMenu = false;
             console.log('切换成功, currentTab现在是:', this.currentTab);
+        },
+
+        // ===== 考点冲刺方法 =====
+        _sprintPointText: function(p) {
+            // 考点内容纯文本缓存（用于搜索）
+            if (!p._text) {
+                var div = document.createElement('div');
+                div.innerHTML = p.html || '';
+                p._text = (div.textContent || '').replace(/\s+/g, ' ').toLowerCase();
+            }
+            return p._text;
+        },
+
+        switchSprintPart: function(partId) {
+            this.sprintPartId = partId;
+            this.sprintView = 'overview';
+            this.currentSprintChapter = null;
+            this.currentSprintAppendix = null;
+        },
+
+        openSprintChapter: function(chapter) {
+            this.currentSprintChapter = chapter;
+            this.sprintView = 'chapter';
+            this.currentSprintAppendix = null;
+            // 初始化展开状态
+            var self = this;
+            chapter.sections.forEach(function(sec) {
+                sec.points.forEach(function(p) {
+                    if (self.sprintExpanded[p.id] === undefined) {
+                        self.$set(self.sprintExpanded, p.id, self.sprintAllExpanded);
+                    }
+                });
+            });
+            window.scrollTo(0, 0);
+        },
+
+        openSprintAppendix: function(appendix) {
+            this.currentSprintAppendix = appendix;
+            this.sprintView = 'appendix';
+            this.currentSprintChapter = null;
+            window.scrollTo(0, 0);
+        },
+
+        backSprintOverview: function() {
+            this.sprintView = 'overview';
+            this.currentSprintChapter = null;
+            this.currentSprintAppendix = null;
+            this.sprintSearch = '';
+            window.scrollTo(0, 0);
+        },
+
+        toggleSprintPoint: function(p) {
+            var current = !!this.sprintExpanded[p.id];
+            this.$set(this.sprintExpanded, p.id, !current);
+        },
+
+        isSprintPointExpanded: function(p) {
+            return this.sprintExpanded[p.id] !== false;
+        },
+
+        toggleSprintAll: function() {
+            var self = this;
+            var allExpanded = !this.sprintAllExpanded;
+            this.sprintAllExpanded = allExpanded;
+            if (this.currentSprintChapter) {
+                this.currentSprintChapter.sections.forEach(function(sec) {
+                    sec.points.forEach(function(p) {
+                        self.$set(self.sprintExpanded, p.id, allExpanded);
+                    });
+                });
+            }
+        },
+
+        toggleSprintMark: function(p) {
+            var key = p.id;
+            var marked = !this.sprintMarks[key];
+            this.$set(this.sprintMarks, key, marked);
+            try {
+                localStorage.setItem('examapp_sprint_marks', JSON.stringify(this.sprintMarks));
+            } catch (e) {}
+        },
+
+        isSprintMarked: function(p) {
+            return !!this.sprintMarks[p.id];
+        },
+
+        loadSprintMarks: function() {
+            try {
+                var raw = localStorage.getItem('examapp_sprint_marks');
+                if (raw) {
+                    this.sprintMarks = JSON.parse(raw) || {};
+                }
+            } catch (e) {
+                this.sprintMarks = {};
+            }
         },
         
         getChapterProgress: function(chapterId) {
@@ -342,6 +543,10 @@ new Vue({
                 console.log('开始加载学习进度');
                 await self.loadProgress();
                 console.log('学习进度加载完成');
+
+                console.log('开始加载考点冲刺收藏');
+                self.loadSprintMarks();
+                console.log('考点冲刺收藏加载完成，共', Object.keys(self.sprintMarks).length, '条');
 
                 console.log('开始加载其他静态数据');
                 await Promise.all([

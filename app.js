@@ -46,7 +46,8 @@ new Vue({
             { id: 'keypoints', icon: '📚', text: '学习重点', shortText: '学习' },
             { id: 'notes', icon: '📝', text: '学习笔记', shortText: '笔记' },
             { id: 'practice', icon: '✍️', text: '真题练习', shortText: '练习' },
-            { id: 'sprint', icon: '🎯', text: '考点冲刺', shortText: '冲刺' },
+            { id: 'handbook', icon: '🎯', text: '考点冲刺', shortText: '考点' },
+            { id: 'sprint', icon: '⚡', text: '选择冲刺', shortText: '冲刺' },
             { id: 'textbook', icon: '📖', text: '教材习题', shortText: '教材' },
             { id: 'review', icon: '🚀', text: '冲刺复习', shortText: '复习' },
             { id: 'exam', icon: '📊', text: '模拟考试', shortText: '考试' },
@@ -170,7 +171,7 @@ new Vue({
 
         // 考点冲刺（选择题考点冲刺手册 1-7章 + 9-15章）
         handbookData: window.handbookData || null,
-        sprintView: 'overview',             // overview 总览 / chapter 章节 / appendix 附录
+        hbView: 'overview',                 // overview 总览 / chapter 章节 / appendix 附录
         sprintPartId: 'part17',             // 当前浏览的部分
         currentSprintChapter: null,         // 当前章节
         currentSprintAppendix: null,        // 当前附录
@@ -178,7 +179,21 @@ new Vue({
         sprintFreqFilter: 'all',            // all / 5高频 / 4中频 / 3基础
         sprintMarks: {},                    // 收藏/重点标记 { pointId: true }
         sprintExpanded: {},                 // 考点展开状态 { pointId: true }
-        sprintAllExpanded: true             // 是否全部展开
+        sprintAllExpanded: true,            // 是否全部展开
+
+        // 选择题冲刺模块状态
+        sprintPapers: [],          // 冲刺试卷列表
+        sprintRecords: {},         // 各试卷最佳成绩记录（localStorage持久化）
+        sprintView: 'list',        // list | quiz | result
+        currentSprintPaper: null,  // 当前试卷
+        sprintQuestions: [],       // 当前试卷题目（含isCorrect标记）
+        sprintAnswers: {},         // 用户答案 { questionId: label }
+        sprintCurrentIndex: 0,     // 当前题索引
+        sprintSubmitted: false,    // 是否已交卷（交卷后才显示解析）
+        sprintReviewMode: false,   // 解析模式
+        sprintResult: { score: 0, correct: 0, total: 0, answered: 0, duration: '', perChapter: [], wrongIds: [] },
+        showSprintSheet: false,    // 答题卡展开
+        sprintStartTime: null      // 开考时间
     },
     
     computed: {
@@ -399,19 +414,39 @@ new Vue({
         sprintMarkedCount: function() {
             var self = this;
             return Object.keys(this.sprintMarks).filter(function(k) { return self.sprintMarks[k]; }).length;
+        },
+
+        // 选择题冲刺：当前题目
+        currentSprintQuestion: function() {
+            if (!this.sprintQuestions || this.sprintQuestions.length === 0 ||
+                this.sprintCurrentIndex < 0 || this.sprintCurrentIndex >= this.sprintQuestions.length) {
+                return null;
+            }
+            return this.sprintQuestions[this.sprintCurrentIndex];
+        },
+
+        // 选择题冲刺：已答题数
+        sprintAnsweredCount: function() {
+            if (!this.sprintQuestions) return 0;
+            var answers = this.sprintAnswers;
+            return this.sprintQuestions.filter(function(q) { return !!answers[q.id]; }).length;
+        },
+
+        // 选择题冲刺：进度百分比
+        sprintProgressPercent: function() {
+            if (!this.sprintQuestions || this.sprintQuestions.length === 0) return 0;
+            return Math.round(this.sprintAnsweredCount / this.sprintQuestions.length * 100);
         }
     },
     
     methods: {
         selectTab: function(tabId) {
-            console.log('selectTab被调用, tabId:', tabId);
             if (!tabId) {
                 console.error('tabId为空!');
                 return;
             }
             this.currentTab = tabId;
             this.showMobileMenu = false;
-            console.log('切换成功, currentTab现在是:', this.currentTab);
         },
 
         // ===== 考点冲刺方法 =====
@@ -427,14 +462,14 @@ new Vue({
 
         switchSprintPart: function(partId) {
             this.sprintPartId = partId;
-            this.sprintView = 'overview';
+            this.hbView = 'overview';
             this.currentSprintChapter = null;
             this.currentSprintAppendix = null;
         },
 
         openSprintChapter: function(chapter) {
             this.currentSprintChapter = chapter;
-            this.sprintView = 'chapter';
+            this.hbView = 'chapter';
             this.currentSprintAppendix = null;
             // 初始化展开状态
             var self = this;
@@ -450,13 +485,13 @@ new Vue({
 
         openSprintAppendix: function(appendix) {
             this.currentSprintAppendix = appendix;
-            this.sprintView = 'appendix';
+            this.hbView = 'appendix';
             this.currentSprintChapter = null;
             window.scrollTo(0, 0);
         },
 
         backSprintOverview: function() {
-            this.sprintView = 'overview';
+            this.hbView = 'overview';
             this.currentSprintChapter = null;
             this.currentSprintAppendix = null;
             this.sprintSearch = '';
@@ -523,51 +558,36 @@ new Vue({
         
         init: async function() {
             var self = this;
-            console.log('Vue 实例初始化开始');
             this.isLoading = true;
             this.errorMessage = '';
 
             try {
-                console.log('开始加载系统设置');
                 self.loadSettings();
-                console.log('系统设置加载完成');
 
-                console.log('开始初始化数据库');
                 await db.init();
-                console.log('数据库初始化完成');
 
-                console.log('开始加载章节数据');
                 await self.loadChapters();
-                console.log('章节数据加载完成，共', self.chapters.length, '章');
 
-                console.log('开始加载学习进度');
                 await self.loadProgress();
-                console.log('学习进度加载完成');
 
-                console.log('开始加载考点冲刺收藏');
                 self.loadSprintMarks();
-                console.log('考点冲刺收藏加载完成，共', Object.keys(self.sprintMarks).length, '条');
 
-                console.log('开始加载其他静态数据');
                 await Promise.all([
                     self.loadQuestions(),
                     self.loadFormulas(),
                     self.loadFlashcards(),
                     self.loadMistakes(),
-                    self.loadTextbookExercises()
+                    self.loadTextbookExercises(),
+                    self.loadSprintPapers()
                 ]);
-                console.log('静态数据加载完成');
-                console.log('错题本数据加载完成，共', self.mistakeBook.length, '条');
 
 
-                console.log('应用初始化完成');
             } catch (error) {
                 console.error('初始化失败:', error);
                 console.error('错误堆栈:', error.stack);
                 self.errorMessage = '应用初始化失败，请刷新页面重试';
             } finally {
                 self.isLoading = false;
-                console.log('初始化结束，isLoading:', self.isLoading);
             }
         },
         
@@ -721,12 +741,8 @@ new Vue({
         
         // 加载教材课后习题数据
         loadTextbookExercises: function() {
-            console.log('loadTextbookExercises 被调用');
-            console.log('window.textbookExercisesData 是否存在:', !!window.textbookExercisesData);
             if (window.textbookExercisesData) {
-                console.log('window.textbookExercisesData 长度:', window.textbookExercisesData.length);
                 this.textbookChapters = window.textbookExercisesData;
-                console.log('this.textbookChapters 已设置，长度:', this.textbookChapters.length);
                 // 默认展开第一个章节
                 if (this.textbookChapters.length > 0) {
                     this.expandedTextbookChapters[this.textbookChapters[0].id] = true;
@@ -744,7 +760,6 @@ new Vue({
         
         // 开始教材习题练习
         startTextbookPractice: function(question) {
-            console.log('开始教材习题练习:', question.id);
             this.currentPracticeQuestion = question;
             this.showPracticeDialog = true;
             this.practiceAnswer = '';
@@ -904,6 +919,223 @@ new Vue({
             this.textbookAnswers = {};
             this.textbookSubmitted = false;
             this.textbookScore = 0;
+        },
+        
+        // ==================== 选择题冲刺模块 ====================
+        
+        // 加载冲刺试卷数据与历史成绩
+        loadSprintPapers: function() {
+            if (window.sprintPapersData) {
+                this.sprintPapers = window.sprintPapersData;
+            } else {
+                console.error('window.sprintPapersData 未找到!');
+                this.sprintPapers = [];
+            }
+            // 读取历史最佳成绩
+            try {
+                var saved = localStorage.getItem('sprintRecords');
+                this.sprintRecords = saved ? JSON.parse(saved) : {};
+            } catch (e) {
+                this.sprintRecords = {};
+            }
+            return Promise.resolve();
+        },
+        
+        // 开始一套冲刺卷
+        startSprint: function(paper) {
+            this.currentSprintPaper = paper;
+            // 深拷贝题目，附加作答状态
+            this.sprintQuestions = paper.questions.map(function(q) {
+                return Object.assign({}, q, { isCorrect: false });
+            });
+            this.sprintAnswers = {};
+            this.sprintCurrentIndex = 0;
+            this.sprintSubmitted = false;
+            this.sprintReviewMode = false;
+            this.showSprintSheet = false;
+            this.sprintStartTime = Date.now();
+            this.sprintView = 'quiz';
+            window.scrollTo(0, 0);
+        },
+        
+        // 选择答案（交卷前可修改）
+        selectSprintAnswer: function(label) {
+            if (this.sprintSubmitted) return;
+            var q = this.currentSprintQuestion;
+            if (!q) return;
+            this.$set(this.sprintAnswers, q.id, label);
+        },
+        
+        // 跳转到指定题目
+        goToSprintQuestion: function(index) {
+            if (index < 0 || index >= this.sprintQuestions.length) return;
+            this.sprintCurrentIndex = index;
+        },
+        
+        // 交卷：判分、生成成绩单、错题自动入错题本
+        submitSprint: function() {
+            var self = this;
+            if (this.sprintSubmitted) return;
+            
+            var unanswered = this.sprintQuestions.filter(function(q) {
+                return !self.sprintAnswers[q.id];
+            });
+            if (unanswered.length > 0) {
+                if (!confirm('还有 ' + unanswered.length + ' 道题未作答，确定要交卷吗？未答题将计为错误。')) {
+                    return;
+                }
+            } else if (!confirm('确定要交卷吗？交卷后将显示答案与解析。')) {
+                return;
+            }
+            
+            // 判分
+            var correct = 0;
+            var wrongIds = [];
+            var chapterMap = {};
+            this.sprintQuestions.forEach(function(q, index) {
+                var userAns = self.sprintAnswers[q.id];
+                q.isCorrect = (userAns === q.answer);
+                if (q.isCorrect) {
+                    correct++;
+                } else {
+                    wrongIds.push(index);
+                }
+                var ch = q.chapterName || '其他';
+                if (!chapterMap[ch]) chapterMap[ch] = { name: ch, shortName: ch.split(' ')[0], total: 0, correct: 0 };
+                chapterMap[ch].total++;
+                if (q.isCorrect) chapterMap[ch].correct++;
+            });
+            
+            var perChapter = Object.keys(chapterMap).map(function(key) {
+                var c = chapterMap[key];
+                c.accuracy = c.total > 0 ? Math.round(c.correct / c.total * 100) : 0;
+                return c;
+            });
+            
+            // 用时
+            var elapsed = Math.floor((Date.now() - this.sprintStartTime) / 1000);
+            var duration = Math.floor(elapsed / 60) + '分' + (elapsed % 60) + '秒';
+            
+            this.sprintResult = {
+                score: correct,
+                correct: correct,
+                total: this.sprintQuestions.length,
+                answered: this.sprintQuestions.length - unanswered.length,
+                duration: duration,
+                perChapter: perChapter,
+                wrongIds: wrongIds
+            };
+            
+            this.sprintSubmitted = true;
+            this.showSprintSheet = false;
+            
+            // 保存最佳成绩
+            var paperId = this.currentSprintPaper.id;
+            var prev = this.sprintRecords[paperId];
+            if (!prev || correct > prev.score) {
+                var record = {
+                    score: correct,
+                    total: this.sprintQuestions.length,
+                    date: new Date().toLocaleDateString('zh-CN')
+                };
+                this.$set(this.sprintRecords, paperId, record);
+                try {
+                    localStorage.setItem('sprintRecords', JSON.stringify(this.sprintRecords));
+                } catch (e) { /* 忽略存储失败 */ }
+            }
+            
+            // 错题自动加入错题本
+            wrongIds.forEach(function(index) {
+                var q = self.sprintQuestions[index];
+                var exists = self.mistakeBook.some(function(m) { return m.questionId === q.id; });
+                if (!exists) {
+                    var mistake = {
+                        questionId: q.id,
+                        question: q.question,
+                        options: q.options,
+                        correctAnswer: q.answer,
+                        userAnswer: self.sprintAnswers[q.id] || '未作答',
+                        explanation: q.explanation,
+                        chapterName: q.chapterName,
+                        type: 'sprint',
+                        timestamp: new Date().toISOString()
+                    };
+                    db.addMistake(mistake).then(function(id) {
+                        mistake.id = id;
+                        self.mistakeBook.unshift(mistake);
+                    }).catch(function(error) {
+                        console.error('添加错题失败:', error);
+                    });
+                }
+            });
+            
+            this.sprintView = 'result';
+            window.scrollTo(0, 0);
+        },
+        
+        // 进入解析模式（可定位到指定题）
+        reviewSprintAt: function(index) {
+            this.sprintReviewMode = true;
+            this.sprintView = 'quiz';
+            this.sprintCurrentIndex = index;
+            this.showSprintSheet = false;
+            window.scrollTo(0, 0);
+        },
+        
+        // 退出解析模式，返回成绩单
+        exitSprintReview: function() {
+            this.sprintReviewMode = false;
+            this.sprintView = 'result';
+            window.scrollTo(0, 0);
+        },
+        
+        // 重新作答当前试卷
+        retrySprint: function() {
+            if (this.currentSprintPaper) {
+                this.startSprint(this.currentSprintPaper);
+            }
+        },
+        
+        // 退出冲刺，返回试卷列表
+        exitSprint: function() {
+            if (this.sprintView === 'quiz' && !this.sprintSubmitted) {
+                if (!confirm('当前试卷尚未交卷，退出后作答记录将丢失，确定退出吗？')) {
+                    return;
+                }
+            }
+            this.sprintView = 'list';
+            this.sprintReviewMode = false;
+            this.sprintSubmitted = false;
+            this.showSprintSheet = false;
+            window.scrollTo(0, 0);
+        },
+        
+        // 手动将错题加入错题本（解析模式）
+        addSprintMistake: function(q) {
+            var self = this;
+            var exists = this.mistakeBook.some(function(m) { return m.questionId === q.id; });
+            if (exists) {
+                alert('该题已在错题本中');
+                return;
+            }
+            var mistake = {
+                questionId: q.id,
+                question: q.question,
+                options: q.options,
+                correctAnswer: q.answer,
+                userAnswer: this.sprintAnswers[q.id] || '未作答',
+                explanation: q.explanation,
+                chapterName: q.chapterName,
+                type: 'sprint',
+                timestamp: new Date().toISOString()
+            };
+            db.addMistake(mistake).then(function(id) {
+                mistake.id = id;
+                self.mistakeBook.unshift(mistake);
+                alert('已加入错题本');
+            }).catch(function(error) {
+                console.error('添加错题失败:', error);
+            });
         },
         
         loadProgress: async function() {
@@ -1161,7 +1393,6 @@ new Vue({
         }, 1000),
         
         startPractice: function(question) {
-            console.log('startPractice called with question:', question.id);
             var self = this;
             // 清除之前的自动跳转定时器
             if (this.practiceAutoJumpTimer) {
@@ -1170,23 +1401,17 @@ new Vue({
             }
             this.practiceAutoJumpCountdown = 0;
             this.currentPracticeQuestion = question;
-            console.log('Current practice question set to:', question.id);
             this.showPracticeDialog = true;
-            console.log('showPracticeDialog set to:', this.showPracticeDialog);
             this.practiceAnswer = '';
             this.practiceResult = null;
-            console.log('startPractice completed');
         },
         
         // 随机开始练习
         startRandomPractice: function() {
             var self = this;
-            console.log('startRandomPractice called');
-            console.log('questions length:', this.questions.length);
             
             // 直接使用所有题目，不进行过滤
             var allQuestions = this.questions;
-            console.log('allQuestions length:', allQuestions.length);
             
             if (allQuestions.length === 0) {
                 alert('题库中没有题目');
@@ -1196,9 +1421,7 @@ new Vue({
             // 随机选择题目
             var randomIndex = Math.floor(Math.random() * allQuestions.length);
             var randomQuestion = allQuestions[randomIndex];
-            console.log('selected question:', randomQuestion);
             
-            console.log('Calling startPractice with question:', randomQuestion.id);
             this.startPractice(randomQuestion);
         },
         
@@ -1283,14 +1506,12 @@ new Vue({
                     db.removeMistake(mistakeId).then(function() {
                         self.mistakeBook.splice(mistakeIndex, 1);
                         // 回答正确时直接跳题，不需要显示解析
-                        console.log('Answer is correct, preparing to jump to next question');
                         // 清除已有的定时器
                         if (self.autoNextTimer) {
                             clearTimeout(self.autoNextTimer);
                         }
                         // 延迟800ms后自动加载下一题
                         self.autoNextTimer = setTimeout(function() {
-                            console.log('Calling nextPracticeQuestion');
                             self.nextPracticeQuestion();
                             self.isSubmitting = false;
                         }, 800);
@@ -1300,14 +1521,12 @@ new Vue({
                     });
                 } else {
                     // 回答正确时直接跳题，不需要显示解析
-                    console.log('Answer is correct, preparing to jump to next question');
                     // 清除已有的定时器
                     if (self.autoNextTimer) {
                         clearTimeout(self.autoNextTimer);
                     }
                     // 延迟800ms后自动加载下一题
                     self.autoNextTimer = setTimeout(function() {
-                        console.log('Calling nextPracticeQuestion');
                         self.nextPracticeQuestion();
                         self.isSubmitting = false;
                     }, 800);
@@ -1316,7 +1535,6 @@ new Vue({
             
             // 回答错误时显示答案解析弹窗
             if (!isCorrect) {
-                console.log('Answer is incorrect, showing explanation dialog');
                 this.showExplanationDialog = true;
             }
         },
@@ -1365,7 +1583,6 @@ new Vue({
                         this.practiceAnswer = '';
                         this.practiceResult = null;
                     } else {
-                        console.warn('当前章节题库为空，无法自动跳转');
                     }
                 } else {
                     // 对于真题练习，从所有题目中选择
@@ -1375,11 +1592,9 @@ new Vue({
                         this.practiceAnswer = '';
                         this.practiceResult = null;
                     } else {
-                        console.warn('题库为空，无法自动跳转');
                     }
                 }
             } else {
-                console.warn('当前没有练习题目，无法自动跳转');
             }
         },
         
@@ -1495,7 +1710,6 @@ new Vue({
 
             this.flashcards = flashcards;
             this.currentFlashcard = flashcards.length > 0 ? flashcards[0] : null;
-            console.log('Flashcards loaded:', flashcards.length, 'Current:', this.currentFlashcard ? this.currentFlashcard.id : 'none');
         },
         
         markCard: function(card, status) {
@@ -1576,11 +1790,8 @@ new Vue({
             var correct = 0;
             var analysis = {};
             
-            console.log('开始评分，考试类型：', this.examType);
-            console.log('题目数量：', this.examQuestions.length);
             
             this.examQuestions.forEach(function(q, index) {
-                console.log('题目' + (index + 1) + ':', q.id, '选择：', q.selected, '答案：', q.answer);
                 
                 var isCorrect = false;
                 if (self.examType === 'morning') {
@@ -1588,9 +1799,7 @@ new Vue({
                     isCorrect = q.selected && q.selected === q.answer;
                     if (isCorrect) {
                         correct++;
-                        console.log('  ✓ 正确');
                     } else {
-                        console.log('  ✗ 错误或未作答');
                     }
                 }
                 
@@ -1657,8 +1866,6 @@ new Vue({
                 score = 0;
             }
             
-            console.log('正确题数：', correct);
-            console.log('得分：', score);
             
             var duration = Utils.formatTime(150 * 60 - this.remainingTime);
             var accuracy = this.examQuestions.length > 0 
@@ -1699,7 +1906,6 @@ new Vue({
             this.showExamResult = true;
             this.inExam = false;
             
-            console.log('考试结果：', this.examResult);
         },
         
         reviewExam: function() {
@@ -1985,7 +2191,6 @@ new Vue({
         
         onFilterChange: function() {
             // 筛选器改变时自动刷新题目列表
-            console.log('筛选条件已改变，自动刷新题目列表');
             // 由于使用了计算属性 filteredQuestions，数据会自动更新
             // 这里可以添加额外的逻辑，如重置页码、显示提示等
         },
@@ -2062,7 +2267,6 @@ new Vue({
             };
             
             db.saveLearningRecord(record).then(function() {
-                console.log('学习记录已保存');
             }).catch(function(error) {
                 console.error('保存学习记录失败:', error);
             });
@@ -2091,7 +2295,6 @@ new Vue({
     watch: {
         // 监听教材章节选择变化
         selectedTextbookChapter: function(newChapterId, oldChapterId) {
-            console.log('选中章节变化:', oldChapterId, '→', newChapterId);
             // 自动展开新选中的章节
             this.expandedTextbookChapters = {};
             this.expandedTextbookChapters[newChapterId] = true;

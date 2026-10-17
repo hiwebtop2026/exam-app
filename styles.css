@@ -3057,7 +3057,6 @@ li {
     word-wrap: break-word;
 }
 
-
 /* ================================================================
    考点冲刺模块（选择题考点冲刺手册）卡片化样式
    ================================================================ */
@@ -3903,6 +3902,498 @@ li {
     }
     .hb-content .grid2 {
         grid-template-columns: 1fr;
+    }
+}
+/* ==================== 选择题冲刺模块（卡片式·移动端优先） ==================== */
+.sprint-module {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+/* ---- 试卷列表 ---- */
+.sprint-intro-card {
+    background: linear-gradient(135deg, #16213e 0%, #1c4fa3 60%, #2f6fd0 100%);
+    color: white;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(28, 79, 163, 0.25);
+}
+
+.sprint-intro-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.sprint-intro-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.sprint-tag {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 12px;
+}
+
+.sprint-intro-desc {
+    font-size: 13px;
+    opacity: 0.9;
+    line-height: 1.7;
+    margin: 0;
+}
+
+.sprint-paper-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sprint-paper-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 16px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.sprint-paper-card:active {
+    transform: scale(0.98);
+}
+
+.sprint-paper-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.sprint-paper-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.sprint-paper-main h3 {
+    font-size: 17px;
+    margin: 0 0 6px 0;
+    color: var(--text-primary);
+}
+
+.sprint-paper-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+}
+
+.sprint-paper-record {
+    margin-top: 6px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+}
+
+.sprint-paper-record b.pass {
+    color: var(--success-color);
+}
+
+.sprint-paper-record b.fail {
+    color: var(--danger-color);
+}
+
+.sprint-record-date {
+    margin-left: 6px;
+    font-size: 11.5px;
+    opacity: 0.75;
+}
+
+.sprint-start-btn {
+    flex-shrink: 0;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 20px;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ---- 答题页 ---- */
+.sprint-topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.sprint-quit-btn {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.sprint-topbar-title {
+    flex: 1;
+    font-weight: 700;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sprint-topbar-count {
+    font-size: 13px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.sprint-review-badge {
+    background: #fef3c7;
+    color: #92400e;
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.sprint-progress-track {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 14px;
+}
+
+.sprint-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), #60a5fa);
+    border-radius: 6px;
+    transition: width 0.3s;
+}
+
+/* 题目卡片 */
+.sprint-qcard {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+    margin-bottom: 14px;
+}
+
+.sprint-qhead {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.sprint-qno {
+    font-weight: 800;
+    color: var(--primary-color);
+    font-size: 15px;
+}
+
+.sprint-qtype {
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid #9a6200;
+    color: #9a6200;
+    border-radius: 4px;
+    padding: 1px 8px;
+}
+
+.sprint-qref {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    margin-left: auto;
+}
+
+.sprint-verdict {
+    font-weight: 800;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.sprint-verdict.ok {
+    color: var(--success-color);
+}
+
+.sprint-verdict.no {
+    color: var(--danger-color);
+}
+
+.sprint-qstem {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.75;
+    margin-bottom: 14px;
+    white-space: pre-wrap;
+}
+
+/* 解析卡片（交卷后显示） */
+.sprint-exp-card {
+    margin-top: 14px;
+    border-top: 1px dashed var(--border-color);
+    padding-top: 14px;
+}
+
+.sprint-exp-row {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.sprint-ans-ok {
+    color: var(--success-color);
+}
+
+.sprint-ans-no {
+    color: var(--danger-color);
+}
+
+.sprint-exp-body {
+    border-left: 4px solid var(--primary-color);
+    background: #eff6ff;
+    border-radius: 0 10px 10px 0;
+    padding: 12px 14px;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.sprint-exp-title {
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 4px;
+}
+
+.sprint-exp-body p {
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.sprint-mistake-btn {
+    margin-top: 12px;
+}
+
+/* 底部导航条 */
+.sprint-nav-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.sprint-nav-bar .btn-secondary,
+.sprint-nav-bar .btn-primary {
+    flex: 1;
+    padding: 12px 8px;
+    font-size: 15px;
+}
+
+.sprint-sheet-toggle {
+    flex: 1;
+    background: white;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+/* 答题卡 */
+.sprint-sheet-card {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+    margin-bottom: 14px;
+}
+
+.sprint-sheet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.sprint-sheet-dot {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    background: white;
+    color: var(--text-secondary);
+}
+
+.sprint-sheet-dot.answered {
+    background: #dbeafe;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.sprint-sheet-dot.current {
+    box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+.sprint-sheet-dot.correct {
+    background: #d1fae5;
+    border-color: var(--success-color);
+    color: #065f46;
+    font-weight: 700;
+}
+
+.sprint-sheet-dot.wrong {
+    background: #fee2e2;
+    border-color: var(--danger-color);
+    color: #991b1b;
+    font-weight: 700;
+}
+
+/* ---- 成绩单 ---- */
+.sprint-result-hero {
+    background: linear-gradient(135deg, #16213e 0%, #1c4fa3 100%);
+    color: white;
+    border-radius: 14px;
+    padding: 26px 20px;
+    text-align: center;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 12px rgba(28, 79, 163, 0.25);
+}
+
+.sprint-result-hero h2 {
+    font-size: 17px;
+    margin: 0 0 8px 0;
+}
+
+.sprint-result-big {
+    font-size: 46px;
+    font-weight: 900;
+    line-height: 1.1;
+}
+
+.sprint-result-total {
+    font-size: 18px;
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+.sprint-result-status {
+    font-size: 15px;
+    font-weight: 800;
+    margin: 8px 0;
+}
+
+.sprint-result-status.pass {
+    color: #8fe3b3;
+}
+
+.sprint-result-status.fail {
+    color: #ffb3ab;
+}
+
+.sprint-result-sub {
+    font-size: 13px;
+    opacity: 0.85;
+}
+
+.sprint-result-card {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.sprint-result-card h3 {
+    font-size: 15px;
+    margin: 0 0 12px 0;
+}
+
+.sprint-result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+    gap: 8px;
+}
+
+.sprint-chapter-cell {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    padding: 10px 6px;
+    text-align: center;
+}
+
+.sprint-chapter-name {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.sprint-chapter-score {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.sprint-chapter-score.weak {
+    color: var(--danger-color);
+}
+
+.sprint-wrong-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.sprint-wrong-no {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.sprint-result-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sprint-result-actions button {
+    width: 100%;
+    padding: 13px;
+    font-size: 15px;
+}
+
+/* 桌面端微调 */
+@media (min-width: 769px) {
+    .sprint-result-actions {
+        flex-direction: row;
     }
 }
 

@@ -819,6 +819,172 @@
                         </div>
                     </div>
                 </div>
+                <!-- 选择题冲刺模块 -->
+                <div v-if="currentTab === 'sprint'" class="module sprint-module">
+                    <!-- 试卷列表 -->
+                    <div v-if="sprintView === 'list'">
+                        <div class="module-header">
+                            <h2>⚡ 选择题冲刺</h2>
+                        </div>
+                        <div class="sprint-intro-card">
+                            <div class="sprint-intro-title">📌 第1-7章 · 第9-15章考点全覆盖 · 仿真题命题套路</div>
+                            <div class="sprint-intro-tags">
+                                <span class="sprint-tag">原句挖空</span>
+                                <span class="sprint-tag">归属分类</span>
+                                <span class="sprint-tag">数字排序</span>
+                                <span class="sprint-tag">场景判断</span>
+                                <span class="sprint-tag">孪生反置</span>
+                            </div>
+                            <p class="sprint-intro-desc">每套40题，建议用时50分钟，24分为合格参考线。交卷后才会显示答案与解析，请独立完成后再对照复盘。</p>
+                        </div>
+                        <div class="sprint-paper-list">
+                            <div v-for="paper in sprintPapers" 
+                                 :key="paper.id"
+                                 class="sprint-paper-card"
+                                 @click="startSprint(paper)">
+                                <div class="sprint-paper-icon">📝</div>
+                                <div class="sprint-paper-main">
+                                    <h3>{{ paper.name }}</h3>
+                                    <div class="sprint-paper-meta">
+                                        <span>{{ paper.total }}题</span>
+                                        <span>⏱ {{ paper.suggestMinutes }}分钟</span>
+                                        <span>合格线 {{ paper.passScore }}分</span>
+                                    </div>
+                                    <div v-if="sprintRecords[paper.id]" class="sprint-paper-record">
+                                        最佳成绩 <b :class="sprintRecords[paper.id].score >= paper.passScore ? 'pass' : 'fail'">{{ sprintRecords[paper.id].score }}分</b>
+                                        <span class="sprint-record-date">{{ sprintRecords[paper.id].date }}</span>
+                                    </div>
+                                </div>
+                                <div class="sprint-paper-action">
+                                    <span class="sprint-start-btn">{{ sprintRecords[paper.id] ? '再测' : '开始' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 答题 / 解析模式 -->
+                    <div v-else-if="sprintView === 'quiz'" class="sprint-quiz">
+                        <div class="sprint-topbar">
+                            <button class="sprint-back-btn" @click="sprintReviewMode ? exitSprintReview() : exitSprint()">
+                                ← {{ sprintReviewMode ? '成绩单' : '退出' }}
+                            </button>
+                            <span class="sprint-topbar-title">{{ currentSprintPaper ? currentSprintPaper.name : '' }}</span>
+                            <span v-if="sprintReviewMode" class="sprint-review-badge">解析模式</span>
+                            <span v-else class="sprint-topbar-count">已答 {{ sprintAnsweredCount }}/{{ sprintQuestions.length }}</span>
+                        </div>
+                        <div class="sprint-progress-track">
+                            <div class="sprint-progress-fill" :style="{width: sprintProgressPercent + '%'}"></div>
+                        </div>
+
+                        <div class="sprint-qcard" v-if="currentSprintQuestion">
+                            <div class="sprint-qhead">
+                                <span class="sprint-qno">第 {{ sprintCurrentIndex + 1 }} 题</span>
+                                <span class="sprint-qtype">{{ currentSprintQuestion.qtype }}</span>
+                                <span class="sprint-qref">{{ currentSprintQuestion.ref }}</span>
+                            </div>
+                            <div v-if="sprintReviewMode" :class="['sprint-verdict', currentSprintQuestion.isCorrect ? 'ok' : 'no']">
+                                {{ currentSprintQuestion.isCorrect ? '✅ 回答正确' : '❌ 回答错误' }}
+                            </div>
+                            <div class="sprint-qstem">{{ currentSprintQuestion.question }}</div>
+                            <div class="options">
+                                <div v-for="option in currentSprintQuestion.options" 
+                                     :key="option.label"
+                                     :class="['option', {
+                                         selected: sprintAnswers[currentSprintQuestion.id] === option.label,
+                                         correct: sprintReviewMode && option.label === currentSprintQuestion.answer,
+                                         wrong: sprintReviewMode && sprintAnswers[currentSprintQuestion.id] === option.label && option.label !== currentSprintQuestion.answer
+                                     }]"
+                                     @click="!sprintReviewMode && selectSprintAnswer(option.label)">
+                                    <span class="option-label">{{ option.label }}</span>
+                                    <span class="option-text">{{ option.text }}</span>
+                                </div>
+                            </div>
+                            <!-- 交卷后（解析模式）才显示答案与解析 -->
+                            <div v-if="sprintReviewMode" class="sprint-exp-card">
+                                <div class="sprint-exp-row">
+                                    <span>正确答案：<b class="sprint-ans-ok">{{ currentSprintQuestion.answer }}</b></span>
+                                    <span v-if="sprintAnswers[currentSprintQuestion.id]">你的答案：
+                                        <b :class="currentSprintQuestion.isCorrect ? 'sprint-ans-ok' : 'sprint-ans-no'">{{ sprintAnswers[currentSprintQuestion.id] }}</b>
+                                    </span>
+                                    <span v-else>你的答案：<b class="sprint-ans-no">未作答</b></span>
+                                </div>
+                                <div class="sprint-exp-body">
+                                    <div class="sprint-exp-title">📖 解析 · {{ currentSprintQuestion.ref }}</div>
+                                    <p>{{ currentSprintQuestion.explanation }}</p>
+                                </div>
+                                <button v-if="!currentSprintQuestion.isCorrect" class="btn-secondary sprint-mistake-btn" @click="addSprintMistake(currentSprintQuestion)">加入错题本</button>
+                            </div>
+                        </div>
+
+                        <div class="sprint-nav-bar">
+                            <button class="btn-secondary" @click="goToSprintQuestion(sprintCurrentIndex - 1)" :disabled="sprintCurrentIndex === 0">上一题</button>
+                            <button class="sprint-sheet-toggle" @click="showSprintSheet = !showSprintSheet">
+                                ▦ 答题卡
+                            </button>
+                            <button v-if="sprintCurrentIndex < sprintQuestions.length - 1" class="btn-secondary" @click="goToSprintQuestion(sprintCurrentIndex + 1)">下一题</button>
+                            <button v-else-if="!sprintReviewMode" class="btn-primary" @click="submitSprint">交卷</button>
+                            <button v-else class="btn-secondary" disabled>已到末题</button>
+                        </div>
+
+                        <!-- 答题卡 -->
+                        <div v-if="showSprintSheet" class="sprint-sheet-card">
+                            <div class="sprint-sheet-grid">
+                                <div v-for="(q, index) in sprintQuestions" 
+                                     :key="q.id"
+                                     :class="['sprint-sheet-dot', {
+                                         answered: sprintAnswers[q.id],
+                                         current: index === sprintCurrentIndex,
+                                         correct: sprintReviewMode && q.isCorrect,
+                                         wrong: sprintReviewMode && !q.isCorrect
+                                     }]"
+                                     @click="goToSprintQuestion(index); showSprintSheet = false;">
+                                    {{ index + 1 }}
+                                </div>
+                            </div>
+                            <button v-if="!sprintReviewMode" class="btn-primary btn-block" @click="submitSprint">📝 交卷查看成绩单</button>
+                        </div>
+                    </div>
+
+                    <!-- 成绩单 -->
+                    <div v-else-if="sprintView === 'result'" class="sprint-result">
+                        <div class="sprint-result-hero">
+                            <h2>📊 {{ currentSprintPaper ? currentSprintPaper.name : '' }} 成绩单</h2>
+                            <div class="sprint-result-big">
+                                {{ sprintResult.score }}<span class="sprint-result-total"> / {{ sprintResult.total }} 分</span>
+                            </div>
+                            <div :class="['sprint-result-status', sprintResult.score >= (currentSprintPaper ? currentSprintPaper.passScore : 24) ? 'pass' : 'fail']">
+                                {{ sprintResult.score >= (currentSprintPaper ? currentSprintPaper.passScore : 24) ? '✔ 达到合格参考线' : '✘ 未达合格参考线' }}
+                            </div>
+                            <div class="sprint-result-sub">
+                                已答 {{ sprintResult.answered }}/{{ sprintResult.total }} ｜ 答对 {{ sprintResult.correct }} ｜ 答错/未答 {{ sprintResult.total - sprintResult.correct }} ｜ 用时 {{ sprintResult.duration }}
+                            </div>
+                        </div>
+
+                        <div class="sprint-result-card">
+                            <h3>📈 分章得分</h3>
+                            <div class="sprint-chapter-grid">
+                                <div v-for="item in sprintResult.perChapter" :key="item.name" class="sprint-chapter-cell">
+                                    <div class="sprint-chapter-name">{{ item.shortName }}</div>
+                                    <div class="sprint-chapter-score" :class="{weak: item.accuracy < 60}">{{ item.correct }} / {{ item.total }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div v-if="sprintResult.wrongIds.length > 0" class="sprint-result-card">
+                            <h3>📌 错题回顾（{{ sprintResult.wrongIds.length }}题，已自动加入错题本）</h3>
+                            <div class="sprint-wrong-list">
+                                <span v-for="idx in sprintResult.wrongIds" :key="idx" class="sprint-wrong-no" @click="reviewSprintAt(idx)">第{{ idx + 1 }}题</span>
+                            </div>
+                        </div>
+
+                        <div class="sprint-result-actions">
+                            <button class="btn-primary" @click="reviewSprintAt(0)">📖 查看答案解析</button>
+                            <button class="btn-secondary" @click="retrySprint">🔄 重新作答</button>
+                            <button class="btn-secondary" @click="exitSprint">返回列表</button>
+                        </div>
+                    </div>
+                </div>
+
             </main>
         </div>
 
@@ -1053,13 +1219,15 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <script src="vue.min.js"></script>
     <script src="db.js"></script>
     <script src="questions.js?v=7"></script>
     <script src="chapters.js"></script>
     <script src="formulas.js"></script>
     <script src="mindmap.js"></script>
     <script src="case_templates.js"></script>
-    <script src="app.js?v=9"></script>
+    <script src="textbook_exercises_data.js"></script>
+    <script src="sprint_questions.js?v=2"></script>
+    <script src="app.js?v=10"></script>
 </body>
 </html>

@@ -930,6 +930,251 @@
                     </div>
                 </div>
 
+                <!-- 高频默写知识点模块 -->
+                <div v-if="currentTab === 'dictation'" class="module">
+                    <div class="dictation-hero">
+                        <div class="dictation-hero-badge">2026.10 考前押题</div>
+                        <h2>📝 高频默写知识点</h2>
+                        <p>依据《案例答题模板与考前冲刺手册》第八部分「高频默写考点速记卡片」，覆盖九大知识领域高频默写点，配套口诀速记</p>
+                    </div>
+
+                    <!-- 统计条 -->
+                    <div class="dictation-stats">
+                        <div class="dictation-stat">
+                            <b>{{ dictationData.length }}</b>
+                            <span>知识分类</span>
+                        </div>
+                        <div class="dictation-stat">
+                            <b>{{ dictationMarkedCount }}</b>
+                            <span>⭐ 重点标记</span>
+                        </div>
+                        <div class="dictation-stat">
+                            <b>33</b>
+                            <span>核心口诀</span>
+                        </div>
+                    </div>
+
+                    <!-- 分类标签 -->
+                    <div class="dictation-cat-tabs">
+                        <button v-for="cat in dictationData"
+                                :key="cat.id"
+                                :class="['dictation-cat-tab', {active: dictationCategoryId === cat.id}]"
+                                @click="switchDictationCategory(cat.id)">
+                            <span class="dictation-cat-icon">{{ cat.icon }}</span>
+                            <span class="dictation-cat-name">{{ cat.title }}</span>
+                        </button>
+                    </div>
+
+                    <!-- 默写考点卡片 -->
+                    <div v-if="currentDictationCategory" class="dictation-content">
+                        <div class="dictation-toolbar">
+                            <span class="dictation-count">{{ currentDictationCategory.points.length }} 个考点</span>
+                            <button class="btn-secondary" @click="toggleDictationAll">{{ dictationAllExpanded ? '📕 全部收起' : '📖 全部展开' }}</button>
+                        </div>
+
+                        <!-- 核心口诀速查表（d13） -->
+                        <div v-if="currentDictationCategory.isTable" class="dictation-mnemonic-table">
+                            <div class="dictation-table-intro">考前 5 分钟快速过一遍的 33 条高频口诀</div>
+                            <div class="dictation-table-grid">
+                                <div v-for="(m, index) in mnemonicTable" :key="index" class="dictation-table-card">
+                                    <div class="dictation-table-head">
+                                        <span class="dictation-table-module">{{ m.module }}</span>
+                                        <span class="dictation-table-mnemonic">{{ m.mnemonic }}</span>
+                                    </div>
+                                    <div class="dictation-table-content">{{ m.content }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dictation-point-grid">
+                            <div v-for="p in currentDictationCategory.points"
+                                 :key="p.id"
+                                 :class="['dictation-point-card', {marked: isDictationMarked(p)}]">
+                                <div class="dictation-point-head" @click="toggleDictationPoint(p)">
+                                    <div class="dictation-point-title">
+                                        <span class="dictation-point-index">{{ p.id.split('-')[1] }}</span>
+                                        <span class="dictation-point-name">{{ p.title }}</span>
+                                    </div>
+                                    <div class="dictation-point-actions">
+                                        <button class="dictation-mark-btn"
+                                                :class="{active: isDictationMarked(p)}"
+                                                :title="isDictationMarked(p) ? '取消重点标记' : '标记为重点'"
+                                                @click.stop="toggleDictationMark(p)">{{ isDictationMarked(p) ? '⭐' : '☆' }}</button>
+                                        <span class="dictation-point-toggle">{{ isDictationPointExpanded(p) ? '▾' : '▸' }}</span>
+                                    </div>
+                                </div>
+                                <div v-show="isDictationPointExpanded(p)" class="dictation-point-body">
+                                    <div v-if="p.mnemonic" class="dictation-mnemonic">
+                                        <span class="dictation-mnemonic-label">口诀</span>
+                                        <span class="dictation-mnemonic-text">{{ p.mnemonic }}</span>
+                                    </div>
+                                    <ul class="dictation-item-list">
+                                        <li v-for="(item, index) in p.items" :key="index">{{ item }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 案例分析及计算冲刺模块 -->
+                <div v-if="currentTab === 'caseSprint'" class="module">
+                    <div class="case-sprint-hero">
+                        <div class="case-sprint-hero-badge">2026.10 案例冲刺</div>
+                        <h2>🧮 案例分析及计算冲刺</h2>
+                        <p>通用方法论 · 九大领域找茬模板 · 计算题答题模板 · 高频简答 · 易混辨析</p>
+                    </div>
+
+                    <!-- 子模块导航 -->
+                    <div class="case-sprint-tabs">
+                        <button :class="['case-sprint-tab', {active: caseSprintView === 'method'}]" @click="switchCaseSprintView('method')">📖 方法论</button>
+                        <button :class="['case-sprint-tab', {active: caseSprintView === 'domains'}]" @click="switchCaseSprintView('domains')">🛠️ 找茬模板</button>
+                        <button :class="['case-sprint-tab', {active: caseSprintView === 'calc'}]" @click="switchCaseSprintView('calc')">🧮 计算题</button>
+                        <button :class="['case-sprint-tab', {active: caseSprintView === 'qa'}]" @click="switchCaseSprintView('qa')">❓ 高频简答</button>
+                        <button :class="['case-sprint-tab', {active: caseSprintView === 'confusables'}]" @click="switchCaseSprintView('confusables')">🔀 易混辨析</button>
+                    </div>
+
+                    <!-- 方法论 -->
+                    <div v-if="caseSprintView === 'method' && caseSprintData" class="case-sprint-section">
+                        <div class="case-sprint-general-rule">{{ caseSprintData.method.generalRule }}</div>
+
+                        <h3 class="case-sprint-block-title">📌 三类题型</h3>
+                        <div class="case-sprint-type-grid">
+                            <div v-for="(t, index) in caseSprintData.method.types" :key="index" class="case-sprint-type-card">
+                                <div class="case-sprint-type-name">{{ t.name }}</div>
+                                <div class="case-sprint-type-ask"><b>题干常见问法：</b>{{ t.ask }}</div>
+                                <div class="case-sprint-type-tips">{{ t.tips }}</div>
+                            </div>
+                        </div>
+
+                        <h3 class="case-sprint-block-title">🧭 情境四格读题法</h3>
+                        <div class="case-sprint-four-grid">
+                            <div v-for="(f, index) in caseSprintData.method.fourGrid" :key="index" class="case-sprint-four-card">
+                                <div class="case-sprint-four-dim">{{ f.dim }}</div>
+                                <div class="case-sprint-four-desc">{{ f.desc }}</div>
+                            </div>
+                        </div>
+
+                        <h3 class="case-sprint-block-title">🔍 11 条线索词对照表</h3>
+                        <div class="case-sprint-table-card">
+                            <table class="case-sprint-table">
+                                <thead>
+                                    <tr><th>线索词（题干出现）</th><th>对应问题</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(c, index) in caseSprintData.method.clueTable" :key="index">
+                                        <td>{{ c.clue }}</td>
+                                        <td>{{ c.problem }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h3 class="case-sprint-block-title">🧰 8 条万能找茬模板</h3>
+                        <div class="case-sprint-universal-list">
+                            <div v-for="(tpl, index) in caseSprintData.method.universalTemplates" :key="index" class="case-sprint-universal-item">
+                                <span class="case-sprint-universal-no">{{ index + 1 }}</span>
+                                <span>{{ tpl }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 九大领域找茬模板 -->
+                    <div v-if="caseSprintView === 'domains' && caseSprintData" class="case-sprint-section">
+                        <div class="case-sprint-domain-tabs">
+                            <button v-for="d in caseSprintData.domains"
+                                    :key="d.id"
+                                    :class="['case-sprint-domain-tab', {active: caseSprintDomainId === d.id}]"
+                                    @click="selectCaseDomain(d.id)">{{ d.name }}</button>
+                        </div>
+
+                        <div v-if="currentCaseDomain" class="case-sprint-domain-content">
+                            <h3 class="case-sprint-block-title">🔗 过程链</h3>
+                            <div class="case-sprint-process-chain">{{ currentCaseDomain.process }}</div>
+
+                            <h3 class="case-sprint-block-title">💡 关键记忆点</h3>
+                            <div class="case-sprint-memory">{{ currentCaseDomain.memory }}</div>
+
+                            <h3 class="case-sprint-block-title">⚠️ 常见问题</h3>
+                            <div class="case-sprint-problem-list">
+                                <div v-for="(prob, index) in currentCaseDomain.problems" :key="index" class="case-sprint-problem-item">{{ prob }}</div>
+                            </div>
+
+                            <h3 class="case-sprint-block-title">📝 答题模板句式</h3>
+                            <div class="case-sprint-template-list">
+                                <div v-for="(tpl, index) in currentCaseDomain.templates" :key="index" class="case-sprint-template-card">
+                                    <span class="case-sprint-universal-no">{{ index + 1 }}</span>
+                                    <span>{{ tpl }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 计算题 -->
+                    <div v-if="caseSprintView === 'calc' && caseSprintData" class="case-sprint-section">
+                        <div class="case-sprint-calc-tabs">
+                            <button v-for="c in caseSprintData.calc"
+                                    :key="c.id"
+                                    :class="['case-sprint-calc-tab', {active: caseSprintCalcId === c.id}]"
+                                    @click="selectCaseCalc(c.id)">
+                                <span class="case-sprint-calc-star">★</span>
+                                <span>{{ c.name }}</span>
+                            </button>
+                        </div>
+
+                        <div v-if="currentCaseCalc" class="case-sprint-calc-content">
+                            <div class="case-sprint-calc-head">
+                                <h3 class="case-sprint-block-title">{{ currentCaseCalc.name }}</h3>
+                                <span class="case-sprint-calc-tag">{{ currentCaseCalc.tag }}</span>
+                            </div>
+
+                            <h4 class="case-sprint-sub-title">公式</h4>
+                            <div class="case-sprint-formula-grid">
+                                <div v-for="(f, index) in currentCaseCalc.formulas" :key="index" class="case-sprint-formula-card">
+                                    <div class="case-sprint-formula-name">{{ f.name }}</div>
+                                    <div class="case-sprint-formula-expr">{{ f.formula }}</div>
+                                    <div v-if="f.judge" class="case-sprint-formula-judge">{{ f.judge }}</div>
+                                </div>
+                            </div>
+
+                            <h4 class="case-sprint-sub-title">解题步骤</h4>
+                            <div class="case-sprint-steps">
+                                <div class="case-sprint-step-item">
+                                    <span class="case-sprint-step-no">→</span>
+                                    <span>{{ currentCaseCalc.steps }}</span>
+                                </div>
+                            </div>
+
+                            <div v-if="currentCaseCalc.example" class="case-sprint-example-card">
+                                <h4 class="case-sprint-sub-title">答题示例</h4>
+                                <pre class="case-sprint-example">{{ currentCaseCalc.example }}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 高频简答 -->
+                    <div v-if="caseSprintView === 'qa' && caseSprintData" class="case-sprint-section">
+                        <div class="case-sprint-qa-grid">
+                            <div v-for="q in caseSprintData.qa" :key="q.id" class="case-sprint-qa-card">
+                                <div class="case-sprint-qa-question">{{ q.title }}</div>
+                                <div class="case-sprint-qa-answer">{{ q.content }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 易混辨析 -->
+                    <div v-if="caseSprintView === 'confusables' && caseSprintData" class="case-sprint-section">
+                        <div class="case-sprint-confus-grid">
+                            <div v-for="x in caseSprintData.confusables" :key="x.id" class="case-sprint-confus-card">
+                                <div class="case-sprint-confus-title">{{ x.title }}</div>
+                                <div class="case-sprint-confus-key">
+                                    <b>关键区分：</b>{{ x.content }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 教材课后习题模块 -->
                 <div v-if="currentTab === 'textbook'" class="module">
                     <div class="module-header">
@@ -1438,6 +1683,8 @@
     <script src="textbook_exercises_data.js"></script>
     <script src="sprint_questions.js?v=2"></script>
     <script src="handbook_data.js?v=2"></script>
-    <script src="app.js?v=12"></script>
+    <script src="dictation_data.js?v=1"></script>
+    <script src="case_sprint_data.js?v=1"></script>
+    <script src="app.js?v=13"></script>
 </body>
 </html>

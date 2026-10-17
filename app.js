@@ -48,6 +48,8 @@ new Vue({
             { id: 'practice', icon: '✍️', text: '真题练习', shortText: '练习' },
             { id: 'handbook', icon: '🎯', text: '考点冲刺', shortText: '考点' },
             { id: 'sprint', icon: '⚡', text: '选择冲刺', shortText: '冲刺' },
+            { id: 'dictation', icon: '📝', text: '高频默写', shortText: '默写' },
+            { id: 'caseSprint', icon: '🧮', text: '案例冲刺', shortText: '案例' },
             { id: 'textbook', icon: '📖', text: '教材习题', shortText: '教材' },
             { id: 'review', icon: '🚀', text: '冲刺复习', shortText: '复习' },
             { id: 'exam', icon: '📊', text: '模拟考试', shortText: '考试' },
@@ -193,7 +195,23 @@ new Vue({
         sprintReviewMode: false,   // 解析模式
         sprintResult: { score: 0, correct: 0, total: 0, answered: 0, duration: '', perChapter: [], wrongIds: [] },
         showSprintSheet: false,    // 答题卡展开
-        sprintStartTime: null      // 开考时间
+        sprintStartTime: null,      // 开考时间
+
+        // 高频默写知识点模块状态
+        dictationData: window.dictationData || [],
+        mnemonicTable: window.mnemonicTable || [],   // 核心口诀速查表（33条）
+        dictationCategoryId: (window.dictationData && window.dictationData[0]) ? window.dictationData[0].id : '',
+        dictationExpanded: {},      // 考点展开状态 { pointId: true }
+        dictationAllExpanded: true, // 是否全部展开
+        dictationMarked: {},        // 收藏/重点标记 { pointId: true }
+
+        // 案例分析及计算冲刺模块状态
+        caseSprintData: window.caseSprintData || null,
+        caseSprintView: 'method',   // method | domains | calc | qa | confusables
+        caseSprintDomainId: (window.caseSprintData && window.caseSprintData.domains && window.caseSprintData.domains[0]) ? window.caseSprintData.domains[0].id : '',
+        caseSprintCalcId: (window.caseSprintData && window.caseSprintData.calc && window.caseSprintData.calc[0]) ? window.caseSprintData.calc[0].id : '',
+        caseSprintExpanded: {},     // 模板展开状态 { templateId: true }
+        caseSprintCalcExpanded: {}  // 计算题展开状态 { calcId: true }
     },
     
     computed: {
@@ -436,6 +454,33 @@ new Vue({
         sprintProgressPercent: function() {
             if (!this.sprintQuestions || this.sprintQuestions.length === 0) return 0;
             return Math.round(this.sprintAnsweredCount / this.sprintQuestions.length * 100);
+        },
+
+        // 高频默写：当前分类
+        currentDictationCategory: function() {
+            var self = this;
+            if (!this.dictationData || !this.dictationData.length) return null;
+            return this.dictationData.find(function(c) { return c.id === self.dictationCategoryId; }) || null;
+        },
+
+        // 高频默写：重点标记数量
+        dictationMarkedCount: function() {
+            var self = this;
+            return Object.keys(this.dictationMarked).filter(function(k) { return self.dictationMarked[k]; }).length;
+        },
+
+        // 案例冲刺：当前领域
+        currentCaseDomain: function() {
+            var self = this;
+            if (!this.caseSprintData || !this.caseSprintData.domains) return null;
+            return this.caseSprintData.domains.find(function(d) { return d.id === self.caseSprintDomainId; }) || null;
+        },
+
+        // 案例冲刺：当前计算题
+        currentCaseCalc: function() {
+            var self = this;
+            if (!this.caseSprintData || !this.caseSprintData.calc) return null;
+            return this.caseSprintData.calc.find(function(c) { return c.id === self.caseSprintCalcId; }) || null;
         }
     },
     
@@ -571,6 +616,8 @@ new Vue({
                 await self.loadProgress();
 
                 self.loadSprintMarks();
+
+                self.loadDictationMarks();
 
                 await Promise.all([
                     self.loadQuestions(),
@@ -2289,6 +2336,91 @@ new Vue({
             } else {
                 this.showLearningDialog = false;
             }
+        },
+
+        // ===== 高频默写知识点方法 =====
+        switchDictationCategory: function(categoryId) {
+            this.dictationCategoryId = categoryId;
+            this.dictationExpanded = {};
+            window.scrollTo(0, 0);
+        },
+
+        isDictationPointExpanded: function(p) {
+            return this.dictationExpanded[p.id] !== false;
+        },
+
+        toggleDictationPoint: function(p) {
+            var current = !!this.dictationExpanded[p.id];
+            this.$set(this.dictationExpanded, p.id, !current);
+        },
+
+        toggleDictationAll: function() {
+            var self = this;
+            var allExpanded = !this.dictationAllExpanded;
+            this.dictationAllExpanded = allExpanded;
+            if (this.currentDictationCategory) {
+                this.currentDictationCategory.points.forEach(function(p) {
+                    self.$set(self.dictationExpanded, p.id, allExpanded);
+                });
+            }
+        },
+
+        toggleDictationMark: function(p) {
+            var key = p.id;
+            var marked = !this.dictationMarked[key];
+            this.$set(this.dictationMarked, key, marked);
+            try {
+                localStorage.setItem('examapp_dictation_marks', JSON.stringify(this.dictationMarked));
+            } catch (e) {}
+        },
+
+        isDictationMarked: function(p) {
+            return !!this.dictationMarked[p.id];
+        },
+
+        loadDictationMarks: function() {
+            try {
+                var raw = localStorage.getItem('examapp_dictation_marks');
+                if (raw) {
+                    this.dictationMarked = JSON.parse(raw) || {};
+                }
+            } catch (e) {
+                this.dictationMarked = {};
+            }
+        },
+
+        // ===== 案例分析及计算冲刺方法 =====
+        switchCaseSprintView: function(view) {
+            this.caseSprintView = view;
+            window.scrollTo(0, 0);
+        },
+
+        selectCaseDomain: function(domainId) {
+            this.caseSprintDomainId = domainId;
+            window.scrollTo(0, 0);
+        },
+
+        selectCaseCalc: function(calcId) {
+            this.caseSprintCalcId = calcId;
+            window.scrollTo(0, 0);
+        },
+
+        isCaseTemplateExpanded: function(t) {
+            return this.caseSprintExpanded[t.id] !== false;
+        },
+
+        toggleCaseTemplate: function(t) {
+            var current = !!this.caseSprintExpanded[t.id];
+            this.$set(this.caseSprintExpanded, t.id, !current);
+        },
+
+        isCaseCalcExpanded: function(c) {
+            return this.caseSprintCalcExpanded[c.id] !== false;
+        },
+
+        toggleCaseCalc: function(c) {
+            var current = !!this.caseSprintCalcExpanded[c.id];
+            this.$set(this.caseSprintCalcExpanded, c.id, !current);
         }
     },
     

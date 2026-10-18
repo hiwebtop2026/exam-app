@@ -52,7 +52,7 @@ new Vue({
             { id: 'mustMemorize', icon: '📌', text: '考前必背', shortText: '必背' },
             { id: 'caseSprint', icon: '🧮', text: '案例冲刺', shortText: '案例' },
             { id: 'textbook', icon: '📖', text: '教材习题', shortText: '教材' },
-            { id: 'review', icon: '🚀', text: '冲刺复习', shortText: '复习' },
+            { id: 'english', icon: '🔤', text: '专业英语', shortText: '英语' },
             { id: 'exam', icon: '📊', text: '模拟考试', shortText: '考试' },
             { id: 'mockExam', icon: '💻', text: '机考模拟', shortText: '机考' },
             { id: 'mistakes', icon: '❌', text: '错题本', shortText: '错题' },
@@ -91,14 +91,6 @@ new Vue({
         },
 
         years: [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017],
-        
-        flashcards: [],
-        coreFormulas: [],
-        
-        // 冲刺复习状态
-        reviewMode: 'flashcards',
-        currentFlashcard: null,
-        flashcardFlipped: false,
         
         // 考试状态
         examRecords: [],
@@ -161,6 +153,16 @@ new Vue({
         
         // 错题本
         mistakeBook: [],
+        
+        // 专业英语模块状态
+        englishData: window.englishData || null,
+        englishView: 'trends',              // trends | vocab | quiz
+        englishVocabCatId: (window.englishData && window.englishData.vocabCategories && window.englishData.vocabCategories[0]) ? window.englishData.vocabCategories[0].id : '',
+        englishHideZh: false,               // 默记模式（隐藏中文释义）
+        englishRevealed: {},                // 默记模式下已点开的释义 { en: true }
+        englishMarks: {},                   // 重点词汇标记 { en: true }
+        englishQuizDomain: 'all',           // all | pm | it | sec
+        englishQuizAnswers: {},             // 真题作答记录 { qid: label }
         
         // 加载状态
         isLoading: false,
@@ -345,10 +347,51 @@ new Vue({
             };
         },
         
-        formulas: function() {
-            return this.coreFormulas;
+        // ===== 专业英语 computed =====
+        englishTrends: function() {
+            return this.englishData ? this.englishData.trends : [];
         },
-        
+        englishVocabCategories: function() {
+            return this.englishData ? this.englishData.vocabCategories : [];
+        },
+        currentEnglishVocabCat: function() {
+            var self = this;
+            return this.englishVocabCategories.find(function(c) { return c.id === self.englishVocabCatId; }) || null;
+        },
+        englishVocabTotal: function() {
+            var total = 0;
+            this.englishVocabCategories.forEach(function(c) { total += c.words.length; });
+            return total;
+        },
+        englishVocabMarkedCount: function() {
+            var marks = this.englishMarks;
+            return Object.keys(marks).filter(function(k) { return marks[k]; }).length;
+        },
+        englishQuestions: function() {
+            return this.englishData ? this.englishData.questions : [];
+        },
+        englishDomains: function() {
+            return [
+                { id: 'all', name: '全部' },
+                { id: 'pm', name: '🧭 项目管理' },
+                { id: 'it', name: '💡 新技术' },
+                { id: 'sec', name: '🔐 安全服务' }
+            ];
+        },
+        englishFilteredQuestions: function() {
+            var self = this;
+            if (this.englishQuizDomain === 'all') return this.englishQuestions;
+            return this.englishQuestions.filter(function(q) { return q.domain === self.englishQuizDomain; });
+        },
+        englishAnsweredCount: function() {
+            var answers = this.englishQuizAnswers;
+            return this.englishFilteredQuestions.filter(function(q) { return !!answers[q.id]; }).length;
+        },
+        englishCorrectCount: function() {
+            var answers = this.englishQuizAnswers;
+            return this.englishFilteredQuestions.filter(function(q) { return answers[q.id] === q.answer; }).length;
+        },
+
         fontSizeClass: function() {
             return 'font-size-' + this.settings.fontSize;
         },
@@ -675,10 +718,12 @@ new Vue({
 
                 self.loadMustMemorizeMarks();
 
+                self.loadEnglishMarks();
+
+                self.loadEnglishQuiz();
+
                 await Promise.all([
                     self.loadQuestions(),
-                    self.loadFormulas(),
-                    self.loadFlashcards(),
                     self.loadMistakes(),
                     self.loadTextbookExercises(),
                     self.loadSprintPapers()
@@ -701,37 +746,6 @@ new Vue({
         
         loadQuestions: function() {
             this.questions = window.questionsData || [];
-            return Promise.resolve();
-        },
-        
-        loadFormulas: function() {
-            var allFormulas = [];
-            for (var category in formulasData) {
-                if (formulasData.hasOwnProperty(category)) {
-                    var formulas = formulasData[category].map(function(f) {
-                        return {
-                            id: f.id,
-                            name: f.name,
-                            category: f.category,
-                            formula: f.expression,
-                            description: f.explanation,
-                            example: f.variables ? f.variables.map(function(v) {
-                                return v.name + ': ' + v.desc;
-                            }).join('；') : '',
-                            variables: f.variables
-                        };
-                    });
-                    allFormulas = allFormulas.concat(formulas);
-                }
-            }
-            this.coreFormulas = allFormulas.slice(0, 12);
-            return Promise.resolve();
-        },
-        
-        loadFlashcards: function() {
-            this.flashcards = flashcardsData.map(function(card) {
-                return Object.assign({}, card, { flipped: false });
-            });
             return Promise.resolve();
         },
         
@@ -1719,115 +1733,58 @@ new Vue({
             this.isSubmitting = false;
         },
         
-        // 冲刺复习方法
-        flipFlashcard: function() {
-            this.flashcardFlipped = !this.flashcardFlipped;
+        // ==================== 专业英语模块 ====================
+        switchEnglishView: function(view) {
+            this.englishView = view;
+            window.scrollTo(0, 0);
         },
-        
-        markFlashcardKnown: function() {
-            if (!this.currentFlashcard) return;
-            
-            // 从flashcards中移除
-            var index = this.flashcards.findIndex(function(c) { 
-                return c.id === this.currentFlashcard.id; 
-            }.bind(this));
-            
-            if (index > -1) {
-                this.flashcards.splice(index, 1);
-            }
-            
-            // 更新数据库状态
-            if (db.updateFlashcardStatus) {
-                db.updateFlashcardStatus(this.currentFlashcard.id, 'known');
-            }
-            
-            // 重置状态
-            this.flashcardFlipped = false;
-            this.currentFlashcard = this.flashcards.length > 0 ? this.flashcards[0] : null;
+        switchEnglishVocabCat: function(catId) {
+            this.englishVocabCatId = catId;
         },
-        
-        markFlashcardUnknown: function() {
-            if (!this.currentFlashcard) return;
-            
-            // 将卡片放到队列末尾，稍后复习
-            var card = this.currentFlashcard;
-            this.flashcards.push(card);
-            this.flashcards.shift();
-            
-            // 更新数据库状态
-            if (db.updateFlashcardStatus) {
-                db.updateFlashcardStatus(card.id, 'unknown');
-            }
-            
-            // 重置状态
-            this.flashcardFlipped = false;
-            this.currentFlashcard = this.flashcards.length > 0 ? this.flashcards[0] : null;
+        toggleEnglishHideZh: function() {
+            this.englishHideZh = !this.englishHideZh;
+            if (!this.englishHideZh) this.englishRevealed = {};
         },
-        
-        resetFlashcards: function() {
-            // 重新加载所有flashcards
-            this.loadFlashcards();
-            this.flashcardFlipped = false;
+        toggleEnglishWord: function(w) {
+            if (!this.englishHideZh) return;
+            this.$set(this.englishRevealed, w.en, !this.englishRevealed[w.en]);
         },
-        
-        loadFlashcards: function() {
-            var self = this;
-            // 从关键知识点生成复习卡片
-            var flashcards = [];
-            var id = 1;
-
-            // 如果 chapters 还没有加载，使用 flashcardsData 作为备用
-            var chapters = this.chapters && this.chapters.length > 0 ? this.chapters : [];
-
-            chapters.forEach(function(chapter) {
-                if (chapter.keypoints) {
-                    chapter.keypoints.forEach(function(point) {
-                        // 加载全部卡片内容，不区分重要性级别
-                        flashcards.push({
-                            id: id++,
-                            question: point.title,
-                            answer: point.content || '请查看详细内容',
-                            chapterId: chapter.id,
-                            chapterName: chapter.name,
-                            level: point.level
-                        });
-                    });
-                }
-            });
-
-            // 如果 chapters 没有生成卡片，使用 flashcardsData 作为备用
-            if (flashcards.length === 0 && typeof flashcardsData !== 'undefined') {
-                flashcards = flashcardsData.map(function(card, index) {
-                    return {
-                        id: card.id || index + 1,
-                        question: card.question,
-                        answer: card.answer,
-                        chapterId: card.chapter || 'general',
-                        chapterName: card.chapter || '通用'
-                    };
-                });
-            }
-
-            // 随机打乱顺序
-            flashcards.sort(function() { return Math.random() - 0.5; });
-
-            this.flashcards = flashcards;
-            this.currentFlashcard = flashcards.length > 0 ? flashcards[0] : null;
+        toggleEnglishMark: function(w) {
+            this.$set(this.englishMarks, w.en, !this.englishMarks[w.en]);
+            localStorage.setItem('examapp_english_marks', JSON.stringify(this.englishMarks));
         },
-        
-        markCard: function(card, status) {
-            card.flipped = false;
-            
-            if (status === 'know') {
-                var index = this.flashcards.findIndex(function(c) { 
-                    return c.id === card.id; 
-                });
-                if (index > -1) {
-                    this.flashcards.splice(index, 1);
-                }
+        loadEnglishMarks: function() {
+            try {
+                var raw = localStorage.getItem('examapp_english_marks');
+                if (raw) this.englishMarks = JSON.parse(raw) || {};
+            } catch (e) {
+                this.englishMarks = {};
             }
-            
-            db.updateFlashcardStatus(card.id, status);
+        },
+        setEnglishDomain: function(id) {
+            this.englishQuizDomain = id;
+        },
+        englishDomainName: function(domain) {
+            var map = { pm: '项目管理', it: '新技术', sec: '安全服务' };
+            return map[domain] || domain;
+        },
+        selectEnglishOption: function(q, label) {
+            if (this.englishQuizAnswers[q.id]) return; // 已作答不可改
+            this.$set(this.englishQuizAnswers, q.id, label);
+            localStorage.setItem('examapp_english_quiz', JSON.stringify(this.englishQuizAnswers));
+        },
+        resetEnglishQuiz: function() {
+            this.englishQuizAnswers = {};
+            localStorage.removeItem('examapp_english_quiz');
+            window.scrollTo(0, 0);
+        },
+        loadEnglishQuiz: function() {
+            try {
+                var raw = localStorage.getItem('examapp_english_quiz');
+                if (raw) this.englishQuizAnswers = JSON.parse(raw) || {};
+            } catch (e) {
+                this.englishQuizAnswers = {};
+            }
         },
         
         startExam: function(type) {

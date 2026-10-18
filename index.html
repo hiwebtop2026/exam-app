@@ -503,46 +503,94 @@
                     </div>
                 </div>
 
-                <!-- 冲刺复习模块 -->
-                <div v-if="currentTab === 'review'" class="module">
-                    <div class="review-mode-selector">
-                        <button :class="['mode-btn', {active: reviewMode === 'flashcards'}]" 
-                                @click="reviewMode = 'flashcards'">🎯 快速复习</button>
-                        <button :class="['mode-btn', {active: reviewMode === 'formulas'}]" 
-                                @click="reviewMode = 'formulas'">📐 核心公式</button>
+                <!-- 专业英语模块 -->
+                <div v-if="currentTab === 'english'" class="module">
+                    <div class="eng-hero">
+                        <div class="eng-hero-badge">2026.10 考前冲刺</div>
+                        <h2>🔤 专业英语</h2>
+                        <p>上午卷第 71-75 题 · 共 5 分 · 高频词汇 + 历年真题全覆盖</p>
                     </div>
-                    
-                    <div v-if="reviewMode === 'flashcards'" class="flashcards-container">
-                        <div v-if="currentFlashcard" class="flashcard">
-                            <div class="flashcard-inner" :class="{flipped: flashcardFlipped}" @click="flipFlashcard">
-                                <div class="flashcard-front">
-                                    <h3>{{ currentFlashcard.question }}</h3>
-                                    <p class="flashcard-hint">点击翻转查看答案</p>
+
+                    <div class="eng-tabs">
+                        <button :class="['eng-tab', {active: englishView === 'trends'}]" @click="switchEnglishView('trends')">📊 命题趋势</button>
+                        <button :class="['eng-tab', {active: englishView === 'vocab'}]" @click="switchEnglishView('vocab')">📖 高频词汇</button>
+                        <button :class="['eng-tab', {active: englishView === 'quiz'}]" @click="switchEnglishView('quiz')">✍️ 真题演练</button>
+                    </div>
+
+                    <!-- 命题趋势视图 -->
+                    <div v-if="englishView === 'trends'">
+                        <div class="eng-stats">
+                            <div class="eng-stat"><b>5</b><span>题量(71-75题)</span></div>
+                            <div class="eng-stat"><b>3</b><span>大命题方向</span></div>
+                            <div class="eng-stat"><b>{{ englishQuestions.length }}</b><span>历年真题</span></div>
+                            <div class="eng-stat"><b>{{ englishVocabTotal }}</b><span>高频词汇</span></div>
+                        </div>
+                        <div v-for="t in englishTrends" :key="t.title" class="eng-trend-card">
+                            <div class="eng-trend-head"><span class="eng-trend-icon">{{ t.icon }}</span><h3>{{ t.title }}</h3></div>
+                            <p>{{ t.desc }}</p>
+                        </div>
+                    </div>
+
+                    <!-- 高频词汇视图 -->
+                    <div v-if="englishView === 'vocab'">
+                        <div class="eng-vocab-tabs">
+                            <button v-for="cat in englishVocabCategories" :key="cat.id"
+                                    :class="['eng-vocab-tab', {active: englishVocabCatId === cat.id}]"
+                                    @click="switchEnglishVocabCat(cat.id)">
+                                <span>{{ cat.icon }}</span><span>{{ cat.title }}</span>
+                            </button>
+                        </div>
+                        <div class="eng-toolbar" v-if="currentEnglishVocabCat">
+                            <span>{{ currentEnglishVocabCat.words.length }} 词 · ⭐ {{ englishVocabMarkedCount }} 个重点</span>
+                            <button class="btn-secondary" @click="toggleEnglishHideZh">{{ englishHideZh ? '👁 显示释义' : '📝 默记模式' }}</button>
+                        </div>
+                        <div class="eng-word-grid" v-if="currentEnglishVocabCat">
+                            <div v-for="w in currentEnglishVocabCat.words" :key="w.en"
+                                 :class="['eng-word-card', {marked: englishMarks[w.en]}]"
+                                 @click="toggleEnglishWord(w)">
+                                <div class="eng-word-en">
+                                    <span>{{ w.en }}</span>
+                                    <span class="eng-word-star" @click.stop="toggleEnglishMark(w)">{{ englishMarks[w.en] ? '★' : '☆' }}</span>
                                 </div>
-                                <div class="flashcard-back">
-                                    <h3>答案</h3>
-                                    <p>{{ currentFlashcard.answer }}</p>
-                                    <div class="flashcard-actions">
-                                        <button class="btn-success" @click.stop="markFlashcardKnown">✓ 已掌握</button>
-                                        <button class="btn-warning" @click.stop="markFlashcardUnknown">✗ 未掌握</button>
-                                    </div>
-                                </div>
+                                <div class="eng-word-zh" v-show="!englishHideZh || englishRevealed[w.en]">{{ w.zh }}<span v-if="w.note" class="eng-word-note"> · {{ w.note }}</span></div>
+                                <div class="eng-word-tip" v-show="englishHideZh && !englishRevealed[w.en]">点击显示释义</div>
                             </div>
                         </div>
-                        <div v-else class="review-complete">
-                            <h3>🎉 本轮复习完成！</h3>
-                            <p>你已完成所有复习卡片</p>
-                            <button class="btn-primary" @click="resetFlashcards">重新开始</button>
-                        </div>
                     </div>
-                    
-                    <div v-if="reviewMode === 'formulas'" class="formulas-grid">
-                        <div v-for="formula in formulas" :key="formula.id" class="formula-card">
-                            <h4>{{ formula.name }}</h4>
-                            <div class="formula">{{ formula.formula }}</div>
-                            <p class="formula-desc">{{ formula.description }}</p>
-                            <div class="formula-example">
-                                <strong>示例：</strong>{{ formula.example }}
+
+                    <!-- 真题演练视图 -->
+                    <div v-if="englishView === 'quiz'">
+                        <div class="eng-domain-tabs">
+                            <button v-for="d in englishDomains" :key="d.id"
+                                    :class="['eng-domain-tab', {active: englishQuizDomain === d.id}]"
+                                    @click="setEnglishDomain(d.id)">{{ d.name }}</button>
+                        </div>
+                        <div class="eng-toolbar">
+                            <span>已答 {{ englishAnsweredCount }}/{{ englishFilteredQuestions.length }} · 正确 {{ englishCorrectCount }}<span v-if="englishAnsweredCount > 0">（{{ Math.round(englishCorrectCount / englishAnsweredCount * 100) }}%）</span></span>
+                            <button class="btn-secondary" @click="resetEnglishQuiz">🔄 重置作答</button>
+                        </div>
+                        <div v-for="q in englishFilteredQuestions" :key="q.id" class="eng-q-card">
+                            <div class="eng-q-meta">
+                                <span class="eng-q-year">{{ q.year }}</span>
+                                <span class="eng-q-domain">{{ englishDomainName(q.domain) }}</span>
+                            </div>
+                            <div class="eng-q-stem">{{ q.question }}</div>
+                            <div class="options">
+                                <div v-for="opt in q.options" :key="opt.label"
+                                     :class="['option', {
+                                         correct: englishQuizAnswers[q.id] && opt.label === q.answer,
+                                         wrong: englishQuizAnswers[q.id] === opt.label && opt.label !== q.answer
+                                     }]"
+                                     @click="selectEnglishOption(q, opt.label)">
+                                    <span class="option-label">{{ opt.label }}</span>
+                                    <span class="option-text">{{ opt.text }}</span>
+                                </div>
+                            </div>
+                            <div v-if="englishQuizAnswers[q.id]" class="eng-exp">
+                                <b :class="englishQuizAnswers[q.id] === q.answer ? 'eng-ok' : 'eng-no'">
+                                    {{ englishQuizAnswers[q.id] === q.answer ? '✅ 回答正确' : '❌ 正确答案：' + q.answer }}
+                                </b>
+                                <p>{{ q.explanation }}</p>
                             </div>
                         </div>
                     </div>
@@ -1946,7 +1994,6 @@
     <script src="db.js"></script>
     <script src="questions.js?v=7"></script>
     <script src="chapters.js"></script>
-    <script src="formulas.js"></script>
     <script src="mindmap.js"></script>
     <script src="case_templates.js"></script>
     <script src="textbook_exercises_data.js"></script>
@@ -1958,6 +2005,7 @@
     <script src="mock_exam_a.js?v=1"></script>
     <script src="mock_exam_b.js?v=1"></script>
     <script src="mock_exam_c.js?v=1"></script>
-    <script src="app.js?v=15"></script>
+    <script src="english_data.js?v=1"></script>
+    <script src="app.js?v=16"></script>
 </body>
 </html>

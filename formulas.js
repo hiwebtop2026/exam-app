@@ -129,15 +129,16 @@ const formulasData = {
         },
         {
             id: 'f-cost-6',
-            name: '完工尚需估算',
+            name: '完工尚需估算 ETC / 完工估算 EAC',
             category: '成本管理',
-            expression: 'ETC = (BAC - EV) / CPI',
-            explanation: '还需多少成本完成剩余工作',
+            expression: '典型偏差：ETC=(BAC-EV)/CPI，EAC=BAC/CPI；非典型偏差：ETC=BAC-EV，EAC=AC+(BAC-EV)',
+            explanation: '典型偏差=后续按当前CPI绩效继续；非典型偏差=后续按计划绩效执行（与 handbook 13-7 对齐）',
             variables: [
                 { name: 'ETC', desc: '完工尚需估算 (Estimate to Complete)' },
                 { name: 'BAC', desc: '完工预算' },
                 { name: 'EV', desc: '挣值' },
-                { name: 'CPI', desc: '成本绩效指数' }
+                { name: 'CPI', desc: '成本绩效指数' },
+                { name: 'AC', desc: '实际成本' }
             ]
         },
         {
@@ -245,7 +246,7 @@ const flashcardsData = [
     },
     {
         id: 'fc-8',
-        category: '人力资源管理',
+        category: '资源管理',
         question: '冲突解决的最佳方法是什么？',
         answer: '合作/解决问题是最佳方法，能实现双赢。其他方法包括：撤退、缓和、妥协、强迫。'
     },
@@ -258,8 +259,8 @@ const flashcardsData = [
     {
         id: 'fc-10',
         category: '质量管理',
-        question: '质量管理七工具是哪些？',
-        answer: '1. 因果图（鱼骨图）\n2. 流程图\n3. 核查表\n4. 帕累托图\n5. 直方图\n6. 控制图\n7. 散点图'
+        question: '管理质量与控制质量的数据表现工具有哪些？（第3版教材口径）',
+        answer: '管理质量（6种）：亲和图、因果图、流程图、直方图、矩阵图、散点图\n控制质量（4种）：因果图、控制图、直方图、散点图\n注：因果图=鱼骨图；第3版教材P475-501，不再使用旧版"老七种工具"提法。'
     },
     {
         id: 'fc-11',
@@ -271,7 +272,7 @@ const flashcardsData = [
         id: 'fc-12',
         category: '整体管理',
         question: '十大知识领域是什么？',
-        answer: '整体、范围、进度、成本、质量、人力、沟通、风险、采购、干系人\n口诀：整范进成质，人沟风采干'
+        answer: '整体、范围、进度、成本、质量、资源、沟通、风险、采购、干系人\n口诀：整范进成质，资沟风采干（第3版教材"资源管理"，旧称人力资源管理）'
     }
 ];
 

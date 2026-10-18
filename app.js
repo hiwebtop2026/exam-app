@@ -49,10 +49,12 @@ new Vue({
             { id: 'handbook', icon: '🎯', text: '考点冲刺', shortText: '考点' },
             { id: 'sprint', icon: '⚡', text: '选择冲刺', shortText: '冲刺' },
             { id: 'dictation', icon: '📝', text: '高频默写', shortText: '默写' },
+            { id: 'mustMemorize', icon: '📌', text: '考前必背', shortText: '必背' },
             { id: 'caseSprint', icon: '🧮', text: '案例冲刺', shortText: '案例' },
             { id: 'textbook', icon: '📖', text: '教材习题', shortText: '教材' },
             { id: 'review', icon: '🚀', text: '冲刺复习', shortText: '复习' },
             { id: 'exam', icon: '📊', text: '模拟考试', shortText: '考试' },
+            { id: 'mockExam', icon: '💻', text: '机考模拟', shortText: '机考' },
             { id: 'mistakes', icon: '❌', text: '错题本', shortText: '错题' },
             { id: 'caseAnalysis', icon: '📋', text: '案例模板', shortText: '案例' }
         ],
@@ -116,6 +118,21 @@ new Vue({
             analysis: []
         },
         examReviewMode: false,
+
+        // 机考模拟
+        mockExamData: (window.mockExamPapers ? Object.keys(window.mockExamPapers).map(function(k){ return window.mockExamPapers[k]; }) : []),
+        mockView: 'select',          // select | exam | result
+        mockPaper: null,             // 当前试卷对象
+        mockCurrentSection: 'morning', // morning | afternoon
+        mockQIndex: 0,               // morning: 0-74；afternoon: 0-3（大题序号）
+        mockAnswers: {},              // 上午单选答案 {qid: 'A'}
+        mockCaseAnswers: {},         // 下午案例答案 {bigId: {subNo: 文本 或 ['B','D']}}
+        mockRemaining: 150 * 60,     // 剩余秒数
+        mockTimer: null,
+        mockSubmitted: false,
+        mockScore: 0,
+        mockCorrectCount: 0,
+        mockAreaStats: [],
         
         // 学习状态
         isLearning: false,
@@ -205,6 +222,13 @@ new Vue({
         dictationAllExpanded: true, // 是否全部展开
         dictationMarked: {},        // 收藏/重点标记 { pointId: true }
 
+        // 考前必背 / 应掌握模块状态
+        mustMemorizeData: window.mustMemorizeData || { tiers: [] },
+        mustMemorizeTierId: 'must',  // must | master
+        mustMemorizeExpanded: {},    // 条目展开状态 { itemId: true }
+        mustAllExpanded: true,       // 是否全部展开
+        mustMemorizeMarked: {},      // 重点标记 { itemId: true }
+
         // 案例分析及计算冲刺模块状态
         caseSprintData: window.caseSprintData || null,
         caseSprintView: 'method',   // method | domains | calc | qa | confusables
@@ -218,7 +242,17 @@ new Vue({
         isMobile: function() {
             return window.innerWidth <= 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         },
-        
+
+        mockCurrentQ: function() {
+            if (!this.mockPaper || this.mockCurrentSection !== 'morning') return null;
+            return this.mockPaper.morning[this.mockQIndex] || null;
+        },
+
+        mockCurrentBig: function() {
+            if (!this.mockPaper || this.mockCurrentSection !== 'afternoon') return null;
+            return this.mockPaper.afternoon[this.mockQIndex] || null;
+        },
+
         currentChapterData: function() {
             return this.chapters.find(function(c) { 
                 return c.id === this.currentChapter; 
@@ -469,6 +503,26 @@ new Vue({
             return Object.keys(this.dictationMarked).filter(function(k) { return self.dictationMarked[k]; }).length;
         },
 
+        // 考前必背：当前层级
+        currentMustTier: function() {
+            var self = this;
+            if (!this.mustMemorizeData || !this.mustMemorizeData.tiers) return null;
+            return this.mustMemorizeData.tiers.find(function(t) { return t.id === self.mustMemorizeTierId; }) || null;
+        },
+
+        // 考前必背：当前层级条目总数
+        currentMustTierItemCount: function() {
+            var tier = this.currentMustTier;
+            if (!tier || !tier.groups) return 0;
+            return tier.groups.reduce(function(sum, g) { return sum + (g.items ? g.items.length : 0); }, 0);
+        },
+
+        // 考前必背：重点标记数量
+        mustMemorizeMarkedCount: function() {
+            var self = this;
+            return Object.keys(this.mustMemorizeMarked).filter(function(k) { return self.mustMemorizeMarked[k]; }).length;
+        },
+
         // 案例冲刺：当前领域
         currentCaseDomain: function() {
             var self = this;
@@ -618,6 +672,8 @@ new Vue({
                 self.loadSprintMarks();
 
                 self.loadDictationMarks();
+
+                self.loadMustMemorizeMarks();
 
                 await Promise.all([
                     self.loadQuestions(),
@@ -1979,7 +2035,180 @@ new Vue({
             this.inExam = false;
             this.showExamResult = true;
         },
-        
+
+        // ============ 机考模拟 ============
+        startMockPaper: function(paper) {
+            this.mockPaper = paper;
+            this.mockView = 'exam';
+            this.mockCurrentSection = 'morning';
+            this.mockQIndex = 0;
+            this.mockAnswers = {};
+            this.mockCaseAnswers = {};
+            this.mockRemaining = 150 * 60;
+            this.mockSubmitted = false;
+            this.mockScore = 0;
+            this.mockCorrectCount = 0;
+            this.mockAreaStats = [];
+            var self = this;
+            if (this.mockTimer) { clearInterval(this.mockTimer); }
+            this.mockTimer = setInterval(function() {
+                if (self.mockRemaining > 0) {
+                    self.mockRemaining--;
+                } else {
+                    self.submitMock();
+                }
+            }, 1000);
+            window.scrollTo(0, 0);
+        },
+
+        selectMockOption: function(label) {
+            if (this.mockSubmitted || !this.mockCurrentQ) return;
+            this.$set(this.mockAnswers, this.mockCurrentQ.id, label);
+        },
+
+        switchMockSection: function(sec) {
+            this.mockCurrentSection = sec;
+            this.mockQIndex = 0;
+            window.scrollTo(0, 0);
+        },
+
+        jumpMockQ: function(i) {
+            if (this.mockSubmitted) return;
+            this.mockQIndex = i;
+        },
+
+        nextMockQ: function() {
+            var len = this.mockCurrentSection === 'morning'
+                ? (this.mockPaper ? this.mockPaper.morning.length : 0)
+                : (this.mockPaper ? this.mockPaper.afternoon.length : 0);
+            if (this.mockQIndex < len - 1) this.mockQIndex++;
+        },
+
+        prevMockQ: function() {
+            if (this.mockQIndex > 0) this.mockQIndex--;
+        },
+
+        mockCaseAnswer: function(bigId, subNo) {
+            var big = this.mockCaseAnswers[bigId];
+            if (big && subNo in big) return big[subNo];
+            return null;
+        },
+
+        setMockCaseAnswer: function(bigId, subNo, val) {
+            if (this.mockSubmitted) return;
+            if (!this.mockCaseAnswers[bigId]) {
+                this.$set(this.mockCaseAnswers, bigId, {});
+            }
+            this.$set(this.mockCaseAnswers[bigId], subNo, val);
+        },
+
+        setMockJudge: function(bigId, subNo, val) {
+            this.setMockCaseAnswer(bigId, subNo, val);
+        },
+
+        isMockMultiSelected: function(bigId, subNo, label) {
+            var v = this.mockCaseAnswer(bigId, subNo);
+            return Array.isArray(v) && v.indexOf(label) !== -1;
+        },
+
+        toggleMockMulti: function(bigId, subNo, label) {
+            if (this.mockSubmitted) return;
+            var cur = this.mockCaseAnswer(bigId, subNo);
+            var arr = Array.isArray(cur) ? cur.slice() : [];
+            var idx = arr.indexOf(label);
+            if (idx === -1) arr.push(label); else arr.splice(idx, 1);
+            this.setMockCaseAnswer(bigId, subNo, arr);
+        },
+
+        mockSubTypeName: function(t) {
+            var map = { calc: '计算题', short: '简答题', judge: '判断题', fill: '填空题', multi: '多选式', find: '找错题' };
+            return map[t] || t;
+        },
+
+        mockSubPlaceholder: function(t) {
+            if (t === 'find') return '请逐条指出材料中的错误，并给出正确做法...';
+            if (t === 'calc') return '请写出计算过程与结果...';
+            return '请输入你的答案...';
+        },
+
+        formatMockTime: function(s) {
+            return Utils.formatTime(s);
+        },
+
+        confirmMockSubmit: function() {
+            var answered = Object.keys(this.mockAnswers).length;
+            var total = this.mockPaper ? this.mockPaper.morning.length : 0;
+            if (answered < total) {
+                return confirm('上午单选还有 ' + (total - answered) + ' 道题未作答，确定交卷吗？（案例题不自动判分）');
+            }
+            return confirm('确定交卷吗？');
+        },
+
+        submitMock: function() {
+            if (this.mockSubmitted) return;
+            if (this.mockTimer) { clearInterval(this.mockTimer); this.mockTimer = null; }
+            var self = this;
+            var correct = 0;
+            var areaMap = {};
+            (this.mockPaper.morning || []).forEach(function(q) {
+                var ok = self.mockAnswers[q.id] === q.answer;
+                if (ok) correct++;
+                if (!areaMap[q.area]) areaMap[q.area] = { area: q.area, correct: 0, total: 0 };
+                areaMap[q.area].total++;
+                if (ok) areaMap[q.area].correct++;
+            });
+            var stats = [];
+            for (var k in areaMap) {
+                if (areaMap.hasOwnProperty(k)) {
+                    var row = areaMap[k];
+                    row.accuracy = row.total > 0 ? Math.round(row.correct / row.total * 100) : 0;
+                    stats.push(row);
+                }
+            }
+            this.mockCorrectCount = correct;
+            this.mockScore = correct;
+            this.mockAreaStats = stats;
+            this.mockSubmitted = true;
+            this.mockView = 'result';
+            window.scrollTo(0, 0);
+        },
+
+        isMockQCorrect: function(q) {
+            return this.mockAnswers[q.id] === q.answer;
+        },
+
+        addMockMistake: function(q) {
+            var self = this;
+            var exists = this.mistakeBook.some(function(m) { return m.questionId === q.id; });
+            if (exists) { alert('该题目已在错题本中'); return; }
+            var mistake = {
+                questionId: q.id,
+                question: q.stem,
+                chapterName: q.area,
+                userAnswer: this.mockAnswers[q.id] || '未作答',
+                correctAnswer: q.answer,
+                explanation: q.explanation + (q.ref ? '\n' + q.ref : ''),
+                options: q.options,
+                date: new Date().toLocaleDateString('zh-CN')
+            };
+            db.addMistake(mistake).then(function(id) {
+                mistake.id = id;
+                self.mistakeBook.unshift(mistake);
+                alert('已添加到错题本');
+            }).catch(function(error) {
+                console.error('添加错题失败:', error);
+                alert('添加失败，请重试');
+            });
+        },
+
+        exitMockExam: function() {
+            if (this.mockTimer) { clearInterval(this.mockTimer); this.mockTimer = null; }
+            this.mockView = 'select';
+            this.mockPaper = null;
+            this.mockSubmitted = false;
+            window.scrollTo(0, 0);
+        },
+
         formatExplanation: function(explanation) {
             if (!explanation) return '暂无解析';
             
@@ -2389,6 +2618,59 @@ new Vue({
             }
         },
 
+        // ===== 考前必背 / 应掌握方法 =====
+        switchMustTier: function(tierId) {
+            this.mustMemorizeTierId = tierId;
+            this.mustMemorizeExpanded = {};
+            window.scrollTo(0, 0);
+        },
+
+        isMustItemExpanded: function(item) {
+            return this.mustMemorizeExpanded[item.id] !== false;
+        },
+
+        toggleMustItem: function(item) {
+            var current = !!this.mustMemorizeExpanded[item.id];
+            this.$set(this.mustMemorizeExpanded, item.id, !current);
+        },
+
+        toggleMustAll: function() {
+            var self = this;
+            var allExpanded = !this.mustAllExpanded;
+            this.mustAllExpanded = allExpanded;
+            if (this.currentMustTier && this.currentMustTier.groups) {
+                this.currentMustTier.groups.forEach(function(g) {
+                    (g.items || []).forEach(function(item) {
+                        self.$set(self.mustMemorizeExpanded, item.id, allExpanded);
+                    });
+                });
+            }
+        },
+
+        toggleMustMark: function(item) {
+            var key = item.id;
+            var marked = !this.mustMemorizeMarked[key];
+            this.$set(this.mustMemorizeMarked, key, marked);
+            try {
+                localStorage.setItem('examapp_mustmemorize_marks', JSON.stringify(this.mustMemorizeMarked));
+            } catch (e) {}
+        },
+
+        isMustMarked: function(item) {
+            return !!this.mustMemorizeMarked[item.id];
+        },
+
+        loadMustMemorizeMarks: function() {
+            try {
+                var raw = localStorage.getItem('examapp_mustmemorize_marks');
+                if (raw) {
+                    this.mustMemorizeMarked = JSON.parse(raw) || {};
+                }
+            } catch (e) {
+                this.mustMemorizeMarked = {};
+            }
+        },
+
         // ===== 案例分析及计算冲刺方法 =====
         switchCaseSprintView: function(view) {
             this.caseSprintView = view;
@@ -2447,6 +2729,9 @@ new Vue({
     beforeDestroy: function() {
         if (this.examTimer) {
             clearInterval(this.examTimer);
+        }
+        if (this.mockTimer) {
+            clearInterval(this.mockTimer);
         }
         if (this.learningTimer) {
             clearInterval(this.learningTimer);

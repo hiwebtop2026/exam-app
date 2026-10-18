@@ -735,6 +735,203 @@
                     </div>
                 </div>
 
+                <!-- 机考模拟模块 -->
+                <div v-if="currentTab === 'mockExam'" class="module">
+                    <!-- ① 选卷视图 -->
+                    <div v-if="mockView === 'select'" class="me-select-view">
+                        <div class="me-hero">
+                            <div class="me-hero-badge">2026.10.24/25 正式机考</div>
+                            <h2>💻 机考模拟</h2>
+                            <p>三套全真模拟卷：上午 75 道单选（75 分，45 分及格）+ 下午 4 道案例大题（75 分）。建议用时 150 分钟，交卷后自动批改单选并展示案例参考答案。</p>
+                        </div>
+                        <div class="me-paper-grid">
+                            <div v-for="paper in mockExamData" :key="paper.id" class="me-paper-card" @click="startMockPaper(paper)">
+                                <div class="me-paper-badge">{{ paper.badge }}</div>
+                                <h3>{{ paper.name }}</h3>
+                                <p class="me-paper-stat">📝 上午 {{ paper.morning.length }} 道单选 ＋ 下午 {{ paper.afternoon.length }} 道案例</p>
+                                <p class="me-paper-stat">⏱ 建议时长 150 分钟　满分 75 分</p>
+                                <button class="btn-primary">开始作答</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ② 考试视图 -->
+                    <div v-if="mockView === 'exam' && mockPaper" class="me-exam-view">
+                        <div class="me-exam-header">
+                            <div class="me-exam-paper-name">{{ mockPaper.name }}</div>
+                            <div class="me-section-tabs">
+                                <button :class="['me-section-tab', {active: mockCurrentSection === 'morning'}]"
+                                        @click="switchMockSection('morning')">上午单选（{{ mockPaper.morning.length }}）</button>
+                                <button :class="['me-section-tab', {active: mockCurrentSection === 'afternoon'}]"
+                                        @click="switchMockSection('afternoon')">下午案例（{{ mockPaper.afternoon.length }}）</button>
+                            </div>
+                            <div class="me-timer">⏱ {{ formatMockTime(mockRemaining) }}</div>
+                            <button class="btn-primary me-submit-btn" @click="confirmMockSubmit() && submitMock()">交卷</button>
+                        </div>
+
+                        <!-- 题号导航格 -->
+                        <div class="me-nav-grid">
+                            <template v-if="mockCurrentSection === 'morning'">
+                                <div v-for="(q, i) in mockPaper.morning" :key="q.id"
+                                     :class="['me-nav-cell', {answered: mockAnswers[q.id], current: i === mockQIndex}]"
+                                     @click="jumpMockQ(i)">{{ i + 1 }}</div>
+                            </template>
+                            <template v-else>
+                                <div v-for="(big, i) in mockPaper.afternoon" :key="big.id"
+                                     :class="['me-nav-cell me-nav-big', {current: i === mockQIndex}]"
+                                     @click="jumpMockQ(i)">{{ big.id }}</div>
+                            </template>
+                        </div>
+
+                        <!-- 上午单选题 -->
+                        <div v-if="mockCurrentSection === 'morning' && mockCurrentQ" class="me-question-card">
+                            <div class="me-q-head">
+                                <span class="me-q-no">第 {{ mockQIndex + 1 }} 题 / 共 {{ mockPaper.morning.length }} 题</span>
+                                <span class="me-q-area">{{ mockCurrentQ.area }} · {{ mockCurrentQ.domain }}</span>
+                            </div>
+                            <p class="me-stem" style="white-space: pre-wrap;">{{ mockCurrentQ.stem }}</p>
+                            <div class="me-options">
+                                <div v-for="opt in mockCurrentQ.options" :key="opt.label"
+                                     :class="['me-option', {selected: mockAnswers[mockCurrentQ.id] === opt.label}]"
+                                     @click="selectMockOption(opt.label)">
+                                    <span class="me-option-label">{{ opt.label }}</span>
+                                    <span class="me-option-text">{{ opt.text }}</span>
+                                </div>
+                            </div>
+                            <div class="me-nav-buttons">
+                                <button class="btn-secondary" :disabled="mockQIndex === 0" @click="prevMockQ">上一题</button>
+                                <button class="btn-secondary" @click="switchMockSection('afternoon')">去下午案例 →</button>
+                                <button class="btn-primary" :disabled="mockQIndex === mockPaper.morning.length - 1" @click="nextMockQ">下一题</button>
+                            </div>
+                        </div>
+
+                        <!-- 下午案例题 -->
+                        <div v-if="mockCurrentSection === 'afternoon' && mockCurrentBig" class="me-case-card">
+                            <div class="me-q-head">
+                                <span class="me-q-no">{{ mockCurrentBig.title }}</span>
+                                <span class="me-q-area">{{ mockCurrentBig.area }}</span>
+                            </div>
+                            <div class="me-scenario" style="white-space: pre-wrap;">{{ mockCurrentBig.scenario }}</div>
+                            <div v-for="sub in mockCurrentBig.questions" :key="sub.no" class="me-sub-q">
+                                <div class="me-sub-head">
+                                    <b>{{ sub.no }}</b>
+                                    <span class="me-sub-type">{{ mockSubTypeName(sub.type) }}</span>
+                                </div>
+                                <p class="me-sub-q-text" style="white-space: pre-wrap;">{{ sub.q }}</p>
+                                <textarea v-if="sub.type === 'calc' || sub.type === 'short' || sub.type === 'find'"
+                                          class="me-textarea" rows="5"
+                                          :placeholder="mockSubPlaceholder(sub.type)"
+                                          :value="mockCaseAnswer(mockCurrentBig.id, sub.no) || ''"
+                                          @input="setMockCaseAnswer(mockCurrentBig.id, sub.no, $event.target.value)"></textarea>
+                                <div v-else-if="sub.type === 'judge'" class="me-judge-row">
+                                    <button :class="['me-judge-btn', {active: mockCaseAnswer(mockCurrentBig.id, sub.no) === '√'}]"
+                                            @click="setMockJudge(mockCurrentBig.id, sub.no, '√')">√ 正确</button>
+                                    <button :class="['me-judge-btn', {active: mockCaseAnswer(mockCurrentBig.id, sub.no) === '×'}]"
+                                            @click="setMockJudge(mockCurrentBig.id, sub.no, '×')">× 错误</button>
+                                </div>
+                                <textarea v-else-if="sub.type === 'fill'"
+                                          class="me-textarea" rows="2" placeholder="请填写答案"
+                                          :value="mockCaseAnswer(mockCurrentBig.id, sub.no) || ''"
+                                          @input="setMockCaseAnswer(mockCurrentBig.id, sub.no, $event.target.value)"></textarea>
+                                <div v-else-if="sub.type === 'multi'" class="me-multi-list">
+                                    <div v-for="opt in sub.options" :key="opt.label"
+                                         :class="['me-multi-item', {active: isMockMultiSelected(mockCurrentBig.id, sub.no, opt.label)}]"
+                                         @click="toggleMockMulti(mockCurrentBig.id, sub.no, opt.label)">
+                                        <span class="me-option-label">{{ opt.label }}</span>
+                                        <span>{{ opt.text }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="me-nav-buttons">
+                                <button class="btn-secondary" :disabled="mockQIndex === 0" @click="prevMockQ">上一题</button>
+                                <button class="btn-secondary" @click="switchMockSection('morning')">← 返回上午单选</button>
+                                <button class="btn-primary" :disabled="mockQIndex === mockPaper.afternoon.length - 1" @click="nextMockQ">下一题</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ③ 成绩视图 -->
+                    <div v-if="mockView === 'result' && mockPaper" class="me-result-view">
+                        <div class="me-hero me-result-hero">
+                            <div class="me-hero-badge">{{ mockPaper.name }}</div>
+                            <h2>📊 考试成绩</h2>
+                            <div class="me-score-big" :class="mockScore >= 45 ? 'pass' : 'fail'">
+                                {{ mockScore }} <span>/ 75 分</span>
+                            </div>
+                            <p>{{ mockScore >= 45 ? '✅ 达到 45 分及格线' : '❌ 未达 45 分及格线，继续加油' }}（答对 {{ mockCorrectCount }} / {{ mockPaper.morning.length }} 题）</p>
+                        </div>
+
+                        <!-- 按 area 统计 -->
+                        <div class="me-result-card">
+                            <h3>📈 知识领域正确率</h3>
+                            <table class="me-area-table">
+                                <thead>
+                                    <tr><th>知识领域</th><th>答对 / 题数</th><th>正确率</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="row in mockAreaStats" :key="row.area">
+                                        <td>{{ row.area }}</td>
+                                        <td>{{ row.correct }} / {{ row.total }}</td>
+                                        <td class="me-bar-cell">
+                                            <div class="me-bar-wrap"><div class="me-bar-fill" :class="row.accuracy >= 60 ? 'ok' : 'bad'" :style="{width: row.accuracy + '%'}"></div></div>
+                                            {{ row.accuracy }}%
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 案例题参考答案 -->
+                        <div class="me-result-card">
+                            <h3>📝 下午案例题参考答案与评分要点</h3>
+                            <div v-for="big in mockPaper.afternoon" :key="big.id" class="me-case-ref">
+                                <h4>{{ big.title }} <span class="me-q-area">{{ big.area }}</span></h4>
+                                <div class="me-scenario" style="white-space: pre-wrap;">{{ big.scenario }}</div>
+                                <div v-for="sub in big.questions" :key="sub.no" class="me-case-sub-ref">
+                                    <b>{{ sub.no }}（{{ sub.points }} 分）</b>
+                                    <p class="me-ref-q" style="white-space: pre-wrap;">{{ sub.q }}</p>
+                                    <div class="me-ref-answer" style="white-space: pre-wrap;">
+                                        <span class="me-ref-label">参考答案：</span>{{ sub.answer }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 单选题解析 -->
+                        <div class="me-result-card">
+                            <h3>🔍 上午单选题逐题解析</h3>
+                            <div v-for="(q, i) in mockPaper.morning" :key="q.id"
+                                 :class="['me-review-q', isMockQCorrect(q) ? 'ok' : 'bad']">
+                                <div class="me-review-q-head">
+                                    <span class="me-q-no">{{ i + 1 }}. [{{ q.area }}]</span>
+                                    <span :class="['me-review-status', isMockQCorrect(q) ? 'ok' : 'bad']">
+                                        {{ isMockQCorrect(q) ? '✅ 答对' : (mockAnswers[q.id] ? '❌ 答错' : '⚪ 未答') }}
+                                    </span>
+                                    <button v-if="!isMockQCorrect(q)" class="btn-secondary me-mistake-btn" @click="addMockMistake(q)">加入错题本</button>
+                                </div>
+                                <p style="white-space: pre-wrap;">{{ q.stem }}</p>
+                                <div v-for="opt in q.options" :key="opt.label"
+                                     :class="['me-option me-option-static', {right: opt.label === q.answer, wrong: mockAnswers[q.id] === opt.label && opt.label !== q.answer}]">
+                                    <span class="me-option-label">{{ opt.label }}</span>
+                                    <span class="me-option-text">{{ opt.text }}</span>
+                                </div>
+                                <div class="me-ref-answer">
+                                    <span class="me-ref-label">你的答案：</span>{{ mockAnswers[q.id] || '（未作答）' }}
+                                    <span class="me-ref-label">　正确答案：</span><b>{{ q.answer }}</b>
+                                </div>
+                                <div class="me-ref-answer" style="white-space: pre-wrap;">
+                                    <span class="me-ref-label">解析：</span>{{ q.explanation }}
+                                </div>
+                                <div v-if="q.ref" class="me-ref">{{ q.ref }}</div>
+                            </div>
+                        </div>
+
+                        <div class="me-result-actions">
+                            <button class="btn-secondary" @click="exitMockExam">返回选卷</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 错题本模块 -->
                 <div v-if="currentTab === 'mistakes'" class="module">
                     <div class="module-header">
@@ -1011,6 +1208,78 @@
                                     <ul class="dictation-item-list">
                                         <li v-for="(item, index) in p.items" :key="index">{{ item }}</li>
                                     </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 考前必背 / 应掌握模块 -->
+                <div v-if="currentTab === 'mustMemorize'" class="module">
+                    <div class="mustm-hero">
+                        <div class="mustm-hero-badge">2026.10 考前冲刺</div>
+                        <h2>📌 考前必背 / 应掌握</h2>
+                        <p>依据《命题趋势研究报告》§3 高频考点清单，按第3版教材口径整理：临考必须背下来的公式、流程与定义，以及理解运用的易混辨析</p>
+                    </div>
+
+                    <!-- 统计条 -->
+                    <div class="mustm-stats">
+                        <div class="mustm-stat">
+                            <b>{{ currentMustTierItemCount }}</b>
+                            <span>{{ currentMustTier ? currentMustTier.name : '' }}条目</span>
+                        </div>
+                        <div class="mustm-stat">
+                            <b>{{ currentMustTier ? currentMustTier.groups.length : 0 }}</b>
+                            <span>知识分组</span>
+                        </div>
+                        <div class="mustm-stat">
+                            <b>{{ mustMemorizeMarkedCount }}</b>
+                            <span>⭐ 重点标记</span>
+                        </div>
+                    </div>
+
+                    <!-- 两级 Tab：必背 / 应掌握 -->
+                    <div class="mustm-tier-tabs">
+                        <button v-for="tier in mustMemorizeData.tiers"
+                                :key="tier.id"
+                                :class="['mustm-tier-tab', {active: mustMemorizeTierId === tier.id}]"
+                                @click="switchMustTier(tier.id)">
+                            <span class="mustm-tier-name">{{ tier.name }}</span>
+                            <span class="mustm-tier-desc">{{ tier.desc }}</span>
+                        </button>
+                    </div>
+
+                    <!-- 分组卡片网格 -->
+                    <div v-if="currentMustTier" class="mustm-content">
+                        <div class="mustm-toolbar">
+                            <span class="mustm-toolbar-text">{{ currentMustTier.desc }}</span>
+                            <button class="btn-secondary" @click="toggleMustAll">{{ mustAllExpanded ? '📕 全部收起' : '📖 全部展开' }}</button>
+                        </div>
+
+                        <div class="mustm-group-grid">
+                            <div v-for="g in currentMustTier.groups" :key="g.id" class="mustm-group-card">
+                                <div class="mustm-group-head">
+                                    <span class="mustm-group-name">{{ g.name }}</span>
+                                    <span class="mustm-group-count">{{ g.items.length }} 条</span>
+                                </div>
+                                <div class="mustm-item-list">
+                                    <div v-for="item in g.items" :key="item.id"
+                                         :class="['mustm-item', {marked: isMustMarked(item)}]">
+                                        <div class="mustm-item-head" @click="toggleMustItem(item)">
+                                            <span class="mustm-item-title">{{ item.title }}</span>
+                                            <div class="mustm-item-actions">
+                                                <button class="mustm-mark-btn"
+                                                        :class="{active: isMustMarked(item)}"
+                                                        :title="isMustMarked(item) ? '取消重点标记' : '标记为重点'"
+                                                        @click.stop="toggleMustMark(item)">{{ isMustMarked(item) ? '⭐' : '☆' }}</button>
+                                                <span class="mustm-item-toggle">{{ isMustItemExpanded(item) ? '▾' : '▸' }}</span>
+                                            </div>
+                                        </div>
+                                        <div v-show="isMustItemExpanded(item)" class="mustm-item-body">
+                                            <div class="mustm-item-content">{{ item.content }}</div>
+                                            <div class="mustm-item-ref">{{ item.ref }}</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1685,6 +1954,10 @@
     <script src="handbook_data.js?v=2"></script>
     <script src="dictation_data.js?v=1"></script>
     <script src="case_sprint_data.js?v=1"></script>
-    <script src="app.js?v=13"></script>
+    <script src="must_memorize_data.js?v=1"></script>
+    <script src="mock_exam_a.js?v=1"></script>
+    <script src="mock_exam_b.js?v=1"></script>
+    <script src="mock_exam_c.js?v=1"></script>
+    <script src="app.js?v=15"></script>
 </body>
 </html>

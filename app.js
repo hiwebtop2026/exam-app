@@ -53,6 +53,7 @@ new Vue({
             { id: 'caseSprint', icon: '🧮', text: '案例冲刺', shortText: '案例' },
             { id: 'textbook', icon: '📖', text: '教材习题', shortText: '教材' },
             { id: 'english', icon: '🔤', text: '专业英语', shortText: '英语' },
+            { id: 'member', icon: '💎', text: '会员中心', shortText: '会员' },
             { id: 'exam', icon: '📊', text: '模拟考试', shortText: '考试' },
             { id: 'mockExam', icon: '💻', text: '机考模拟', shortText: '机考' },
             { id: 'mistakes', icon: '❌', text: '错题本', shortText: '错题' },
@@ -163,6 +164,63 @@ new Vue({
         englishMarks: {},                   // 重点词汇标记 { en: true }
         englishQuizDomain: 'all',           // all | pm | it | sec
         englishQuizAnswers: {},             // 真题作答记录 { qid: label }
+
+        // 会员授权状态（离线激活码，本地校验，不上传任何数据）
+        license: { type: 'free', code: '', activatedAt: null, expiresAt: null, trialUsed: false },
+        memberCodeInput: '',
+        memberMessage: '',
+        memberMessageType: 'info',          // info | success | error
+        pendingTab: '',                     // 因未解锁而暂缓进入的模块
+        trialDays: 7,
+        // 会员专属模块（tab id）
+        premiumTabIds: ['exam', 'mockExam', 'sprint', 'dictation', 'mustMemorize', 'caseSprint', 'textbook'],
+        premiumFeatures: [
+            { id: 'exam', name: '模拟考试', desc: '上午/下午全真计时' },
+            { id: 'mockExam', name: '机考模拟', desc: '3 套机考卷 + 4 道案例' },
+            { id: 'sprint', name: '选择冲刺', desc: '按章节刷选择题' },
+            { id: 'dictation', name: '高频默写', desc: '关键词填空自测' },
+            { id: 'mustMemorize', name: '考前必背', desc: '高频考点速记' },
+            { id: 'caseSprint', name: '案例冲刺', desc: '案例答题框架' },
+            { id: 'textbook', name: '教材习题', desc: '第三版课后习题' },
+            { id: 'englishQuiz', name: '专业英语真题', desc: '62 道历年真题 + 解析' }
+        ],
+        // 年卡激活码哈希（SHA-256，有效期 365 天）
+        licenseCodeHashes: [
+            'c3552a7a970af1863e38e5ca03436b63ae9de53a84a5ed34e8e71a04a3e09239',
+            'a9707d0d71d4dc316c06df91bc777192bf26b18768cb68c0da84c9b957a96c46',
+            'de2a52228e1a81c90c36612863fd7c04e5d46863c4f3662026427eee72e2bdea',
+            '9fc937b25ce0e64edb6707e4e6dd1fe4aa0c0c23bdaea6dfa299bf6e9dcab55e'
+        ],
+        // 永久激活码哈希（SHA-256，无到期时间）
+        lifetimeCodeHashes: [
+            '7e30a5f2f214d2f9ad83d28f458aa713175a2de1f7b0189316a9883cdfc3ada6',
+            '8fc4a78c92041b96e4758206e3fa1bc6aabf238ba7340373ecb91b899397d925',
+            '777842277133ca5f5fb96c4e67de367ba56627b60941dd77b8a739036c175007',
+            '6935fb46027a5b37e51d7c7ea0105c1908055737232572fbfc1fad75a12ab8db',
+            '73be02c0730c6e996d5d85244392be62d9bcc45f29ca059498e5c582f5febfd6'
+        ],
+        // 购买联系方式（部署前替换为你自己的）
+        memberContact: {
+            wechat: '请替换为你的微信号',
+            email: '请替换为你的邮箱'
+        },
+        memberPlans: [
+            {
+                id: 'free', name: '免费版', price: '¥0', period: '永久', recommended: false,
+                desc: '先体验核心学习功能',
+                features: ['学习计划 / 重点 / 笔记', '真题练习 + 错题本', '考点冲刺手册', '专业英语趋势 + 275 高频词']
+            },
+            {
+                id: 'year', name: '全站年卡', price: '¥99', period: '/年', recommended: true,
+                desc: '适合一个考季集中冲刺',
+                features: ['解锁全部会员功能', '模拟考试 + 机考模拟', '冲刺 / 默写 / 必背 / 案例', '专业英语 62 道真题', '有效期内持续更新']
+            },
+            {
+                id: 'life', name: '永久买断', price: '¥199', period: '一次性', recommended: false,
+                desc: '一次付费，长期使用',
+                features: ['包含年卡全部权益', '永久有效，不限考季', '后续内容免费更新', '优先答疑支持']
+            }
+        ],
         
         // 加载状态
         isLoading: false,
@@ -392,6 +450,38 @@ new Vue({
             return this.englishFilteredQuestions.filter(function(q) { return answers[q.id] === q.answer; }).length;
         },
 
+        // ===== 会员授权 computed =====
+        isTrialActive: function() {
+            return this.license.type === 'trial' && !!this.license.expiresAt &&
+                new Date(this.license.expiresAt).getTime() > Date.now();
+        },
+        canAccessPremium: function() {
+            if (this.license.type === 'pro') {
+                return !this.license.expiresAt || new Date(this.license.expiresAt).getTime() > Date.now();
+            }
+            return this.isTrialActive;
+        },
+        licenseStatusText: function() {
+            if (this.license.type === 'pro') {
+                if (this.license.expiresAt) {
+                    if (new Date(this.license.expiresAt).getTime() <= Date.now()) {
+                        return '会员已到期（原有效期至 ' + this.formatLicenseDate(this.license.expiresAt) + '）';
+                    }
+                    return '全站会员（至 ' + this.formatLicenseDate(this.license.expiresAt) + '）';
+                }
+                return '全站永久会员';
+            }
+            if (this.license.type === 'trial') {
+                return this.isTrialActive ? '免费试用中' : '试用已到期';
+            }
+            return '免费版';
+        },
+        licenseRemainingDays: function() {
+            if (!this.canAccessPremium || !this.license.expiresAt) return null;
+            var diff = new Date(this.license.expiresAt).getTime() - Date.now();
+            return Math.max(1, Math.ceil(diff / 86400000));
+        },
+
         fontSizeClass: function() {
             return 'font-size-' + this.settings.fontSize;
         },
@@ -587,6 +677,15 @@ new Vue({
                 console.error('tabId为空!');
                 return;
             }
+            if (this.isModuleLocked(tabId)) {
+                this.pendingTab = tabId;
+                this.currentTab = 'member';
+                this.memberMessage = '「' + this.tabName(tabId) + '」为会员专属功能，可免费试用 ' + this.trialDays + ' 天，或输入激活码解锁。';
+                this.memberMessageType = 'info';
+                this.showMobileMenu = false;
+                window.scrollTo(0, 0);
+                return;
+            }
             this.currentTab = tabId;
             this.showMobileMenu = false;
         },
@@ -721,6 +820,8 @@ new Vue({
                 self.loadEnglishMarks();
 
                 self.loadEnglishQuiz();
+
+                self.loadLicense();
 
                 await Promise.all([
                     self.loadQuestions(),
@@ -1751,7 +1852,9 @@ new Vue({
         },
         toggleEnglishMark: function(w) {
             this.$set(this.englishMarks, w.en, !this.englishMarks[w.en]);
-            localStorage.setItem('examapp_english_marks', JSON.stringify(this.englishMarks));
+            try {
+                localStorage.setItem('examapp_english_marks', JSON.stringify(this.englishMarks));
+            } catch (e) { /* 存储配额不足时忽略，不影响当前使用 */ }
         },
         loadEnglishMarks: function() {
             try {
@@ -1771,11 +1874,13 @@ new Vue({
         selectEnglishOption: function(q, label) {
             if (this.englishQuizAnswers[q.id]) return; // 已作答不可改
             this.$set(this.englishQuizAnswers, q.id, label);
-            localStorage.setItem('examapp_english_quiz', JSON.stringify(this.englishQuizAnswers));
+            try {
+                localStorage.setItem('examapp_english_quiz', JSON.stringify(this.englishQuizAnswers));
+            } catch (e) { /* 存储配额不足时忽略 */ }
         },
         resetEnglishQuiz: function() {
             this.englishQuizAnswers = {};
-            localStorage.removeItem('examapp_english_quiz');
+            try { localStorage.removeItem('examapp_english_quiz'); } catch (e) {}
             window.scrollTo(0, 0);
         },
         loadEnglishQuiz: function() {
@@ -1785,6 +1890,203 @@ new Vue({
             } catch (e) {
                 this.englishQuizAnswers = {};
             }
+        },
+
+        // ==================== 会员授权 ====================
+        isModuleLocked: function(tabId) {
+            return this.premiumTabIds.indexOf(tabId) !== -1 && !this.canAccessPremium;
+        },
+        tabName: function(tabId) {
+            var item = this.menuItems.find(function(i) { return i.id === tabId; });
+            return item ? item.text : tabId;
+        },
+        goMember: function() {
+            this.currentTab = 'member';
+            this.showMobileMenu = false;
+            window.scrollTo(0, 0);
+        },
+        goPendingTab: function() {
+            if (!this.pendingTab) return;
+            // 再次校验权限，避免未激活状态下通过“前往待解锁模块”绕过门禁
+            if (this.isModuleLocked(this.pendingTab)) {
+                this.memberMessage = '「' + this.tabName(this.pendingTab) + '」尚未解锁，请先开启试用或输入激活码。';
+                this.memberMessageType = 'error';
+                return;
+            }
+            var tab = this.pendingTab;
+            this.pendingTab = '';
+            this.currentTab = tab;
+            window.scrollTo(0, 0);
+        },
+        startTrial: function() {
+            if (this.license.trialUsed) {
+                this.memberMessage = '免费试用已使用过，请输入激活码解锁。';
+                this.memberMessageType = 'error';
+                return;
+            }
+            var now = new Date();
+            this.license = {
+                type: 'trial',
+                code: '',
+                activatedAt: now.toISOString(),
+                expiresAt: new Date(now.getTime() + this.trialDays * 86400000).toISOString(),
+                trialUsed: true
+            };
+            this.saveLicense();
+            this.memberMessage = '已开启 ' + this.trialDays + ' 天免费试用，全部会员功能已解锁。';
+            this.memberMessageType = 'success';
+        },
+        activateLicense: function() {
+            var raw = (this.memberCodeInput || '').trim();
+            if (!raw) {
+                this.memberMessage = '请输入激活码。';
+                this.memberMessageType = 'error';
+                return;
+            }
+            var normalized = raw.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+            var hash = this.sha256Hex(normalized);
+            var now = new Date();
+            var expiresAt = null;
+            var matched = false;
+            if (this.lifetimeCodeHashes.indexOf(hash) !== -1) {
+                matched = true;
+                expiresAt = null;
+            } else if (this.licenseCodeHashes.indexOf(hash) !== -1) {
+                matched = true;
+                expiresAt = new Date(now.getTime() + 365 * 86400000).toISOString();
+            }
+            if (!matched) {
+                this.memberMessage = '激活码无效，请检查后重试，或联系作者获取。';
+                this.memberMessageType = 'error';
+                return;
+            }
+            this.license = {
+                type: 'pro',
+                code: normalized,
+                activatedAt: now.toISOString(),
+                expiresAt: expiresAt,
+                trialUsed: true
+            };
+            this.saveLicense();
+            this.memberCodeInput = '';
+            this.memberMessage = expiresAt ? '激活成功，全站会员有效期 365 天。' : '激活成功，已解锁全站永久会员。';
+            this.memberMessageType = 'success';
+        },
+        saveLicense: function() {
+            try {
+                localStorage.setItem('examapp_license', JSON.stringify(this.license));
+            } catch (e) {}
+        },
+        loadLicense: function() {
+            try {
+                var raw = localStorage.getItem('examapp_license');
+                if (!raw) return;
+                var saved = JSON.parse(raw);
+                if (!saved || ['free', 'trial', 'pro'].indexOf(saved.type) === -1) return;
+                this.license = {
+                    type: saved.type,
+                    code: saved.code || '',
+                    activatedAt: saved.activatedAt || null,
+                    expiresAt: saved.expiresAt || null,
+                    trialUsed: !!saved.trialUsed
+                };
+            } catch (e) {
+                this.license = { type: 'free', code: '', activatedAt: null, expiresAt: null, trialUsed: false };
+            }
+        },
+        formatLicenseDate: function(iso) {
+            if (!iso) return '';
+            var d = new Date(iso);
+            if (isNaN(d.getTime())) return '';
+            return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+        },
+        selectMemberPlan: function(planId) {
+            if (planId === 'free') {
+                this.memberMessage = '免费版已可使用学习计划、真题练习、考点冲刺、专业英语词汇等功能。';
+                this.memberMessageType = 'info';
+                return;
+            }
+            this.memberMessage = '请通过下方联系方式联系作者，付款后获取激活码。';
+            this.memberMessageType = 'info';
+            var el = document.getElementById('member-contact');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        },
+        // 纯 JS SHA-256（UTF-8），确保 file:// 离线打开时也能校验激活码
+        sha256Hex: function(input) {
+            var K = [
+                0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+                0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+                0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+                0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+                0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+                0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+                0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+                0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+            ];
+            var H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+            var bytes = [];
+            var str = String(input);
+            for (var i = 0; i < str.length; i++) {
+                var code = str.charCodeAt(i);
+                if (code < 0x80) {
+                    bytes.push(code);
+                } else if (code < 0x800) {
+                    bytes.push(0xc0 | (code >> 6), 0x80 | (code & 0x3f));
+                } else if (code >= 0xd800 && code <= 0xdbff && i + 1 < str.length) {
+                    var next = str.charCodeAt(i + 1);
+                    if (next >= 0xdc00 && next <= 0xdfff) {
+                        i++;
+                        var cp = 0x10000 + ((code - 0xd800) << 10) + (next - 0xdc00);
+                        bytes.push(0xf0 | (cp >> 18), 0x80 | ((cp >> 12) & 0x3f), 0x80 | ((cp >> 6) & 0x3f), 0x80 | (cp & 0x3f));
+                    } else {
+                        bytes.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
+                    }
+                } else {
+                    bytes.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
+                }
+            }
+            var bitLen = bytes.length * 8;
+            bytes.push(0x80);
+            while (bytes.length % 64 !== 56) bytes.push(0);
+            var hi = Math.floor(bitLen / 0x100000000);
+            var lo = bitLen >>> 0;
+            bytes.push((hi >>> 24) & 0xff, (hi >>> 16) & 0xff, (hi >>> 8) & 0xff, hi & 0xff);
+            bytes.push((lo >>> 24) & 0xff, (lo >>> 16) & 0xff, (lo >>> 8) & 0xff, lo & 0xff);
+
+            function rotr(x, n) {
+                return (x >>> n) | (x << (32 - n));
+            }
+
+            for (var off = 0; off < bytes.length; off += 64) {
+                var w = new Array(64);
+                for (var j = 0; j < 16; j++) {
+                    w[j] = ((bytes[off + j * 4] << 24) | (bytes[off + j * 4 + 1] << 16) |
+                            (bytes[off + j * 4 + 2] << 8) | bytes[off + j * 4 + 3]) >>> 0;
+                }
+                for (j = 16; j < 64; j++) {
+                    var s0 = rotr(w[j - 15], 7) ^ rotr(w[j - 15], 18) ^ (w[j - 15] >>> 3);
+                    var s1 = rotr(w[j - 2], 17) ^ rotr(w[j - 2], 19) ^ (w[j - 2] >>> 10);
+                    w[j] = (w[j - 16] + s0 + w[j - 7] + s1) >>> 0;
+                }
+                var a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+                for (j = 0; j < 64; j++) {
+                    var S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
+                    var ch = (e & f) ^ ((~e) & g);
+                    var t1 = (h + S1 + ch + K[j] + w[j]) >>> 0;
+                    var S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
+                    var maj = (a & b) ^ (a & c) ^ (b & c);
+                    var t2 = (S0 + maj) >>> 0;
+                    h = g; g = f; f = e; e = (d + t1) >>> 0;
+                    d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+                }
+                H[0] = (H[0] + a) >>> 0; H[1] = (H[1] + b) >>> 0; H[2] = (H[2] + c) >>> 0; H[3] = (H[3] + d) >>> 0;
+                H[4] = (H[4] + e) >>> 0; H[5] = (H[5] + f) >>> 0; H[6] = (H[6] + g) >>> 0; H[7] = (H[7] + h) >>> 0;
+            }
+            var hex = '';
+            for (i = 0; i < 8; i++) {
+                hex += ('00000000' + (H[i] >>> 0).toString(16)).slice(-8);
+            }
+            return hex;
         },
         
         startExam: function(type) {
@@ -2288,6 +2590,12 @@ new Vue({
                 self.isLoading = true;
                 try {
                     await db.resetDatabase();
+                    // 同时清除 localStorage 中的学习痕迹（保留会员授权与字体设置）
+                    ['examapp_sprint_marks', 'sprintRecords', 'examapp_english_marks',
+                     'examapp_english_quiz', 'examapp_dictation_marks', 'examapp_mustmemorize_marks'
+                    ].forEach(function(key) {
+                        try { localStorage.removeItem(key); } catch (e) {}
+                    });
                     // 重新初始化应用
                     await self.init();
                     alert('数据库重置成功！');
@@ -2303,10 +2611,13 @@ new Vue({
         // 系统设置
         changeFontSize: function(size) {
             this.settings.fontSize = size;
-            // 保存设置到本地存储
-            localStorage.setItem('examAppSettings', JSON.stringify(this.settings));
+            // 保存设置到本地存储（隐私模式下可能不可用）
+            try {
+                localStorage.setItem('examAppSettings', JSON.stringify(this.settings));
+            } catch (e) {}
             // 实时更新页面字体大小
-            document.querySelector('.main-container').className = 'main-container font-size-' + size;
+            var container = document.querySelector('.main-container');
+            if (container) container.className = 'main-container font-size-' + size;
         },
         
         showSettings: function() {
@@ -2426,6 +2737,13 @@ new Vue({
             // 筛选器改变时自动刷新题目列表
             // 由于使用了计算属性 filteredQuestions，数据会自动更新
             // 这里可以添加额外的逻辑，如重置页码、显示提示等
+        },
+
+        // 题目来源标签：模拟预测题不伪装成某年真题
+        questionYearLabel: function(question) {
+            if (!question) return '';
+            if (question.simulated) return '模拟预测';
+            return (question.year || '') + '年';
         },
         
         finishLearning: function() {

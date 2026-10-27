@@ -306,7 +306,7 @@ class ExamPrepDB {
 
     // 重置数据库（清除所有数据）
     async resetDatabase() {
-        const storeNames = ['study_plans', 'user_progress', 'notes', 'practice_records', 'exam_records', 'mistakes', 'flashcard_status'];
+        const storeNames = ['study_plans', 'user_progress', 'notes', 'practice_records', 'exam_records', 'mistakes', 'flashcard_status', 'learning_records'];
         for (const storeName of storeNames) {
             await this.clear(storeName);
         }

@@ -2,14 +2,14 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="系统集成项目管理工程师备考系统 - 提供学习计划、真题练习、模拟考试等功能">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="format-detection" content="telephone=no">
     <meta name="theme-color" content="#667eea">
     <title>系统集成项目管理工程师备考系统</title>
-    <link rel="stylesheet" href="styles.css?v=3">
+    <link rel="stylesheet" href="styles.css?v=4">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
 </head>
 <body>
@@ -63,6 +63,7 @@
                          @click.stop="selectTab(item.id)">
                         <span class="nav-icon">{{ item.icon }}</span>
                         <span class="nav-text">{{ item.text }}</span>
+                        <span v-if="isModuleLocked(item.id)" class="nav-lock">🔒</span>
                     </div>
                 </nav>
                 <div class="mobile-menu-footer">
@@ -82,6 +83,7 @@
                          @click="selectTab(item.id)">
                         <span class="nav-icon">{{ item.icon }}</span>
                         <span class="nav-text">{{ item.text }}</span>
+                        <span v-if="isModuleLocked(item.id)" class="nav-lock">🔒</span>
                     </div>
                 </nav>
                 
@@ -108,6 +110,7 @@
                      @click="selectTab(item.id)">
                     <span class="nav-icon">{{ item.icon }}</span>
                     <span class="nav-text">{{ item.shortText || item.text }}</span>
+                    <span v-if="isModuleLocked(item.id)" class="nav-lock nav-lock-float">🔒</span>
                 </div>
             </nav>
 
@@ -283,7 +286,7 @@
                                 <span class="question-type" :class="question.type">
                                     {{ question.type === 'morning' ? '上午' : '下午' }}
                                 </span>
-                                <span class="question-year">{{ question.year }}年</span>
+                                <span class="question-year">{{ questionYearLabel(question) }}</span>
                                 <span class="question-chapter">{{ question.chapterName }}</span>
                             </div>
                             <div class="question-title">{{ question.title }}</div>
@@ -560,6 +563,13 @@
 
                     <!-- 真题演练视图 -->
                     <div v-if="englishView === 'quiz'">
+                        <div v-if="!canAccessPremium" class="mem-lock-card">
+                            <div class="mem-lock-icon">🔒</div>
+                            <h3>真题演练为会员功能</h3>
+                            <p>{{ englishQuestions.length }} 道历年真题 + 中文解析，免费试用 {{ trialDays }} 天即可解锁。</p>
+                            <button class="btn-primary" @click="goMember">💎 前往会员中心</button>
+                        </div>
+                        <template v-else>
                         <div class="eng-domain-tabs">
                             <button v-for="d in englishDomains" :key="d.id"
                                     :class="['eng-domain-tab', {active: englishQuizDomain === d.id}]"
@@ -593,7 +603,88 @@
                                 <p>{{ q.explanation }}</p>
                             </div>
                         </div>
+                        </template>
                     </div>
+                </div>
+
+                <!-- 会员中心模块 -->
+                <div v-if="currentTab === 'member'" class="module">
+                    <div class="mem-hero">
+                        <div class="mem-hero-badge">MEMBERSHIP</div>
+                        <h2>💎 会员中心</h2>
+                        <p>解锁全部冲刺与模拟功能，把有限的时间用在最可能考的地方</p>
+                    </div>
+
+                    <div class="mem-status">
+                        <div class="mem-status-left">
+                            <span class="mem-status-label">当前方案</span>
+                            <b>{{ licenseStatusText }}</b>
+                            <span v-if="licenseRemainingDays !== null" class="mem-status-sub">剩余 {{ licenseRemainingDays }} 天</span>
+                        </div>
+                        <div class="mem-status-right">
+                            <button v-if="!canAccessPremium && !license.trialUsed" class="btn-primary" @click="startTrial">🎁 免费试用 {{ trialDays }} 天</button>
+                            <span v-else-if="canAccessPremium" class="mem-ok-badge">✅ 全站已解锁</span>
+                            <button v-if="pendingTab && canAccessPremium" class="btn-secondary" @click="goPendingTab">前往「{{ tabName(pendingTab) }}」</button>
+                        </div>
+                    </div>
+
+                    <div v-if="memberMessage" :class="['mem-message', memberMessageType]">{{ memberMessage }}</div>
+
+                    <div class="mem-plans">
+                        <div v-for="plan in memberPlans" :key="plan.id" :class="['mem-plan', {recommended: plan.recommended}]">
+                            <div v-if="plan.recommended" class="mem-plan-flag">推荐</div>
+                            <h3>{{ plan.name }}</h3>
+                            <div class="mem-price"><b>{{ plan.price }}</b><span>{{ plan.period }}</span></div>
+                            <p class="mem-plan-desc">{{ plan.desc }}</p>
+                            <ul class="mem-plan-features">
+                                <li v-for="f in plan.features" :key="f">{{ f }}</li>
+                            </ul>
+                            <button :class="plan.id === 'free' ? 'btn-secondary' : 'btn-primary'" class="btn-block" @click="selectMemberPlan(plan.id)">
+                                {{ plan.id === 'free' ? '免费使用' : (canAccessPremium ? '已解锁' : '获取激活码') }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mem-section" id="member-activate">
+                        <h3>🔑 激活码</h3>
+                        <p class="mem-hint">付款后获取激活码，输入即可解锁全站。激活状态保存在本机浏览器，清除浏览器数据后需重新激活。</p>
+                        <div class="mem-activate-row">
+                            <input v-model="memberCodeInput" class="mem-input" placeholder="例如：ZYZJ-2026-XXXX-XXXX" @keyup.enter="activateLicense" />
+                            <button class="btn-primary" @click="activateLicense">激活</button>
+                        </div>
+                        <p class="mem-hint mem-small">激活码仅在本地做哈希校验，不上传任何数据。</p>
+                    </div>
+
+                    <div class="mem-section" id="member-contact">
+                        <h3>💳 购买方式</h3>
+                        <p class="mem-hint">添加作者微信，说明需要的方案并付款，作者会发放激活码。</p>
+                        <div class="mem-contact">
+                            <div><span>微信</span><b>{{ memberContact.wechat }}</b></div>
+                            <div><span>邮箱</span><b>{{ memberContact.email }}</b></div>
+                        </div>
+                        <p class="mem-hint mem-small">部署前请在 app.js 的 memberContact 中替换为你自己的联系方式；接入在线支付需申请微信支付或支付宝商户号。</p>
+                    </div>
+
+                    <div class="mem-section">
+                        <h3>🎁 会员权益对比</h3>
+                        <div class="mem-table-wrap">
+                            <table class="mem-table">
+                                <thead><tr><th>功能</th><th>免费版</th><th>会员</th></tr></thead>
+                                <tbody>
+                                    <tr v-for="f in premiumFeatures" :key="f.id">
+                                        <td>{{ f.name }}<span class="mem-table-desc">{{ f.desc }}</span></td>
+                                        <td class="mem-no">—</td>
+                                        <td class="mem-yes">✓</td>
+                                    </tr>
+                                    <tr><td>学习计划 / 学习重点 / 学习笔记</td><td class="mem-yes">✓</td><td class="mem-yes">✓</td></tr>
+                                    <tr><td>真题练习 / 考点冲刺 / 错题本 / 案例模板</td><td class="mem-yes">✓</td><td class="mem-yes">✓</td></tr>
+                                    <tr><td>专业英语：命题趋势 + {{ englishVocabTotal }} 高频词</td><td class="mem-yes">✓</td><td class="mem-yes">✓</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="mem-legal">本应用为个人学习工具，题库为考生回忆整理，仅供学习交流；商用前请确认内容授权。</div>
                 </div>
 
                 <!-- 模拟考试模块 -->
@@ -1769,7 +1860,7 @@
                 <div class="dialog-body">
                     <div v-if="currentPracticeQuestion" class="practice-content">
                         <div class="question-info">
-                            <span class="question-year">{{ currentPracticeQuestion.year }}年</span>
+                            <span class="question-year">{{ questionYearLabel(currentPracticeQuestion) }}</span>
                             <span class="question-type" :class="currentPracticeQuestion.type">
                                 {{ currentPracticeQuestion.type === 'morning' ? '上午' : '下午' }}
                             </span>
@@ -1851,8 +1942,8 @@
                             <h4>📌 题目信息</h4>
                             <div class="info-grid">
                                 <div class="info-item">
-                                    <span class="label">年份：</span>
-                                    <span class="value">{{ currentPracticeQuestion.year }}年</span>
+                                    <span class="label">来源：</span>
+                                    <span class="value">{{ questionYearLabel(currentPracticeQuestion) }}</span>
                                 </div>
                                 <div class="info-item">
                                     <span class="label">类型：</span>
@@ -1992,8 +2083,8 @@
 
     <script src="vue.min.js"></script>
     <script src="db.js"></script>
-    <script src="questions.js?v=7"></script>
-    <script src="chapters.js"></script>
+    <script src="questions.js?v=8"></script>
+    <script src="chapters.js?v=1"></script>
     <script src="mindmap.js"></script>
     <script src="case_templates.js"></script>
     <script src="textbook_exercises_data.js"></script>
@@ -2006,6 +2097,6 @@
     <script src="mock_exam_b.js?v=1"></script>
     <script src="mock_exam_c.js?v=1"></script>
     <script src="english_data.js?v=2"></script>
-    <script src="app.js?v=16"></script>
+    <script src="app.js?v=18"></script>
 </body>
 </html>

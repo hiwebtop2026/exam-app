@@ -1122,12 +1122,12 @@ window.questionsData = [
         question: '信息安全等级保护的实施流程不包括（）。',
         options: [
             { label: 'A', text: '系统定级' },
-            { label: '安全规划' },
-            { label: '安全实施' },
-            { label: '安全评估' }
+            { label: 'B', text: '安全规划' },
+            { label: 'C', text: '安全实施' },
+            { label: 'D', text: '安全评估' }
         ],
         answer: 'B',
-        explanation: '信息安全等级保护的实施流程包括：系统定级、安全规划、安全实施、安全评估、监督检查等。选项B安全规划是其中的一个步骤，不是不包括的内容。正确答案应该是没有正确选项，这里可能题目有误，正确的实施流程包括：系统定级、安全规划、安全实施、安全评估、监督检查。',
+        explanation: '信息安全等级保护的标准实施流程为：系统定级、备案、安全建设整改、等级测评、监督检查。选项A系统定级、C安全建设整改（安全实施）、D等级测评（安全评估）均属于该流程，而B安全规划不属于等保实施流程，故答案为B。',
         tags: ['等级保护', '信息安全'],
         difficulty: 'medium'
     },
@@ -1915,9 +1915,9 @@ window.questionsData = [
         question: '人力资源管理计划的主要内容不包括（）。',
         options: [
             { label: 'A', text: '角色和职责' },
-            { label: '项目组织图' },
-            { label: '人员配备管理计划' },
-            { label: '团队绩效评估' }
+            { label: 'B', text: '项目组织图' },
+            { label: 'C', text: '人员配备管理计划' },
+            { label: 'D', text: '团队绩效评估' }
         ],
         answer: 'D',
         explanation: '人力资源管理计划的主要内容包括：角色和职责、项目组织图、人员配备管理计划等。团队绩效评估是团队建设的输出，不是人力资源管理计划的内容。',
@@ -2055,7 +2055,7 @@ window.questionsData = [
         options: [
             { label: 'A', text: '按需自助服务' },
             { label: 'B', text: '广泛的网络访问' },
-            { label: '资源池化' },
+            { label: 'C', text: '资源池化' },
             { label: 'D', text: '高成本' }
         ],
         answer: 'D',
@@ -3272,6 +3272,9 @@ window.questionsData = [
     },
     {
         id: 'q2025017',
+        year: 2025,
+        type: 'morning',
+        chapter: 'project_integration',
         chapterName: '项目整合管理',
         title: '某智慧城市项目采用"1+N"总包模式，总集成商的首要工作是',
         question: '某智慧城市项目采用"1+N"总包模式，即1家总集成商加N家专业分包商。项目启动阶段，总集成商的首要工作是\nA. 与每家分包商签订独立合同\nB. 建立统一的项目治理架构\nC. 完成整体技术方案详细设计\nD. 向甲方提交项目章程',
@@ -3363,10 +3366,11 @@ window.questionsData = [
         difficulty: 'medium'
     },
     
-    // ===== 2027年模拟题（重点知识点） =====
+    // ===== 模拟预测题（非真题，仅用于练习，UI 标注为“模拟预测”） =====
     {
         id: 'q2027001',
         year: 2027,
+        simulated: true,
         type: 'morning',
         chapter: 'project_integration',
         chapterName: '项目整合管理',
@@ -3386,6 +3390,7 @@ window.questionsData = [
     {
         id: 'q2027002',
         year: 2027,
+        simulated: true,
         type: 'morning',
         chapter: 'project_scope',
         chapterName: '项目范围管理',
@@ -3405,6 +3410,7 @@ window.questionsData = [
     {
         id: 'q2027003',
         year: 2027,
+        simulated: true,
         type: 'morning',
         chapter: 'project_schedule',
         chapterName: '项目进度管理',
@@ -3424,6 +3430,7 @@ window.questionsData = [
     {
         id: 'q2027004',
         year: 2027,
+        simulated: true,
         type: 'morning',
         chapter: 'project_cost',
         chapterName: '项目成本管理',
@@ -3443,6 +3450,7 @@ window.questionsData = [
     {
         id: 'q2027005',
         year: 2027,
+        simulated: true,
         type: 'morning',
         chapter: 'project_quality',
         chapterName: '项目质量管理',
@@ -3462,6 +3470,7 @@ window.questionsData = [
     {
         id: 'q2027006',
         year: 2027,
+        simulated: true,
         type: 'morning',
         chapter: 'project_hr',
         chapterName: '项目人力资源管理',
@@ -3481,6 +3490,7 @@ window.questionsData = [
     {
         id: 'q2027007',
         year: 2027,
+        simulated: true,
         type: 'morning',
         chapter: 'project_communication',
         chapterName: '项目沟通管理',
@@ -3500,6 +3510,7 @@ window.questionsData = [
     {
         id: 'q2027008',
         year: 2027,
+        simulated: true,
         type: 'morning',
         chapter: 'project_risk',
         chapterName: '项目风险管理',
@@ -3519,6 +3530,7 @@ window.questionsData = [
     {
         id: 'q2027009',
         year: 2027,
+        simulated: true,
         type: 'morning',
         chapter: 'project_procurement',
         chapterName: '项目采购管理',
@@ -3538,6 +3550,7 @@ window.questionsData = [
     {
         id: 'q2027010',
         year: 2027,
+        simulated: true,
         type: 'morning',
         chapter: 'project_stakeholder',
         chapterName: '项目干系人管理',
@@ -3556,7 +3569,5 @@ window.questionsData = [
     }
 ];
 
-// 导出题库数据
-window.questionsData = questionsData;
-
+// 题库已在上方直接挂载到 window.questionsData，无需再次赋值
 // 教材课后习题数据已移至 textbook_exercises_data.js（避免两处重复声明 window.textbookExercisesData 互相覆盖）

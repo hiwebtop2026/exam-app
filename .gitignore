@@ -23,3 +23,22 @@ node_modules/
 # 构建输出（如果有的话）
 dist/
 build/
+
+# 本地素材与处理脚本（禁止提交，避免版权文件被发布到 GitHub Pages）
+*.pdf
+*.docx
+_docx_extracted.txt
+debug.html
+backup_*.js
+questions_backup.js
+*_backup.js
+analyze_counts.py
+check_*.py
+fix_*.py
+merge_questions.py
+parse_*.py
+rebuild_questions.py
+verify_*.py
+verify_*.js
+convert_pdf_to_docx.py
+extract_docx.py

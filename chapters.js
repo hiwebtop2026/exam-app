@@ -3049,4 +3049,4 @@ n为干系人数量
     }
 ];
 
-window.chaptersData = chaptersData;
+// 章节数据已在文件开头直接挂载到 window.chaptersData，无需再次赋值

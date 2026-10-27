@@ -61,8 +61,9 @@ new Vue({
         ],
         
         showMobileMenu: false,
-        
-        overallProgress: 35,
+
+        // 学习进度：由学习计划完成情况计算（loadProgress 会覆盖为本地已保存值）
+        overallProgress: 0,
         
         dailyTasks: [
             { id: 1, text: '学习第5章 项目整体管理', completed: false },
@@ -91,7 +92,7 @@ new Vue({
             chapter: ''
         },
 
-        years: [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017],
+        years: [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007],
         
         // 考试状态
         examRecords: [],
@@ -485,7 +486,8 @@ new Vue({
         fontSizeClass: function() {
             return 'font-size-' + this.settings.fontSize;
         },
-        
+
+
         // 案例分析模板计算属性
         currentTemplateData: function() {
             var templates = this.caseAnalysisData.generalTemplates || [];

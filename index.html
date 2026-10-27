@@ -9,7 +9,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="theme-color" content="#667eea">
     <title>系统集成项目管理工程师备考系统</title>
-    <link rel="stylesheet" href="styles.css?v=4">
+    <link rel="stylesheet" href="styles.css?v=5">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
 </head>
 <body>
@@ -125,6 +125,10 @@
                 <div v-if="errorMessage" class="error-message">
                     <p>{{ errorMessage }}</p>
                     <button class="btn-primary" @click="init">重新加载</button>
+                </div>
+
+                <div v-if="!storageAvailable && !isLoading" class="storage-warn">
+                    ⚠️ 当前浏览器禁用了本地数据库（常见于无痕/隐私模式），笔记、错题与成绩将不会被保存。建议用普通窗口打开。
                 </div>
 
                 <!-- 学习计划模块 -->
@@ -2097,6 +2101,6 @@
     <script src="mock_exam_b.js?v=1"></script>
     <script src="mock_exam_c.js?v=1"></script>
     <script src="english_data.js?v=2"></script>
-    <script src="app.js?v=19"></script>
+    <script src="app.js?v=20"></script>
 </body>
 </html>

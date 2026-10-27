@@ -226,6 +226,7 @@ new Vue({
         // 加载状态
         isLoading: false,
         errorMessage: '',
+        storageAvailable: true,   // IndexedDB 是否可用（无痕模式可能不可用）
         
         // 系统设置
         settings: {
@@ -807,11 +808,20 @@ new Vue({
             try {
                 self.loadSettings();
 
-                await db.init();
+                // 无痕模式/隐私设置下 IndexedDB 可能不可用，此时降级为“不保存”模式而不是整页报错
+                try {
+                    await db.init();
+                    self.storageAvailable = true;
+                } catch (dbError) {
+                    self.storageAvailable = false;
+                    console.warn('本地数据库不可用，学习记录将不会被保存：', dbError);
+                }
 
                 await self.loadChapters();
 
                 await self.loadProgress();
+
+                await self.loadStudyPlan();
 
                 self.loadSprintMarks();
 
@@ -853,12 +863,17 @@ new Vue({
         },
         
         loadStudyPlan: async function() {
-            var savedPlan = await db.getStudyPlan();
-            if (savedPlan) {
-                this.studyPlan = savedPlan.plan;
-            } else {
-                this.generateDefaultPlan();
+            try {
+                var savedPlan = this.storageAvailable ? await db.getStudyPlan() : null;
+                if (savedPlan && savedPlan.plan && savedPlan.plan.length > 0) {
+                    this.studyPlan = savedPlan.plan;
+                    return;
+                }
+            } catch (e) {
+                console.warn('读取学习计划失败，使用默认计划:', e);
             }
+            this.generateDefaultPlan();
+            this.normalizeDefaultPlan();
         },
         
         generateDefaultPlan: function() {
@@ -947,6 +962,17 @@ new Vue({
                 }
             ];
         },
+
+        // 新用户整理默认计划：全部任务未完成，第 1 周为当前周（避免一开始就显示“已完成”的假进度）
+        normalizeDefaultPlan: function() {
+            this.studyPlan.forEach(function(week, index) {
+                week.tasks.forEach(function(task) { task.completed = false; });
+                week.status = index === 0 ? 'in-progress' : 'pending';
+                week.statusText = index === 0 ? '进行中' : '待开始';
+                week.current = index === 0;
+            });
+            this.overallProgress = 0;
+        },
         
         loadNotes: async function() {
             this.notes = await db.getNotes();
@@ -956,7 +982,12 @@ new Vue({
         },
         
         loadMistakes: async function() {
-            this.mistakeBook = await db.getMistakes();
+            try {
+                this.mistakeBook = await db.getMistakes();
+            } catch (e) {
+                // 本地数据库不可用（如无痕模式）时不影响其他功能
+                this.mistakeBook = [];
+            }
         },
         
         // 加载教材课后习题数据
@@ -1359,10 +1390,15 @@ new Vue({
         },
         
         loadProgress: async function() {
-            var progress = await db.getProgress();
-            if (progress) {
-                this.overallProgress = progress.overallProgress || 0;
-                this.chapterProgress = progress.chapterProgress || {};
+            if (!this.storageAvailable) return;
+            try {
+                var progress = await db.getProgress();
+                if (progress) {
+                    this.overallProgress = progress.overallProgress || 0;
+                    this.chapterProgress = progress.chapterProgress || {};
+                }
+            } catch (e) {
+                console.warn('读取学习进度失败:', e);
             }
         },
         
@@ -2591,7 +2627,7 @@ new Vue({
             if (confirm('确定要重置数据库吗？这将清除所有学习记录、笔记、错题本等数据。')) {
                 self.isLoading = true;
                 try {
-                    await db.resetDatabase();
+                    if (self.storageAvailable) await db.resetDatabase();
                     // 同时清除 localStorage 中的学习痕迹（保留会员授权与字体设置）
                     ['examapp_sprint_marks', 'sprintRecords', 'examapp_english_marks',
                      'examapp_english_quiz', 'examapp_dictation_marks', 'examapp_mustmemorize_marks'

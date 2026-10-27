@@ -5960,3 +5960,15 @@ li {
 }
 
 
+
+/* 本地数据库不可用提示 */
+.storage-warn {
+    margin: 12px 0 0;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #fff7ed;
+    border: 1px solid #fdba74;
+    color: #9a3412;
+    font-size: 14px;
+    line-height: 1.6;
+}

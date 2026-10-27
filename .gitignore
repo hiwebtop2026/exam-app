@@ -42,3 +42,7 @@ verify_*.py
 verify_*.js
 convert_pdf_to_docx.py
 extract_docx.py
+
+# IDE / 工具生成的临时产物
+.trae-html-share-packages/
+

@@ -61,6 +61,7 @@ new Vue({
         ],
         
         showMobileMenu: false,
+        windowWidth: (typeof window !== 'undefined' ? window.innerWidth : 1280),  // 响应式计算依赖
 
         // 学习进度：由学习计划完成情况计算（loadProgress 会覆盖为本地已保存值）
         overallProgress: 0,
@@ -302,7 +303,8 @@ new Vue({
     
     computed: {
         isMobile: function() {
-            return window.innerWidth <= 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            // 依赖 windowWidth，窗口缩放/横竖屏切换时能重新计算（Vue 2 无法追踪 window.innerWidth）
+            return this.windowWidth <= 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         },
 
         mockCurrentQ: function() {
@@ -3036,10 +3038,19 @@ new Vue({
     },
     
     mounted: function() {
+        var self = this;
+        // 窗口尺寸变化/横竖屏切换时更新响应式宽度（防抖）
+        this.onWindowResize = Utils.debounce(function() {
+            self.windowWidth = window.innerWidth;
+        }, 150);
+        window.addEventListener('resize', this.onWindowResize);
         this.init();
     },
     
     beforeDestroy: function() {
+        if (this.onWindowResize) {
+            window.removeEventListener('resize', this.onWindowResize);
+        }
         if (this.examTimer) {
             clearInterval(this.examTimer);
         }
